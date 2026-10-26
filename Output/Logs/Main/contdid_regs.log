@@ -1,0 +1,576 @@
+  id G         D time_period     Y D_any cvegeo05 remittance_hh_02
+1  1 2 0.9248447           1 -0.75     1    20107                0
+2  1 2 0.9248447           2  0.07     1    20107                0
+3  2 2 0.9248447           1 -0.91     1    20107                0
+4  2 2 0.9248447           2  0.08     1    20107                0
+5  3 2 0.9248447           1 -4.58     1    20107                0
+6  3 2 0.9248447           2  0.33     1    20107                0
+           haz  waz bmiz
+children  2436 1084 2383
+untreated  518  245  507
+treated   1918  839 1876
+           haz waz bmiz
+children  1300 275 1203
+untreated  297  56  278
+treated   1003 219  925
+Data done, elapsed: 0.1 min
+
+==================== Case 1, dose aggregation: haz ====================
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.]  
+ -0.2061        0.0657    -0.3349     -0.0773 *
+
+
+Overall ACRT:  
+    ACRT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0957        0.0799    -0.2523      0.0609 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 1, dose aggregation: waz ====================
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0365        0.0981    -0.2287      0.1557 
+
+
+Overall ACRT:  
+   ACRT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0499        0.1301    -0.2052      0.3049 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 1, dose aggregation: bmiz ====================
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0259        0.0651    -0.1535      0.1018 
+
+
+Overall ACRT:  
+   ACRT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0148        0.0639    -0.1103        0.14 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Case 1 done, elapsed: 0.3 min
+
+==================== Case 2, ATT event study: haz ====================
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.1012        0.0744    -0.2471      0.0447 
+
+
+Dynamic Effects:
+ Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -1   0.0498     0.0862       -0.1418      0.2413 
+          0  -0.1012     0.0751       -0.2681      0.0657 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 2, ACRT event study: haz ====================
+
+Overall ACRT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0165        0.1131    -0.2381      0.2051 
+
+
+Dynamic Effects:
+ Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -1  -0.1387     0.1327       -0.4262      0.1487 
+          0  -0.0165     0.1108       -0.2565      0.2234 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 2, ATT event study: waz ====================
+
+Overall ATT:  
+    ATT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0473        0.1751    -0.2958      0.3904 
+
+
+Dynamic Effects:
+ Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -1  -0.0986      0.198       -0.5066      0.3095 
+          0   0.0473      0.182       -0.3277      0.4223 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 2, ACRT event study: waz ====================
+
+Overall ACRT:  
+    ATT    Std. Error     [ 95%  Conf. Int.] 
+ 0.2585        0.2367    -0.2055      0.7225 
+
+
+Dynamic Effects:
+ Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -1  -0.1546     0.2279       -0.6012      0.2921 
+          0   0.2585     0.2503       -0.2321      0.7491 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 2, ATT event study: bmiz ====================
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0632        0.0779    -0.2158      0.0895 
+
+
+Dynamic Effects:
+ Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -1   0.0893     0.0908       -0.1004      0.2790 
+          0  -0.0632     0.0719       -0.2135      0.0871 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+
+==================== Case 2, ACRT event study: bmiz ====================
+
+Overall ACRT:  
+    ATT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0504        0.0806    -0.1077      0.2084 
+
+
+Dynamic Effects:
+ Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -1   0.1418     0.1188       -0.1238      0.4073 
+          0   0.0504     0.0836       -0.1366      0.2373 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Case 2 done, elapsed: 0.3 min
+
+Case 3 (CCK) did not run for haz : missing values and NaN's not allowed if 'na.rm' is FALSE 
+
+Case 3 (CCK) did not run for waz : missing values and NaN's not allowed if 'na.rm' is FALSE 
+
+Case 3 (CCK) did not run for bmiz : missing values and NaN's not allowed if 'na.rm' is FALSE 
+
+==================== Clustered estimates: haz ====================
+Untreated (D = 0): 518 children in 34 municipalities | Treated (D > 0): 1918 children in 99 municipalities
+  0%  10%  25%  50%  75%  90% 100% 
+0.01 0.20 0.37 0.92 1.56 1.96 2.51 
+Average ATT  = -0.206 ( 0.092 )   [contdid SE: 0.066 ]
+Average ACRT = -0.096 ( 0.167 )   [contdid SE: 0.08 ]
+
+==================== Clustered estimates: waz ====================
+Untreated (D = 0): 245 children in 30 municipalities | Treated (D > 0): 839 children in 93 municipalities
+  0%  10%  25%  50%  75%  90% 100% 
+0.01 0.16 0.36 0.92 1.48 1.96 2.51 
+Average ATT  = -0.037 ( 0.092 )   [contdid SE: 0.098 ]
+Average ACRT = 0.05 ( 0.139 )   [contdid SE: 0.13 ]
+
+==================== Clustered estimates: bmiz ====================
+Untreated (D = 0): 507 children in 34 municipalities | Treated (D > 0): 1876 children in 99 municipalities
+  0%  10%  25%  50%  75%  90% 100% 
+0.01 0.20 0.37 0.92 1.56 1.96 2.51 
+Average ATT  = -0.026 ( 0.077 )   [contdid SE: 0.065 ]
+Average ACRT = 0.015 ( 0.083 )   [contdid SE: 0.064 ]
+
+==================== Remittance buffer: haz | 2002 remittances = 0 ====================
+Untreated: 314 children in 27 municipalities | Treated: 861 children
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.]  
+ -0.1926         0.089     -0.367     -0.0181 *
+
+
+Overall ACRT:  
+    ACRT    Std. Error     [ 95%  Conf. Int.]  
+ -0.2075        0.0943    -0.3923     -0.0228 *
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Clustered average ATT = -0.193 ( 0.095 )
+
+==================== Remittance buffer: haz | 2002 remittances = 1 ====================
+Untreated: 111 children in 23 municipalities | Treated: 563 children
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.]  
+ -0.4837        0.1394    -0.7569     -0.2104 *
+
+
+Overall ACRT:  
+    ACRT    Std. Error     [ 95%  Conf. Int.] 
+ -0.1226        0.2166     -0.547      0.3019 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Clustered average ATT = -0.484 ( 0.157 )
+Difference in average ATT (remittance minus non-remittance) = -0.291 ( 0.171 )
+
+==================== Remittance buffer: waz | 2002 remittances = 0 ====================
+Untreated: 128 children in 22 municipalities | Treated: 304 children
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0547        0.1516    -0.3518      0.2424 
+
+
+Overall ACRT:  
+   ACRT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0533        0.1501    -0.2409      0.3474 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Clustered average ATT = -0.055 ( 0.147 )
+
+==================== Remittance buffer: waz | 2002 remittances = 1 ====================
+Untreated: 49 children in 18 municipalities | Treated: 244 children
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.3795         0.211    -0.7929       0.034 
+
+
+Overall ACRT:  
+  ACRT    Std. Error     [ 95%  Conf. Int.] 
+ 0.737        0.3791     -0.006        1.48 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Clustered average ATT = -0.379 ( 0.169 )
+Difference in average ATT (remittance minus non-remittance) = -0.325 ( 0.224 )
+
+==================== Remittance buffer: bmiz | 2002 remittances = 0 ====================
+Untreated: 307 children in 27 municipalities | Treated: 843 children
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0771         0.083    -0.2398      0.0856 
+
+
+Overall ACRT:  
+   ACRT    Std. Error     [ 95%  Conf. Int.]  
+ 0.2982        0.0779     0.1455      0.4509 *
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Clustered average ATT = -0.077 ( 0.1 )
+
+==================== Remittance buffer: bmiz | 2002 remittances = 1 ====================
+Untreated: 109 children in 23 municipalities | Treated: 549 children
+
+Overall ATT:  
+    ATT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0336        0.1466    -0.2538      0.3209 
+
+
+Overall ACRT:  
+   ACRT    Std. Error     [ 95%  Conf. Int.] 
+ 0.0757        0.1649    -0.2475      0.3989 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Clustered average ATT = 0.034 ( 0.164 )
+Difference in average ATT (remittance minus non-remittance) = 0.111 ( 0.186 )
+
+==================== SPI classes: haz ====================
+Near normal (untreated): 1457 children in 81 municipalities | Dry (z <= -1): 943 children in 50 municipalities
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.] 
+ -0.0032        0.0554    -0.1119      0.1054 
+
+
+Overall ACRT:  
+    ACRT    Std. Error     [ 95%  Conf. Int.]  
+ -0.1924         0.068    -0.3256     -0.0592 *
+---
+Signif. codes: `*' confidence band does not cover 0
+
+a. Clustered: Average ATT = -0.003 ( 0.102 ) | Average ACRT = -0.192 ( 0.262 )
+b. Average ATT, dry vs near normal:
+ dry                           -0.003 (0.098)  p clustered = 0.974 | p wild bootstrap = 0.974 | 943 children in 50 municipalities
+c. SPI groups vs near normal:
+ mod_dry                        0.162 (0.105)  p clustered = 0.124 | p wild bootstrap = 0.156 | 441 children in 26 municipalities
+ sev_dry                       -0.149 (0.126)  p clustered = 0.241 | p wild bootstrap = 0.296 | 502 children in 24 municipalities
+Extremely dry shown alone (6 municipalities, SE not reliable):
+ mod_dry                        0.162 (0.105)  p clustered = 0.124 | p wild bootstrap = 0.156 | 441 children in 26 municipalities
+ sev_only                      -0.247 (0.142)  p clustered = 0.084 | p wild bootstrap = 0.122 | 389 children in 18 municipalities
+ ext_dry                        0.190 (0.142)  p clustered = 0.185 | p wild bootstrap = 0.299 | 113 children in 6 municipalities
+d. Pre-trends, 2002 to 2005, each group vs near normal:
+ mod_dry                       -0.179 (0.122)  p clustered = 0.147 | p wild bootstrap = 0.161 | 216 children in 23 municipalities
+ sev_dry                       -0.022 (0.111)  p clustered = 0.841 | p wild bootstrap = 0.868 | 260 children in 21 municipalities
+f. Remittance buffer, dry x 2002 remittances:
+ dry                           -0.069 (0.113)  p clustered = 0.545 | p wild bootstrap = 0.573 | 707 children in 44 municipalities
+ remittance_hh_02              -0.066 (0.108)  p clustered = 0.543 | p wild bootstrap = 0.553 | 662 children in 98 municipalities
+ dry:remittance_hh_02          -0.081 (0.136)  p clustered = 0.554 | p wild bootstrap = 0.559 | 220 children in 38 municipalities
+g. Wild bootstrap check of the main average ATT (any deficit vs none):
+ D_any                         -0.206 (0.089)  p clustered = 0.022 | p wild bootstrap = 0.040 | 1918 children in 99 municipalities
+
+==================== SPI classes: waz ====================
+Near normal (untreated): 677 children in 75 municipalities | Dry (z <= -1): 398 children in 46 municipalities
+
+Overall ATT:  
+    ATT    Std. Error     [ 95%  Conf. Int.]  
+ -0.206        0.0824    -0.3676     -0.0445 *
+
+
+Overall ACRT:  
+    ACRT    Std. Error     [ 95%  Conf. Int.]  
+ -0.3046        0.0799    -0.4613     -0.1479 *
+---
+Signif. codes: `*' confidence band does not cover 0
+
+a. Clustered: Average ATT = -0.206 ( 0.118 ) | Average ACRT = -0.305 ( 0.389 )
+b. Average ATT, dry vs near normal:
+ dry                           -0.206 (0.111)  p clustered = 0.066 | p wild bootstrap = 0.067 | 398 children in 46 municipalities
+c. SPI groups vs near normal:
+ mod_dry                       -0.080 (0.119)  p clustered = 0.499 | p wild bootstrap = 0.521 | 191 children in 23 municipalities
+ sev_dry                       -0.322 (0.168)  p clustered = 0.057 | p wild bootstrap = 0.050 | 207 children in 23 municipalities
+Extremely dry shown alone (6 municipalities, SE not reliable):
+ mod_dry                       -0.080 (0.119)  p clustered = 0.499 | p wild bootstrap = 0.521 | 191 children in 23 municipalities
+ sev_only                      -0.337 (0.207)  p clustered = 0.106 | p wild bootstrap = 0.102 | 161 children in 18 municipalities
+ ext_dry                       -0.269 (0.166)  p clustered = 0.107 | p wild bootstrap = 0.246 | 46 children in 5 municipalities
+d. Pre-trends, 2002 to 2005, each group vs near normal:
+ mod_dry                        0.144 (0.215)  p clustered = 0.507 | p wild bootstrap = 0.528 | 57 children in 19 municipalities
+ sev_dry                        0.139 (0.254)  p clustered = 0.586 | p wild bootstrap = 0.613 | 53 children in 17 municipalities
+f. Remittance buffer, dry x 2002 remittances:
+ dry                           -0.233 (0.182)  p clustered = 0.204 | p wild bootstrap = 0.260 | 264 children in 39 municipalities
+ remittance_hh_02               0.057 (0.128)  p clustered = 0.657 | p wild bootstrap = 0.664 | 291 children in 80 municipalities
+ dry:remittance_hh_02          -0.115 (0.216)  p clustered = 0.597 | p wild bootstrap = 0.602 | 104 children in 30 municipalities
+g. Wild bootstrap check of the main average ATT (any deficit vs none):
+ D_any                         -0.037 (0.092)  p clustered = 0.693 | p wild bootstrap = 0.696 | 839 children in 93 municipalities
+
+==================== SPI classes: bmiz ====================
+Near normal (untreated): 1433 children in 81 municipalities | Dry (z <= -1): 915 children in 50 municipalities
+
+Overall ATT:  
+     ATT    Std. Error     [ 95%  Conf. Int.]  
+ -0.1269        0.0552    -0.2352     -0.0187 *
+
+
+Overall ACRT:  
+    ACRT    Std. Error     [ 95%  Conf. Int.]  
+ -0.3309        0.0699    -0.4679     -0.1939 *
+---
+Signif. codes: `*' confidence band does not cover 0
+
+a. Clustered: Average ATT = -0.127 ( 0.081 ) | Average ACRT = -0.331 ( 0.288 )
+b. Average ATT, dry vs near normal:
+ dry                           -0.127 (0.076)  p clustered = 0.097 | p wild bootstrap = 0.106 | 915 children in 50 municipalities
+c. SPI groups vs near normal:
+ mod_dry                       -0.125 (0.132)  p clustered = 0.345 | p wild bootstrap = 0.456 | 422 children in 26 municipalities
+ sev_dry                       -0.129 (0.067)  p clustered = 0.056 | p wild bootstrap = 0.070 | 493 children in 24 municipalities
+Extremely dry shown alone (6 municipalities, SE not reliable):
+ mod_dry                       -0.125 (0.132)  p clustered = 0.345 | p wild bootstrap = 0.456 | 422 children in 26 municipalities
+ sev_only                      -0.106 (0.078)  p clustered = 0.174 | p wild bootstrap = 0.219 | 381 children in 18 municipalities
+ ext_dry                       -0.205 (0.076)  p clustered = 0.008 | p wild bootstrap = 0.022 | 112 children in 6 municipalities
+d. Pre-trends, 2002 to 2005, each group vs near normal:
+ mod_dry                        0.155 (0.221)  p clustered = 0.483 | p wild bootstrap = 0.556 | 197 children in 23 municipalities
+ sev_dry                        0.266 (0.109)  p clustered = 0.016 | p wild bootstrap = 0.020 | 242 children in 21 municipalities
+f. Remittance buffer, dry x 2002 remittances:
+ dry                           -0.163 (0.107)  p clustered = 0.132 | p wild bootstrap = 0.156 | 686 children in 44 municipalities
+ remittance_hh_02               0.062 (0.071)  p clustered = 0.384 | p wild bootstrap = 0.392 | 647 children in 97 municipalities
+ dry:remittance_hh_02           0.073 (0.199)  p clustered = 0.714 | p wild bootstrap = 0.724 | 213 children in 37 municipalities
+g. Wild bootstrap check of the main average ATT (any deficit vs none):
+ D_any                         -0.026 (0.080)  p clustered = 0.747 | p wild bootstrap = 0.760 | 1876 children in 99 municipalities
+SPI section done, elapsed: 0.9 min
+
+==================== Summary ====================
+ outcome    sample                                                estimate
+     haz 2005-2009                           Average ATT (parallel trends)
+     haz 2005-2009             Average ACRT (needs strong parallel trends)
+     waz 2005-2009                           Average ATT (parallel trends)
+     waz 2005-2009             Average ACRT (needs strong parallel trends)
+    bmiz 2005-2009                           Average ATT (parallel trends)
+    bmiz 2005-2009             Average ACRT (needs strong parallel trends)
+     haz 2005-2009                       Average ATT, 2002 remittances = 0
+     haz 2005-2009                       Average ATT, 2002 remittances = 1
+     haz 2005-2009 Average ATT difference: remittance minus non-remittance
+     waz 2005-2009                       Average ATT, 2002 remittances = 0
+     waz 2005-2009                       Average ATT, 2002 remittances = 1
+     waz 2005-2009 Average ATT difference: remittance minus non-remittance
+    bmiz 2005-2009                       Average ATT, 2002 remittances = 0
+    bmiz 2005-2009                       Average ATT, 2002 remittances = 1
+    bmiz 2005-2009 Average ATT difference: remittance minus non-remittance
+    coef se_contdid_bootstrap se_clustered_municipality n_children
+ -0.2061               0.0657                    0.0919       2436
+ -0.0957               0.0799                    0.1670       2436
+ -0.0365               0.0981                    0.0922       1084
+  0.0499               0.1301                    0.1386       1084
+ -0.0259               0.0651                    0.0768       2383
+  0.0148               0.0639                    0.0831       2383
+ -0.1926               0.0890                    0.0949       1175
+ -0.4837               0.1394                    0.1571        674
+ -0.2911                   NA                    0.1707       1849
+ -0.0547               0.1516                    0.1465        432
+ -0.3795               0.2110                    0.1693        293
+ -0.3247                   NA                    0.2240        725
+ -0.0771               0.0830                    0.0996       1150
+  0.0336               0.1466                    0.1639        658
+  0.1107                   NA                    0.1858       1808
+
+==================== SPI classes and wild bootstrap ====================
+ outcome                                              specification
+     haz                             contdid with the SPI dose (a.)
+     haz                  Average ATT: dry (z <= -1) vs near normal
+     haz              Groups: moderately dry, severely dry or worse
+     haz              Groups: moderately dry, severely dry or worse
+     haz                          Groups: all three SPI dry classes
+     haz                          Groups: all three SPI dry classes
+     haz                          Groups: all three SPI dry classes
+     haz Pre-trend 2002-2005: moderately dry, severely dry or worse
+     haz Pre-trend 2002-2005: moderately dry, severely dry or worse
+     haz                  Remittance buffer: dry x 2002 remittances
+     haz                  Remittance buffer: dry x 2002 remittances
+     haz                  Remittance buffer: dry x 2002 remittances
+     haz              Main average ATT from 6): any deficit vs none
+     waz                             contdid with the SPI dose (a.)
+     waz                  Average ATT: dry (z <= -1) vs near normal
+     waz              Groups: moderately dry, severely dry or worse
+     waz              Groups: moderately dry, severely dry or worse
+     waz                          Groups: all three SPI dry classes
+     waz                          Groups: all three SPI dry classes
+     waz                          Groups: all three SPI dry classes
+     waz Pre-trend 2002-2005: moderately dry, severely dry or worse
+     waz Pre-trend 2002-2005: moderately dry, severely dry or worse
+     waz                  Remittance buffer: dry x 2002 remittances
+     waz                  Remittance buffer: dry x 2002 remittances
+     waz                  Remittance buffer: dry x 2002 remittances
+     waz              Main average ATT from 6): any deficit vs none
+    bmiz                             contdid with the SPI dose (a.)
+    bmiz                  Average ATT: dry (z <= -1) vs near normal
+    bmiz              Groups: moderately dry, severely dry or worse
+    bmiz              Groups: moderately dry, severely dry or worse
+    bmiz                          Groups: all three SPI dry classes
+    bmiz                          Groups: all three SPI dry classes
+    bmiz                          Groups: all three SPI dry classes
+    bmiz Pre-trend 2002-2005: moderately dry, severely dry or worse
+    bmiz Pre-trend 2002-2005: moderately dry, severely dry or worse
+    bmiz                  Remittance buffer: dry x 2002 remittances
+    bmiz                  Remittance buffer: dry x 2002 remittances
+    bmiz                  Remittance buffer: dry x 2002 remittances
+    bmiz              Main average ATT from 6): any deficit vs none
+                                        term    coef se_clustered p_clustered
+ Average ACRT (needs strong parallel trends) -0.1924       0.2617       0.462
+                                         dry -0.0032       0.0983       0.974
+                                     mod_dry  0.1623       0.1048       0.124
+                                     sev_dry -0.1486       0.1261       0.241
+                                     mod_dry  0.1623       0.1048       0.124
+                                    sev_only -0.2470       0.1420       0.084
+                                     ext_dry  0.1899       0.1424       0.185
+                                     mod_dry -0.1787       0.1223       0.147
+                                     sev_dry -0.0225       0.1114       0.841
+                                         dry -0.0688       0.1134       0.545
+                            remittance_hh_02 -0.0660       0.1082       0.543
+                        dry:remittance_hh_02 -0.0808       0.1364       0.554
+                                       D_any -0.2061       0.0887       0.022
+ Average ACRT (needs strong parallel trends) -0.3046       0.3891       0.434
+                                         dry -0.2060       0.1112       0.066
+                                     mod_dry -0.0803       0.1185       0.499
+                                     sev_dry -0.3220       0.1676       0.057
+                                     mod_dry -0.0803       0.1186       0.499
+                                    sev_only -0.3371       0.2071       0.106
+                                     ext_dry -0.2693       0.1659       0.107
+                                     mod_dry  0.1435       0.2151       0.507
+                                     sev_dry  0.1388       0.2536       0.586
+                                         dry -0.2330       0.1823       0.204
+                            remittance_hh_02  0.0567       0.1275       0.657
+                        dry:remittance_hh_02 -0.1147       0.2163       0.597
+                                       D_any -0.0365       0.0922       0.693
+ Average ACRT (needs strong parallel trends) -0.3309       0.2876       0.250
+                                         dry -0.1269       0.0760       0.097
+                                     mod_dry -0.1249       0.1318       0.345
+                                     sev_dry -0.1287       0.0667       0.056
+                                     mod_dry -0.1249       0.1318       0.345
+                                    sev_only -0.1063       0.0778       0.174
+                                     ext_dry -0.2049       0.0757       0.008
+                                     mod_dry  0.1555       0.2209       0.483
+                                     sev_dry  0.2662       0.1087       0.016
+                                         dry -0.1630       0.1073       0.132
+                            remittance_hh_02  0.0620       0.0709       0.384
+                        dry:remittance_hh_02  0.0728       0.1985       0.714
+                                       D_any -0.0259       0.0800       0.747
+ p_wild_bootstrap n_children children_in_group municipalities_in_group
+               NA       2400               943                      50
+            0.974       2400               943                      50
+            0.156       2400               441                      26
+            0.296       2400               502                      24
+            0.156       2400               441                      26
+            0.122       2400               389                      18
+            0.299       2400               113                       6
+            0.161       1273               216                      23
+            0.868       1273               260                      21
+            0.573       1814               707                      44
+            0.553       1814               662                      98
+            0.559       1814               220                      38
+            0.040       2436              1918                      99
+               NA       1075               398                      46
+            0.067       1075               398                      46
+            0.521       1075               191                      23
+            0.050       1075               207                      23
+            0.521       1075               191                      23
+            0.102       1075               161                      18
+            0.246       1075                46                       5
+            0.528        270                57                      19
+            0.613        270                53                      17
+            0.260        716               264                      39
+            0.664        716               291                      80
+            0.602        716               104                      30
+            0.696       1084               839                      93
+               NA       2348               915                      50
+            0.106       2348               915                      50
+            0.456       2348               422                      26
+            0.070       2348               493                      24
+            0.456       2348               422                      26
+            0.219       2348               381                      18
+            0.022       2348               112                       6
+            0.556       1179               197                      23
+            0.020       1179               242                      21
+            0.156       1774               686                      44
+            0.392       1774               647                      97
+            0.724       1774               213                      37
+            0.760       2383              1876                      99
+ untreated_municipalities
+                       81
+                       81
+                       81
+                       81
+                       81
+                       81
+                       81
+                       76
+                       76
+                       75
+                       75
+                       75
+                       34
+                       75
+                       75
+                       75
+                       75
+                       75
+                       75
+                       75
+                       44
+                       44
+                       65
+                       65
+                       65
+                       30
+                       81
+                       81
+                       81
+                       81
+                       81
+                       81
+                       81
+                       74
+                       74
+                       75
+                       75
+                       75
+                       34
+Total runtime: 0.9 min

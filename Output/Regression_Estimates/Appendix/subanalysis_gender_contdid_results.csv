@@ -1,0 +1,31 @@
+"outcome","sample","estimate","coef","se_contdid_bootstrap","se_clustered_municipality","n_children"
+"haz","2005-2009, boys","Average ATT (parallel trends)",-0.1776,0.1009,0.1113,1208
+"haz","2005-2009, boys","Average ACRT (needs strong parallel trends)",-0.1038,0.0998,0.2664,1208
+"waz","2005-2009, boys","Average ATT (parallel trends)",-0.0639,0.1376,0.1554,556
+"waz","2005-2009, boys","Average ACRT (needs strong parallel trends)",0.1869,0.1843,0.2031,556
+"bmiz","2005-2009, boys","Average ATT (parallel trends)",-0.0088,0.1047,0.1184,1177
+"bmiz","2005-2009, boys","Average ACRT (needs strong parallel trends)",0.098,0.0864,0.1268,1177
+"haz","2005-2009, girls","Average ATT (parallel trends)",-0.2343,0.0866,0.1047,1228
+"haz","2005-2009, girls","Average ACRT (needs strong parallel trends)",-0.0794,0.1137,0.1472,1228
+"waz","2005-2009, girls","Average ATT (parallel trends)",-0.0195,0.129,0.1064,528
+"waz","2005-2009, girls","Average ACRT (needs strong parallel trends)",-0.0972,0.1548,0.1536,528
+"bmiz","2005-2009, girls","Average ATT (parallel trends)",-0.0425,0.0823,0.0974,1206
+"bmiz","2005-2009, girls","Average ACRT (needs strong parallel trends)",-0.0933,0.102,0.1552,1206
+"haz","2005-2009, boys","Average ATT, 2002 remittances = 0",-0.1952,0.1237,0.1185,589
+"haz","2005-2009, boys","Average ATT, 2002 remittances = 1",-0.3551,0.1923,0.2106,331
+"haz","2005-2009, boys","Average ATT difference: remittance minus non-remittance",-0.1599,NA,0.2169,920
+"waz","2005-2009, boys","Average ATT, 2002 remittances = 0",-0.1733,0.2049,0.2494,220
+"waz","2005-2009, boys","Average ATT, 2002 remittances = 1",-0.2252,0.2402,0.2483,162
+"waz","2005-2009, boys","Average ATT difference: remittance minus non-remittance",-0.0519,NA,0.3536,382
+"bmiz","2005-2009, boys","Average ATT, 2002 remittances = 0",-0.1414,0.1414,0.1682,577
+"bmiz","2005-2009, boys","Average ATT, 2002 remittances = 1",0.3771,0.2028,0.1851,321
+"bmiz","2005-2009, boys","Average ATT difference: remittance minus non-remittance",0.5185,NA,0.2748,898
+"haz","2005-2009, girls","Average ATT, 2002 remittances = 0",-0.185,0.1173,0.1146,586
+"haz","2005-2009, girls","Average ATT, 2002 remittances = 1",-0.609,0.2066,0.2217,343
+"haz","2005-2009, girls","Average ATT difference: remittance minus non-remittance",-0.424,NA,0.2343,929
+"waz","2005-2009, girls","Average ATT, 2002 remittances = 0",0.0537,0.1744,0.1987,212
+"waz","2005-2009, girls","Average ATT, 2002 remittances = 1",-0.4851,0.3207,0.2291,131
+"waz","2005-2009, girls","Average ATT difference: remittance minus non-remittance",-0.5388,NA,0.3396,343
+"bmiz","2005-2009, girls","Average ATT, 2002 remittances = 0",-0.0121,0.1029,0.0953,573
+"bmiz","2005-2009, girls","Average ATT, 2002 remittances = 1",-0.2922,0.1903,0.2094,337
+"bmiz","2005-2009, girls","Average ATT difference: remittance minus non-remittance",-0.2801,NA,0.202,910

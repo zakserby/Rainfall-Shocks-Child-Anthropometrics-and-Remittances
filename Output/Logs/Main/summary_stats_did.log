@@ -1,0 +1,924 @@
+-------------------------------------------------------------------------------
+      name:  sumstats_did
+       log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
+> r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/summary_stats_did.log
+  log type:  text
+ opened on:  26 Oct 2026, 03:49:33
+.     do "$scripts/Statistics/Summary Stats DID.do"
+
+. *******************************************************************
+. * Summary statistics for the 2009 drought DID
+. * Project: MS Thesis
+. *******************************************************************
+. 
+. clear all
+
+. set more off
+
+. 
+. *******************************************************************
+. * Directories
+. *******************************************************************
+. * The root folder is set once in 00_Master.do. If this file is run on its own
+> , the root is found by going up from Stata's working folder until the folder 
+> that has Scripts/00_Master.do
+. if "$root" == "" {
+.     local r = subinstr("`c(pwd)'", "\", "/", .)
+.     while "`r'" != "" & !fileexists("`r'/Scripts/00_Master.do") {
+  2.         local r = substr("`r'", 1, strrpos("`r'", "/") - 1)
+  3.     }
+.     global root "`r'"
+. }
+
+. global raw_mxfls     "$root/Data/Raw/MxFLS"
+
+. global raw_who       "$root/Data/Raw/WHO_reference"
+
+. global clean_mxfls   "$root/Data/Cleaned/MxFLS"
+
+. global clean_who     "$root/Data/Cleaned/WHO_zscores"
+
+. global clean_rain    "$root/Data/Cleaned/Rainfall"
+
+. global clean_banxico "$root/Data/Cleaned/Banxico"
+
+. global out_sumstats  "$root/Output/Tables"
+
+. global out_regs      "$root/Output/Regression_Estimates" 
+
+. global out_logs      "$root/Output/Logs"
+
+. 
+. * Create the folders this project writes to (capture skips quietly if a folde
+> r already exists)
+. foreach d in "$root/Data" "$root/Data/Cleaned" "$clean_mxfls" "$clean_who" "$
+> clean_rain" "$root/Output" "$out_sumstats" "$out_regs" "$out_logs" {
+  2.     capture mkdir "`d'"
+  3. }
+
+. * This includes writing to Main and Appendix subfolders, same as 00_Master.do
+. foreach d in "$out_sumstats" "$out_regs" "$out_logs" {
+  2.     foreach s in Main Appendix {
+  3.         capture mkdir "`d'/`s'"
+  4.     }
+  5. }
+
+. 
+. *******************************************************************
+. * Some preliminaries
+. *******************************************************************
+. 
+. capture which estpost
+
+. if _rc ssc install estout
+
+. capture which distinct
+
+. if _rc ssc install distinct
+
+. 
+. *******************************************************************
+. * Load DID analysis data
+. *******************************************************************
+. 
+. * Loading in data
+. use "$clean_mxfls/mxfls_did_analysis.dta", clear
+(ENNVIH-3 Libro s_sa)
+
+. 
+. *******************************************************************
+. * DID variables
+. *******************************************************************
+. 
+. * Keep remittances only on the 2005 row, blank on the others
+. gen remit05_tmp = remittance_hh if year == 2005
+(82,772 missing values generated)
+
+. * Copy that 2005 value to all of the child's rows
+. bysort pid_link_canonical: egen remittance_hh_05 = max(remit05_tmp)
+(31,971 missing values generated)
+
+. drop remit05_tmp
+
+. 
+. gen did_sample = age < 16 & !missing(treat2009) & treat_early == 0
+
+. 
+. *******************************************************************
+. * Globals
+. *******************************************************************
+. 
+. * Controls. We sort sections by household, child and mother, father and birth
+> . Primarily bc father and birth have fewer observations for children and redu
+> ce the sample size a lot 
+. * Outcomes
+. global outcomes "haz waz bmiz"
+
+. * Treatment and the other droughts between the waves
+. global treatment "treat2009 drought2005 drought2006 drought2007 drought2008"
+
+. * Remittances
+. global remit "remittance_hh_05"
+
+. * Household controls
+. global controls_hh "dwell_electricity dwell_floor_good dwell_roof_good dwell_
+> ventilation_good rooms_per_person ln_pc_expend_month rural"
+
+. * Child and mother controls
+. global controls_child "age child_male fully_vaccinated mother_height_cm mothe
+> r_edu_years mother_age_at_birth mother_employed"
+
+. * Father and Book IV birth controls. Note this is filled for fewer children
+. global controls_birth "father_height_cm father_edu_years father_age_at_birth 
+> father_employed birth_order oldest_child birth_weight_kg delivered_home predo
+> minant_breastfed iron_pregnancy premature"
+
+. 
+. * All vars
+. global baseline_vars "$outcomes $remit $controls_hh $controls_child $controls
+> _birth"
+
+. * Table variables as they enter the regressions, so 2002 remittances and hous
+> ehold controls, and 2005 child and parent controls
+. global remit02 "remittance_hh_02"
+
+. global controls_hh02 "dwell_electricity_02 dwell_floor_good_02 dwell_roof_goo
+> d_02 dwell_ventilation_good_02 rooms_per_person_02 ln_pc_expend_month_02 rura
+> l_02"
+
+. * Continuous DID treatment
+. global contdid_treat "rain_deficit2009 any_deficit2009"
+
+. global table_vars "$treatment $contdid_treat $remit02 $controls_hh02 $control
+> s_child $controls_birth"
+
+. 
+. 
+. *******************************************************************
+. * Summary statistics table, 2005 at baseline
+. *******************************************************************
+. 
+. * Creating general summary table for our primary regression samples. Split in
+> to two panels. 
+. local cells "mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(fmt(2)) coun
+> t(fmt(%9.0fc))"
+
+. local groups `"treat2009 "\addlinespace[6pt]\textit{Binary DID treatment (CHI
+> RPS)}" rain_deficit2009 "\addlinespace[6pt]\textit{Continuous DID treatment (
+> CHIRPS)}" remittance_hh_02 "\addlinespace[6pt]\textit{Remittances (MxFLS-1, 2
+> 002)}" dwell_electricity_02 "\addlinespace[6pt]\textit{Household (MxFLS-1, 20
+> 02)}" age "\addlinespace[6pt]\textit{Child and mother (MxFLS-2, 2005)}" fathe
+> r_height_cm "\addlinespace[6pt]\textit{Father and birth (MxFLS-1 and MxFLS-2)
+> }""'
+
+. 
+. * We compute the numbers in the notes underneath the table here, so nothing i
+> s hardcoded. Same regressions as the sample size table further down including
+>  Models 1 and 3 of DID_Regs.do
+. capture which reghdfe
+
+. if _rc ssc install reghdfe
+
+. * reghdfe needs ftools and require, so on a new computer they must be install
+> ed before the first reghdfe below
+. capture which ftools
+
+. if _rc ssc install ftools
+
+. capture which require
+
+. if _rc ssc install require
+
+. foreach o in haz waz bmiz {
+  2.     quietly count if reg_`o' == 1 & year == 2005
+  3.         * n_ = children in the estimation sample
+.     local n = r(N)
+  4.     quietly reghdfe `o' treat_post if s_`o' == 1, absorb(pid_link_canonica
+> l int_ym) vce(cluster cvegeo05)
+  5.     quietly distinct pid_link_canonical if e(sample)
+  6.         * single_ = children Model 1 drops as singletons
+.     local single_`o' = `n' - r(ndistinct)
+  7.     quietly reghdfe `o' treat_post drought2005_post drought2006_post droug
+> ht2007_post drought2008_post dwell_electricity_02_post dwell_floor_good_02_po
+> st dwell_roof_good_02_post dwell_ventilation_good_02_post rooms_per_person_02
+> _post ln_pc_expend_month_02_post rural_02_post child_male_05_post mother_heig
+> ht_cm_05_post mother_edu_years_05_post mother_age_at_birth_05_post mother_emp
+> loyed_05_post fully_vaccinated_05_post if s_`o' == 1, absorb(pid_link_canonic
+> al int_ym) vce(cluster cvegeo05)
+  8.     quietly distinct pid_link_canonical if e(sample)
+  9.         * Here we add some formatting for these 4 lines below
+.         * m3_ = children in Model 3
+.     local m3_`o' : display %9.0fc r(ndistinct)
+ 10.     local m3_`o' = strtrim("`m3_`o''")
+ 11.     quietly count if reg_`o' == 1 & year == 2005 & rain_z2009 >= 1 & !miss
+> ing(rain_z2009)
+ 12.         * wet_ = children with z of 1 or above that the SPI analysis drops
+.     local wet_`o' = r(N)
+ 13.     local n_`o' : display %9.0fc `n'
+ 14.     local n_`o' = strtrim("`n_`o''")
+ 15. }
+
+. 
+. * Panel A: WAZ sample
+. preserve
+
+.     keep if reg_waz == 1 & year == 2005
+(110,757 observations deleted)
+
+.     quietly estpost summarize waz $table_vars, detail
+
+.     esttab using "$out_sumstats/Main/summary_stats_did_table.tex", replace bo
+> oktabs label ///
+>         cells("`cells'") collabels("Mean" "Std. dev." "Min." "Median" "Max." 
+> "Obs.") noobs nonumber nomtitle ///
+>         refcat(waz "\textit{Outcomes (MxFLS-2, 2005)}" `groups', nolabel) ///
+>         prehead("\documentclass[12pt]{article}" "\usepackage[margin=1in]{geom
+> etry}" "\usepackage{booktabs}" "\usepackage{longtable}" "\usepackage{caption}
+> " ///
+>             "\DeclareCaptionLabelSeparator{emdash}{---}" "\captionsetup{font=
+> normalsize,labelfont=sc,textfont=sc,labelsep=emdash}" "\begin{document}" ///
+>             "\begingroup" "\footnotesize" "\renewcommand{\arraystretch}{0.86}
+> " "\setlength{\tabcolsep}{4pt}" "\setlength{\LTcapwidth}{\textwidth}" ///
+>             "\begin{longtable}{l*{6}{c}}" "\caption{Summary Statistics, 2009 
+> Drought DID Samples}\\" ///
+>             "\toprule" " & \multicolumn{6}{c}{Panel A: WAZ, age \ensuremath{\
+> le}10 in 2005 and 2009}\\" "\cmidrule(lr){2-7}") ///
+>         posthead("\midrule") prefoot("") postfoot("\bottomrule" "\newpage")
+(output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
+> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Main/summary_stats_did_ta
+> ble.tex)
+
+. restore
+
+. 
+. * Panel B: HAZ and BMIZ sample, appended to the same table
+. preserve
+
+.     keep if reg_haz == 1 & year == 2005
+(109,405 observations deleted)
+
+.     quietly estpost summarize haz bmiz $table_vars, detail
+
+.     esttab using "$out_sumstats/Main/summary_stats_did_table.tex", append boo
+> ktabs label ///
+>         cells("`cells'") collabels("Mean" "Std. dev." "Min." "Median" "Max." 
+> "Obs.") noobs nonumber nomtitle ///
+>         refcat(haz "\textit{Outcomes (MxFLS-2, 2005)}" `groups', nolabel) ///
+>         prehead("\toprule" " & \multicolumn{6}{c}{Panel B: HAZ and BMIZ, age 
+> \ensuremath{\le}15 in 2005 and 2009}\\" "\cmidrule(lr){2-7}") ///
+>         posthead("\midrule") prefoot("") ///
+>         postfoot("\bottomrule" ///
+>             "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize
+>  \textit{Notes:} Sample is children with the outcome measured in MxFLS-2 (200
+> 5) and MxFLS-3 (2009), aged 10 or younger (Panel A) or 15 or younger (Panel B
+> )" ///
+>             "in both rounds, with a 2005 municipality and not measured in MxF
+> LS-3 before November 2009. Each row is a child, and Obs. counts children. Sta
+> tistics are at the 2005 baseline, except" ///
+>             "remittances and household variables (2002). Panel B reports BMIZ
+>  for the HAZ sample, as the BMIZ sample is similar and slightly smaller, at `
+> n_bmiz' children." ///
+>             "The continuous DID uses these samples, and binary DID Model 1 ex
+> cludes `single_waz' (Panel A) and `single_haz' (Panel B) children in singleto
+> n" ///
+>             "interview-month cells. Model 3, the main binary DID, adds 2005--
+> 2008 droughts and 2002 household and 2005 child and mother controls and inclu
+> des" ///
+>             "`m3_waz' (WAZ), `m3_haz' (HAZ), and `m3_bmiz' (BMIZ) children. T
+> he SPI analysis compares z of -1 or below with z between -1 and 1, excluding"
+>  ///
+>             "`wet_waz' (Panel A) and `wet_haz' (Panel B) children with z of 1
+>  or above. Drought is annual CHIRPS rainfall in the 2005 municipality below i
+> ts 1981--2004 20th percentile." ///
+>             "Rainfall deficit is max(0,~-z), where z is 2009 rainfall in stan
+> dard deviations from the 1981--2004 municipal mean. Remittances, a proxy, are
+>  cash received in the last" ///
+>             "12 months from parents, siblings, or children outside the househ
+> old. Expenditure is in 2002 pesos per person per month, a proxy for" ///
+>             "household income. Rural is a locality under 2,500 inhabitants (I
+> NEGI, 2024).}\\" ///
+>             "\end{longtable}" "\endgroup")
+(output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
+> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Main/summary_stats_did_ta
+> ble.tex)
+
+. restore
+
+. 
+. 
+. *******************************************************************
+. * Balance table of treated vs control
+. *******************************************************************
+. 
+. 
+. * reghdfe needed for absorbing fixed effects; install once if not already pre
+> sent, same as in DID_Regs
+. capture which reghdfe
+
+. if _rc ssc install reghdfe
+
+. capture which ftools
+
+. if _rc ssc install ftools
+
+. capture which require
+
+. if _rc ssc install require
+
+. 
+. 
+. * This block defines a new Stata command called cnt_row. NOTE: Nothing runs h
+> ere, just the template. This program writes one row of the table by 
+.         * 1) Counting how many control children, households or municipalities
+>  meet a condition
+.         * 1) Counting how many treated children, households or municipalities
+>  meet a condition
+.         * 3) Writes one line of LaTeX into the .tex file that label control c
+> ount & treated count.
+. * Has about 60 rows, and this is done because more efficient then writing 60 
+> times. Only the label and conditions change
+. capture program drop cnt_row
+
+. program define cnt_row
+  1.     gettoken label 0 : 0
+  2.     syntax , Sample(string) Control(string) Treated(string) [Distinct(varn
+> ame) Last]
+  3.     foreach g in control treated {
+  4.                 * Counting Children
+.                 * NOTE: Basically box left blank no distinct(...) in the line
+>  then the program sees an empty box and counts children, one per row of data.
+>  
+.         if "`distinct'" == "" {
+  5.             quietly count if (`sample') & (``g'')
+  6.             local n_`g' = r(N)
+  7.         }
+  8.                 * Counting municipalities or households
+.                 * NOTE: This distinct(...) is filled in with cvegeo05 or foli
+> o_canonical  here and specified later down
+.         else {
+  9.             capture quietly distinct `distinct' if (`sample') & (``g'')
+ 10.             local n_`g' = cond(_rc, 0, r(ndistinct))
+ 11.         }
+ 12.                 * Just formatting
+.         local c_`g' : display %12.0fc `n_`g''
+ 13.         local c_`g' = strtrim("`c_`g''")
+ 14.     }
+ 15.     local end "\\*"
+ 16.         * LaTeX stuff
+.     if "`last'" != "" local end "\\"
+ 17.     file write cnt `"`label' & `c_control' & `c_treated'`end'"' _n
+ 18.         * Displaying in stata
+.     di as text `"`label': "' as result "`c_control' control, `c_treated' trea
+> ted"
+ 19. end
+
+. 
+. 
+. preserve
+
+. * Run DID Models 1, 3 and 5 of DID_Regs.do, we flag with e(sample), meaning t
+> his creates a row with 1's and 0's and the 1's are the observations used in t
+> he regression. Then later on in the script we will count these ones to get th
+> e sample of treated or control. 
+. * Purpose of this block is to find out exactly which children each regression
+>  uses
+. local cnt_did_controls "drought2005_post drought2006_post drought2007_post dr
+> ought2008_post"
+
+. local cnt_controls02 "dwell_electricity_02_post dwell_floor_good_02_post dwel
+> l_roof_good_02_post dwell_ventilation_good_02_post rooms_per_person_02_post l
+> n_pc_expend_month_02_post rural_02_post"
+
+. local cnt_controls05 "child_male_05_post mother_height_cm_05_post mother_edu_
+> years_05_post mother_age_at_birth_05_post mother_employed_05_post fully_vacci
+> nated_05_post"
+
+. foreach o in haz waz bmiz {
+  2.     quietly reghdfe `o' treat_post if s_`o' == 1, absorb(pid_link_canonica
+> l int_ym) vce(cluster cvegeo05)
+  3.     gen m1_`o' = e(sample)
+  4.     quietly reghdfe `o' treat_post `cnt_did_controls' `cnt_controls02' `cn
+> t_controls05' if s_`o' == 1, absorb(pid_link_canonical int_ym) vce(cluster cv
+> egeo05)
+  5.     gen m3_`o' = e(sample)
+  6.     quietly reghdfe `o' treat_post remittance_hh_02_post treat_post_remit0
+> 2 `cnt_did_controls' `cnt_controls02' `cnt_controls05' if s_`o' == 1, absorb(
+> pid_link_canonical int_ym) vce(cluster cvegeo05)
+  7.     gen m5_`o' = e(sample)
+  8. }
+
+. 
+. * Every child in the regression samples has exactly two rows used, 2005 and 2
+> 009. The table counts children, not rows, so each child must be counted once,
+>  thus we only keep one year
+. keep if year == 2005
+(80,341 observations deleted)
+
+. * SPI classes from z = 2009 rainfall in the 2005 municipality, the same cutof
+> fs as add_spi() in functions.R
+. gen spi_near = (rain_z2009 > -1) if rain_z2009 < 1
+(495 missing values generated)
+
+. gen spi_mod = (rain_z2009 <= -1 & rain_z2009 > -1.5) if rain_z2009 < 1
+(495 missing values generated)
+
+. gen spi_sev = (rain_z2009 <= -1.5) if rain_z2009 < 1
+(495 missing values generated)
+
+. gen spi_sevonly = (rain_z2009 <= -1.5 & rain_z2009 > -2) if rain_z2009 < 1
+(495 missing values generated)
+
+. gen spi_ext = (rain_z2009 <= -2) if rain_z2009 < 1
+(495 missing values generated)
+
+. 
+. * Text for the group headings
+. local age_haz "15 or younger"
+
+. local age_waz "10 or younger"
+
+. local age_bmiz "15 or younger"
+
+. 
+. capture file close cnt
+
+. file open cnt using "$out_sumstats/Main/summary_stats_did_table.tex", write a
+> ppend 
+
+. 
+. * LaTex
+. file write cnt "\clearpage" _n "\begingroup" _n "\footnotesize" _n "\renewcom
+> mand{\arraystretch}{0.86}" _n "\setlength{\tabcolsep}{4pt}" _n "\setlength{\L
+> Tcapwidth}{\textwidth}" _n "\setlength{\LTleft}{0pt}" _n "\setlength{\LTright
+> }{0pt plus 1fil}" _n
+
+. file write cnt "\begin{longtable}{@{\extracolsep{\fill}}lcc}" _n "\caption{Sa
+> mple Sizes, Treated and Control Children}\\" _n 
+
+. 
+. 
+. *******************************************************************
+. * Panel A: binary DID
+. *******************************************************************
+. * LaTeX
+. file write cnt "\toprule" _n " & \multicolumn{2}{c}{Panel A: Binary DID, 2009
+>  drought}\\*" _n "\cmidrule(lr){2-3}" _n " & Control & Treated\\*" _n "\midru
+> le" _n
+
+. foreach o in haz waz bmiz {
+  2.     local O = upper("`o'")
+  3.     local space ""
+  4.     if "`o'" != "haz" local space "\addlinespace[6pt]"
+  5.     file write cnt "`space'\textit{`O' sample, children aged `age_`o'' in 
+> 2005 and 2009} & & \\*" _n
+  6.     local t "control(treat2009 == 0) treated(treat2009 == 1)"
+  7.         * This is calling upon the count if in our program and the t sets 
+> control vs treated counts
+.     cnt_row "Children, estimation sample", sample(reg_`o' == 1) `t'
+  8.     cnt_row "Children, Model 1 (basic DID)", sample(m1_`o' == 1) `t'
+  9.     cnt_row "Children, Model 3 (DID with controls)", sample(m3_`o' == 1) `
+> t'
+ 10.     cnt_row "Children, Model 5 (triple difference)", sample(m5_`o' == 1) `
+> t'
+ 11.         * Only exists for triple difference, and also adds up to total num
+> ber of children in Model 5 with the children not in remittance households
+.     cnt_row "\quad In 2002 remittance households", sample(m5_`o' == 1 & remit
+> tance_hh_02 == 1) `t'
+ 12.     cnt_row "Households, estimation sample", sample(reg_`o' == 1) `t' dist
+> inct(folio_canonical)
+ 13.     cnt_row "2005 municipalities, estimation sample", sample(reg_`o' == 1)
+>  `t' distinct(cvegeo05) last
+ 14. }
+Children, estimation sample: 1,442 control, 994 treated
+Children, Model 1 (basic DID): 1,439 control, 993 treated
+Children, Model 3 (DID with controls): 1,021 control, 734 treated
+Children, Model 5 (triple difference): 946 control, 676 treated
+\quad In 2002 remittance households: 377 control, 206 treated
+Households, estimation sample: 894 control, 628 treated
+2005 municipalities, estimation sample: 80 control, 53 treated
+Children, estimation sample: 662 control, 422 treated
+Children, Model 1 (basic DID): 658 control, 420 treated
+Children, Model 3 (DID with controls): 422 control, 278 treated
+Children, Model 5 (triple difference): 385 control, 249 treated
+\quad In 2002 remittance households: 160 control, 98 treated
+Households, estimation sample: 537 control, 344 treated
+2005 municipalities, estimation sample: 74 control, 49 treated
+Children, estimation sample: 1,415 control, 968 treated
+Children, Model 1 (basic DID): 1,412 control, 967 treated
+Children, Model 3 (DID with controls): 1,000 control, 714 treated
+Children, Model 5 (triple difference): 926 control, 661 treated
+\quad In 2002 remittance households: 369 control, 201 treated
+Households, estimation sample: 881 control, 611 treated
+2005 municipalities, estimation sample: 80 control, 53 treated
+
+. file write cnt "\bottomrule" _n
+
+. 
+. *******************************************************************
+. * Panel B: continuous DID, any 2009 rainfall deficit vs none
+. *******************************************************************
+. 
+. file write cnt "\addlinespace[12pt]" _n "\toprule" _n " & \multicolumn{2}{c}{
+> Panel B: Continuous DID, any 2009 deficit}\\*" _n "\cmidrule(lr){2-3}" _n " &
+>  Control & Treated\\*" _n "\midrule" _n
+
+. foreach o in haz waz bmiz {
+  2.     local O = upper("`o'")
+  3.     local space ""
+  4.     if "`o'" != "haz" local space "\addlinespace[6pt]"
+  5.     file write cnt "`space'\textit{`O' sample, children aged `age_`o'' in 
+> 2005 and 2009} & & \\*" _n
+  6.     local t "control(any_deficit2009 == 0) treated(any_deficit2009 == 1)"
+  7.     cnt_row "Children, continuous DID sample", sample(reg_`o' == 1) `t'
+  8.         * Does not add up to total number of households thus we have both 
+> variables
+.     cnt_row "\quad In 2002 remittance households", sample(reg_`o' == 1 & remi
+> ttance_hh_02 == 1) `t'
+  9.     cnt_row "\quad In 2002 non-remittance households", sample(reg_`o' == 1
+>  & remittance_hh_02 == 0) `t'
+ 10.     cnt_row "Households", sample(reg_`o' == 1) `t' distinct(folio_canonica
+> l)
+ 11.     cnt_row "2005 municipalities", sample(reg_`o' == 1) `t' distinct(cvege
+> o05) last
+ 12. }
+Children, continuous DID sample: 518 control, 1,918 treated
+\quad In 2002 remittance households: 111 control, 563 treated
+\quad In 2002 non-remittance households: 314 control, 861 treated
+Households: 324 control, 1,198 treated
+2005 municipalities: 34 control, 99 treated
+Children, continuous DID sample: 245 control, 839 treated
+\quad In 2002 remittance households: 49 control, 244 treated
+\quad In 2002 non-remittance households: 128 control, 304 treated
+Households: 200 control, 681 treated
+2005 municipalities: 30 control, 93 treated
+Children, continuous DID sample: 507 control, 1,876 treated
+\quad In 2002 remittance households: 109 control, 549 treated
+\quad In 2002 non-remittance households: 307 control, 843 treated
+Households: 321 control, 1,171 treated
+2005 municipalities: 34 control, 99 treated
+
+. file write cnt "\bottomrule" _n
+
+. 
+. *******************************************************************
+. * Panel C: continuous DID, SPI drought classes vs near normal
+. *******************************************************************
+. 
+. * Panel C starts on a new page like Panel B of the summary statistics table, 
+> so its header is not left at the bottom of a page
+. file write cnt "\newpage" _n "\toprule" _n " & \multicolumn{2}{c}{Panel C: SP
+> I classes vs near normal}\\*" _n "\cmidrule(lr){2-3}" _n " & Control & Treate
+> d\\*" _n "\midrule" _n
+
+. * Each class with its z range, in the order of the SPI regressions in Contdid
+> _regs.R
+. local cls_mod "Moderately dry, \ensuremath{-1.5<z\le -1}"
+
+. local cls_sev "Severely dry or worse, \ensuremath{z\le -1.5}"
+
+. local cls_sevonly "Severely dry, \ensuremath{-2<z\le -1.5}"
+
+. local cls_ext "Extremely dry, \ensuremath{z\le -2}"
+
+. foreach c in mod sev sevonly ext {
+  2.     local space ""
+  3.     if "`c'" != "mod" local space "\addlinespace[6pt]"
+  4.     file write cnt `"`space'\textit{`cls_`c''} & & \\*"' _n
+  5.     local t "control(spi_near == 1) treated(spi_`c' == 1)"
+  6.     cnt_row "Children, HAZ sample", sample(reg_haz == 1) `t'
+  7.     cnt_row "Children, WAZ sample", sample(reg_waz == 1) `t'
+  8.     cnt_row "Children, BMIZ sample", sample(reg_bmiz == 1) `t'
+  9.     cnt_row "2005 municipalities, HAZ sample", sample(reg_haz == 1) `t' di
+> stinct(cvegeo05)
+ 10.     cnt_row "2005 municipalities, WAZ sample", sample(reg_waz == 1) `t' di
+> stinct(cvegeo05)
+ 11.     cnt_row "2005 municipalities, BMIZ sample", sample(reg_bmiz == 1) `t' 
+> distinct(cvegeo05) last
+ 12. }
+Children, HAZ sample: 1,457 control, 441 treated
+Children, WAZ sample: 677 control, 191 treated
+Children, BMIZ sample: 1,433 control, 422 treated
+2005 municipalities, HAZ sample: 81 control, 26 treated
+2005 municipalities, WAZ sample: 75 control, 23 treated
+2005 municipalities, BMIZ sample: 81 control, 26 treated
+Children, HAZ sample: 1,457 control, 502 treated
+Children, WAZ sample: 677 control, 207 treated
+Children, BMIZ sample: 1,433 control, 493 treated
+2005 municipalities, HAZ sample: 81 control, 24 treated
+2005 municipalities, WAZ sample: 75 control, 23 treated
+2005 municipalities, BMIZ sample: 81 control, 24 treated
+Children, HAZ sample: 1,457 control, 389 treated
+Children, WAZ sample: 677 control, 161 treated
+Children, BMIZ sample: 1,433 control, 381 treated
+2005 municipalities, HAZ sample: 81 control, 18 treated
+2005 municipalities, WAZ sample: 75 control, 18 treated
+2005 municipalities, BMIZ sample: 81 control, 18 treated
+Children, HAZ sample: 1,457 control, 113 treated
+Children, WAZ sample: 677 control, 46 treated
+Children, BMIZ sample: 1,433 control, 112 treated
+2005 municipalities, HAZ sample: 81 control, 6 treated
+2005 municipalities, WAZ sample: 75 control, 5 treated
+2005 municipalities, BMIZ sample: 81 control, 6 treated
+
+. 
+. * Notes at the bottom
+. file write cnt "\bottomrule" _n
+
+. file write cnt "\addlinespace[6pt]\multicolumn{3}{p{0.97\textwidth}}{\scripts
+> ize \textit{Notes:} Counts are children, households, or 2005 municipalities i
+> n each regression sample, at the 2005 baseline." _n
+
+. file write cnt "The estimation samples are children with the outcome measured
+>  in both MxFLS-2 (2005) and MxFLS-3 (2009), aged 15 or younger (HAZ and BMIZ)
+>  or 10 or younger (WAZ) in both rounds." _n
+
+. file write cnt "Children have a 2005 municipality and were not measured in Mx
+> FLS-3 before November 2009. In Panel A, treated children's 2005 municipality 
+> had a drought in 2009, with annual CHIRPS" _n 
+
+. file write cnt "rainfall below its 1981--2004 20th percentile. Model 1 drops 
+> children alone in their interview-month cell, and the continuous DID, with no
+>  interview-month fixed effects, uses the full sample. Model 3 adds the 2005--
+> 2008 droughts and 2002 household" _n 
+
+. file write cnt "and 2005 child and mother controls, and keeps children with a
+> ll of them observed. Model 5 adds 2002 remittances times post and the drought
+>  times post times 2002 remittances, and keeps children" _n
+
+. file write cnt "with 2002 remittances observed, so Model 5 children not in re
+> mittance households are the Model 5 count minus the remittance row. In Panel 
+> B, treated children's 2005 municipality had 2009" _n
+
+. file write cnt "rainfall below its 1981--2004 mean (z below 0), where z is 20
+> 09 rainfall in standard deviations from that mean. These are the continuous D
+> ID samples, and the two remittance rows are the groups" _n
+
+. file write cnt "of the remittance split. They do not add up to the total, as 
+> children with missing 2002 remittances are in neither row. Panel C compares e
+> ach SPI class with near normal (z between -1 and 1)" _n
+
+. file write cnt "in the continuous DID. As McKee, Doesken and Kleist (1993) no
+> te, drought intensity is arbitrarily defined for values of the SPI with these
+>  categories. Children in wet municipalities (z of 1 or above)" _n
+
+. file write cnt "are not in the SPI analysis. Remittances are cash received in
+>  the last 12 months" _n
+
+. file write cnt "from parents, siblings, or children living outside the househ
+> old, from MxFLS-1 (2002).}\\" _n
+
+. file write cnt "\end{longtable}" _n "\endgroup" _n
+
+. 
+. file close cnt
+
+. restore
+
+. 
+. 
+. 
+. *******************************************************************
+. * Attrition
+. *******************************************************************
+. 
+. * Table 3: Sample attrition across the waves, as counts of children in each w
+> ave. The DID only uses 2005 and 2009 and the event studies use all three wave
+> s. The continuous DID uses the same samples, so this covers it too
+. * Each row starts from the children who meet the regression sample rules in t
+> he first wave and could stay in the sample, not from all children measured. T
+> hen the later columns count who is still in the sample
+. 
+. preserve
+
+. * Age cutoffs of the samples, same as in Build_DID_Analysis_Data.do
+. local cut_haz 16
+
+. local cut_waz 11
+
+. local cut_bmiz 16
+
+. 
+. * The loop copies each child's age in 2002, 2005 and 2009 onto all of that ch
+> ild's rows. That way, each row can compare ages across waves, for example age
+> 2009-age2005. A missing age2009 marks the children whose 2009 age has to be f
+> illed in some other way: from their birth date and the 2009 interview date, o
+> r failing that, from the median gap.
+. foreach y in 2002 2005 2009 {
+  2.     gen tmp = age if year == `y'
+  3.     bysort pid_link_canonical: egen age`y' = max(tmp)
+  4.     drop tmp
+  5. }
+(79,682 missing values generated)
+(25,805 missing values generated)
+(83,548 missing values generated)
+(34,007 missing values generated)
+(79,721 missing values generated)
+(35,117 missing values generated)
+
+. 
+. * Median age gap between the waves, for children under 16 measured in both
+. * We use the median bc a few gaps are weird, like −4 or 44, probably from dat
+> a entry errors
+. gen gap0509 = age2009 - age2005 if year == 2005 & age < 16
+(104,025 missing values generated)
+
+. quietly summarize gap0509, detail
+
+. local gap0509 = r(p50)
+
+. local n0509 = r(N)
+
+. * Share of these children within a year of the median, for the notes section
+. quietly count if inrange(gap0509, `gap0509' - 1, `gap0509' + 1)
+
+. local sh0509 : display %3.0f 100 * r(N) / `n0509'
+
+. local sh0509 = strtrim("`sh0509'")
+
+. gen gap0209 = age2009 - age2002 if year == 2002 & age < 16
+(103,098 missing values generated)
+
+. quietly summarize gap0209, detail
+
+. local gap0209 = r(p50)
+
+. local n0209 = r(N)
+
+. quietly count if inrange(gap0209, `gap0209' - 1, `gap0209' + 1)
+
+. local sh0209 : display %3.0f 100 * r(N) / `n0209'
+
+. local sh0209 = strtrim("`sh0209'")
+
+. 
+. * Copy each child's 2009 interview date to all of their rows
+. gen tmp = int_date if year == 2009
+(67,103 missing values generated)
+
+. bysort pid_link_canonical: egen int2009 = max(tmp)
+(9,356 missing values generated)
+
+. drop tmp
+
+. 
+. * This code below has essentially three steps
+. * 1) Measured: if the child was measured in 2009, use that real age.
+. * 2) Computed: if they're in MxFLS-3 but weren't measured, compute their age 
+> from their birth date and their household's 2009 interview date. This only ha
+> ppens if the birth date passed the cleaning check. This code is similar to th
+> e cleaning script
+. * 3) Estimated: if they're not in MxFLS-3 (or the birth date failed the check
+> ), take their last measured age plus the median gap: 4 years from 2005, 8 fro
+> m 2002.
+. gen age_next = age2009
+(35,117 missing values generated)
+
+. replace age_next = floor((int2009 - mdy(bmonth, 15, byear)) / 365.25) if miss
+> ing(age_next) & !missing(age_days)
+(9,876 real changes made)
+
+. replace age_next = age2005 + `gap0509' if missing(age_next)
+(9,261 real changes made)
+
+. replace age_next = age2002 + `gap0209' if missing(age_next)
+(7,519 real changes made)
+
+. 
+. capture file close cnt
+
+. file open cnt using "$out_sumstats/Main/summary_stats_did_table.tex", write a
+> ppend
+
+. 
+. * LaTeX
+. file write cnt "\clearpage" _n "\begingroup" _n "\footnotesize" _n "\renewcom
+> mand{\arraystretch}{0.86}" _n "\setlength{\tabcolsep}{4pt}" _n "\setlength{\L
+> Tcapwidth}{\textwidth}" _n "\setlength{\LTleft}{0pt}" _n "\setlength{\LTright
+> }{0pt plus 1fil}" _n
+
+. file write cnt "\begin{longtable}{@{\extracolsep{\fill}}lccc}" _n "\caption{S
+> ample Attrition Across Waves}\\" _n
+
+. file write cnt "\toprule" _n " & \multicolumn{3}{c}{Number of children (N)}\\
+> *" _n "\cmidrule(lr){2-4}" _n " & MxFLS-1 (2002) & MxFLS-2 (2005) & MxFLS-3 (
+> 2009)\\*" _n "\midrule" _n
+
+. 
+. foreach o in haz waz bmiz {
+  2.     local O = upper("`o'")
+  3.     * This codes children as 1 if children meet the DID sample rules for t
+> he starting baseline regression specification
+.     gen did = (year == 2005 & age < `cut_`o'' & !missing(`o') & !missing(trea
+> t2009) & treat_early == 0 & age_next < `cut_`o'')
+  4.     * If children meet the event study rules
+.     gen es = (year == 2002 & age < `cut_`o'' & !missing(`o') & !missing(cvege
+> o) & treat_early == 0 & age_next < `cut_`o'')
+  5.     bysort pid_link_canonical: egen es05 = max(e_`o' == 1 & !missing(`o') 
+> & year == 2005)
+  6.     bysort pid_link_canonical: egen es_n3 = total(e_`o' == 1 & !missing(`o
+> '))
+  7.     * Counting children
+.     quietly count if did == 1
+  8.     local d05 = r(N)
+  9.     quietly count if did == 1 & reg_`o' == 1
+ 10.     local d09 = r(N)
+ 11.     quietly count if es == 1
+ 12.     local e02 = r(N)
+ 13.     quietly count if es == 1 & es05 == 1
+ 14.     local e05 = r(N)
+ 15.     quietly count if es == 1 & es_n3 == 3
+ 16.     local e09 = r(N)
+ 17.     * Just formatting
+.     foreach x in d05 d09 e02 e05 e09 {
+ 18.         local `x' : display %12.0fc ``x''
+ 19.         local `x' = strtrim("``x''")
+ 20.     }
+ 21.     * LaTeX stuff
+.     local space ""
+ 22.     if "`o'" != "haz" local space "\addlinespace[6pt]"
+ 23.     file write cnt "`space'\textit{`O' sample, children under `cut_`o''} &
+>  & & \\*" _n
+ 24.     file write cnt "DID (2005 and 2009) & & `d05' & `d09'\\*" _n
+ 25.     file write cnt "Event studies (all three waves) & `e02' & `e05' & `e09
+> '\\" _n
+ 26.     * Displaying in stata
+.     di as text "`O': DID 2005 `d05', 2009 `d09' | event studies 2002 `e02', 2
+> 005 `e05', 2009 `e09'"
+ 27.     drop did es es05 es_n3
+ 28. }
+HAZ: DID 2005 3,582, 2009 2,436 | event studies 2002 2,723, 2005 1,856, 2009 1,
+> 300
+WAZ: DID 2005 1,895, 2009 1,084 | event studies 2002 962, 2005 609, 2009 275
+BMIZ: DID 2005 3,511, 2009 2,383 | event studies 2002 2,569, 2005 1,719, 2009 1
+> ,203
+
+. 
+. * Notes at the bottom, like Tables 1 and 2
+. file write cnt "\bottomrule" _n
+
+. file write cnt "\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scripts
+> ize \textit{Notes:} Counts of children in each wave. The DID only uses MxFLS-
+> 2 (2005) and MxFLS-3 (2009), and the event studies" _n
+
+. file write cnt "use all three waves. The continuous DID uses the same samples
+> . Each row starts from the children who meet the regression sample rules in i
+> ts first wave and could stay in the sample, not" _n
+
+. file write cnt "from all children measured. They are under the age cutoff in 
+> every wave, 15 or younger (HAZ and BMIZ) or 10 or younger (WAZ), have a munic
+> ipality, and were not measured in MxFLS-3 before" _n 
+
+. file write cnt "November 2009. Later columns count the children still in the 
+> sample, so the drop across columns is attrition. This is not the same as the 
+> children the regressions drop as singletons, with" _n
+
+. file write cnt "only one wave in the sample, as these also include children w
+> ho aged out or are only in a later wave. The DID 2009 count is the estimation
+>  sample, and the event study 2009 count is the" _n
+
+. file write cnt "children in all three waves. For children not measured in a l
+> ater wave, the age then comes from their birth date and their household's MxF
+> LS-3 measurement date, as MxFLS-3 interviews ran" _n 
+
+. file write cnt "over several years. Children not in MxFLS-3, or whose birth d
+> ate does not agree with their reported age, get their last measured age plus 
+> the median age gap between the waves, `gap0509' years" _n
+
+. file write cnt "from 2005 to 2009 and `gap0209' years from 2002 to 2009. This
+>  is an estimate, but `sh0509' and `sh0209' percent of these gaps are within a
+>  year of the median among children measured in both" _n
+
+. file write cnt "waves, and a guess off by a year only matters for children ne
+> ar the age cutoff, who could be counted as attrition when they aged out or th
+> e other way around. So those who would have aged out anyway are not counted a
+> s attrition.}\\" _n
+
+. file write cnt "\end{longtable}" _n "\endgroup" _n
+
+. 
+. * The document ends here
+. file write cnt "\end{document}" _n
+
+. file close cnt
+
+. restore
+
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+end of do-file
+.     log close sumstats_did
+      name:  sumstats_did
+       log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
+> r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/summary_stats_did.log
+  log type:  text
+ closed on:  26 Oct 2026, 03:49:36
+-------------------------------------------------------------------------------

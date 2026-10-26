@@ -1,0 +1,104 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww29740\viewh16060\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # README ------------------------------------------------------------------------\
+# Generated on: 2026-10-23, updated on 2026-10-25\
+\
+# GENERAL INFORMATION -----------------------------------------------------------\
+# Title of Analysis: Drought, Remittances, and Child Health in Mexico\
+#   (MS Thesis, Proposal 3)\
+# Author: Zachary Serby\
+# Institution: Cornell University\
+\
+# SHARING / ACCESS INFORMATION --------------------------------------------------\
+# Data sources:\
+#   - Mexican Family Life Survey: MxFLS-1 (2002), MxFLS-2 (2005-06), MxFLS-3\
+#     (2009-12). Data, codebooks and questionnaires from ennvih-mxfls.org.\
+#   - CHIRPS v2.0 monthly precipitation, 0.05 degree grid (UCSB Climate Hazards Center).\
+#   - INEGI Marco Geoestadistico 2010 municipal boundaries (Municipios_2010_5).\
+#   - WHO Child Growth Standards (igrowup) and 2007 Growth Reference (who2007)\
+#     Stata macros.\
+\
+# HOW TO RUN --------------------------------------------------------------------\
+#   1. Open Scripts/00_Master.do by double-clicking it (or cd to the project or Scripts\
+#      folder first). The project root is found automatically, so no paths need to\
+#      change on a new computer. Check global Rscript, and the run_* switches (1 runs\
+#      a step, all are on).\
+#   2. Run it. The steps run in this order: rainfall (R), MxFLS cleaning 2002, 2005,\
+#      2009 (later waves read earlier ones), DID analysis data, summary stats,\
+#      DID/DDD, continuous DID (R), subanalyses by sex and by rural vs urban (Stata,\
+#      then R), regression tables, results document (R).\
+#   3. The rainfall step reads the 7.2 GB CHIRPS file, and its output is already in\
+#      Data/Cleaned, so run_R can stay 0. If that file is missing (e.g. Data/Cleaned\
+#      was deleted), the master runs the rainfall step anyway. The continuous DID\
+#      steps are slow because of the wild cluster bootstrap.\
+#\
+# Reproducibility: set.seed(1234) before every bootstrap in R.\
+\
+# DATA & FILE OVERVIEW ----------------------------------------------------------\
+# Scripts/\
+#   - 00_Master.do : runs everything in order.\
+#   - MS Thesis.Rproj : R project. The R scripts take the project root as one folder\
+#     up from Scripts.\
+#   - Cleaning/ : Cleaned_rainfall_municipality_drought.R (CHIRPS to a\
+#     municipality-year rainfall panel with z-scores and a drought indicator), the\
+#     Cleaning Script for MxFLS_2002_03.do, _2005_06.do and _2009_12.do (clean each\
+#     wave, WHO z-scores and controls, the 2009 script appends the panel), and\
+#     Build_DID_Analysis_Data.do (merges the panel and the rainfall on the child's\
+#     2005 municipality and builds the treatment, controls and samples).\
+#   - Statistics/ : Summary Stats DID.do (summary statistics, sample sizes and\
+#     attrition tables) and Regression Stats.do (all regression tables).\
+#   - Regressions/ : DID_Regs.do (DID, DDD, event studies, robustness),\
+#     Contdid_regs.R (continuous DID, SPI drought classes, remittances), functions.R\
+#     (used by the R scripts), and the Subanalysis_Gender_* and Subanalysis_Rural_*\
+#     versions of both.\
+#   - Paper/Build_Results.R : writes Paper/Results.tex and compiles Results.pdf.\
+#\
+# Data/Raw/ (never edited by any script): MxFLS data and documentation (codebooks,\
+#   questionnaires, user guides), CHIRPS, INEGI shapefiles, WHO macros.\
+# Data/Cleaned/ (produced by the scripts):\
+#   - MxFLS/ : wave files, mxfls_panel_2002_2005_2009.dta, mxfls_did_analysis.dta.\
+#   - WHO_zscores/ : z-score files written by the WHO macros.\
+#   - Rainfall/ : municipality_year_rainfall.dta.\
+#\
+# Output/ : each folder has Main (thesis body) and Appendix (robustness and\
+#   subanalyses), and Logs and Figures also have Miscellaneous (not for the thesis).\
+#   - Tables/ : summary_stats_did_table.tex, regression_tables_main.tex,\
+#     regression_tables_appendix.tex.\
+#   - Regression_Estimates/ : event study coefficients (.dta) and continuous DID csv files.\
+#   - Figures/ : trends_*, event_study_*, contdid_* (.png). Subanalysis figures end\
+#     in _boys, _girls, _rural or _urban.\
+#   - Logs/ : every log, and nowhere else.\
+#\
+# Paper/ : Proposal.pdf, and Results.tex and Results.pdf with every main and\
+#   appendix table and the main figures.\
+\
+# DATA-SPECIFIC INFORMATION -----------------------------------------------------\
+# mxfls_panel_2002_2005_2009.dta: 111,841 person-wave rows, 99 variables.\
+#   - IDs: pid_link_canonical (person across waves), folio_canonical (household),\
+#     wave, cvegeo (5-digit INEGI code, state + municipality).\
+#   - Outcomes: haz, waz, bmiz (WHO z-scores).\
+#   - remittance_hh: household got cash from a parent, sibling or child outside the\
+#     household in the last 12 months, 1 = Yes 0 = No, missing if unresolved.\
+#   - int_date, int_year, int_month: measurement date (Book S, else Book C).\
+#\
+# mxfls_did_analysis.dta: the panel, wave renamed year, plus cvegeo05, droughts and\
+#   rain_z 2002-2009, treat2009, rain_deficit2009, post, the _02 and _05 controls\
+#   and the samples s_*, e_* and reg_*.\
+#\
+# municipality_year_rainfall.dta: 2,456 municipalities x 2001-2013.\
+\
+# SOFTWARE REQUIREMENTS ---------------------------------------------------------\
+#   - Stata. reghdfe, ftools, require, estout and distinct install automatically.\
+#   - R >= 4.x. terra, sf, data.table, readxl, haven, did (>= 2.5.0), BMisc,\
+#     sandwich and tinytex install automatically. contdid 0.1.1 installs from\
+#     GitHub (bcallaway11/contdid) and needs ptetools >= 1.0.1. fwildclusterboot\
+#     0.13.0 and summclust 0.7.2 install from the CRAN archive and need the Xcode\
+#     command line tools and gfortran on a Mac.\
+#   - TinyTeX compiles Results.pdf. Build_Results.R installs it if there is no LaTeX.\
+#\
+# END OF README ----------------------------------------------------------------}

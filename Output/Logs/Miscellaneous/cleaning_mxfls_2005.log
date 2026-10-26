@@ -1,0 +1,4252 @@
+-------------------------------------------------------------------------------
+      name:  clean05
+       log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
+> r's Thesis/Proposal 3 Mexico OG/Output/Logs/Miscellaneous/cleaning_mxfls_2005
+> .log
+  log type:  text
+ opened on:  26 Oct 2026, 03:49:18
+.     do "$scripts/Cleaning/Cleaning Script for MxFLS_2005_06.do"
+
+. *******************************************************************
+. * Cleaning Script and Initial Sumamry Statistics
+. * Project: MS Thesis
+. *******************************************************************
+. 
+. clear all
+
+. set more off
+
+. 
+. *******************************************************************
+. * Directories
+. *******************************************************************
+. * The root folder is set once in 00_Master.do. If this file is run on its own
+> , the root is found by going up from Stata's working folder until the folder 
+> that has Scripts/00_Master.do
+. if "$root" == "" {
+.     local r = subinstr("`c(pwd)'", "\", "/", .)
+.     while "`r'" != "" & !fileexists("`r'/Scripts/00_Master.do") {
+  2.         local r = substr("`r'", 1, strrpos("`r'", "/") - 1)
+  3.     }
+.     global root "`r'"
+. }
+
+. global raw_mxfls     "$root/Data/Raw/MxFLS"
+
+. global raw_who       "$root/Data/Raw/WHO_reference"
+
+. global clean_mxfls   "$root/Data/Cleaned/MxFLS"
+
+. global clean_who     "$root/Data/Cleaned/WHO_zscores"
+
+. global clean_rain    "$root/Data/Cleaned/Rainfall"
+
+. global clean_banxico "$root/Data/Cleaned/Banxico"
+
+. global out_sumstats  "$root/Output/Tables"
+
+. global out_regs      "$root/Output/Regression_Estimates" 
+
+. global out_logs      "$root/Output/Logs"
+
+. * Create the folders this project writes to. Note: capture skips quietly if a
+>  folder already exists
+. foreach d in "$root/Data" "$root/Data/Cleaned" "$clean_mxfls" "$clean_who" "$
+> clean_rain" "$root/Output" "$out_sumstats" "$out_regs" "$out_logs" {
+  2.     capture mkdir "`d'"
+  3. }
+
+. * Define base directory path
+. global path "$raw_mxfls/hh05dta_all"
+
+. 
+. *******************************************************************
+. * Health Biomarkers & Anthropometrics
+. *******************************************************************
+. 
+. use "$path/hh05dta_bs/s_sa.dta", clear
+(VERSION 7 Aug 2008)
+
+. * Note for now not differentiating between reported and measured I don't thin
+> k
+. rename sa03       age
+
+. rename sa01       gender
+
+. rename sa04_22    height_cm // Revising, but currently not in use
+
+. rename sa05_21    weight_kg_gr
+
+. rename sa12_21    blood_pressure_systole
+
+. rename sa12_22    blood_pressure_diastole
+
+. rename sa16_21    hemoglobin_g_dl
+
+. 
+. * Child biomarkers
+. rename sa07_21    child_height_cm
+
+. rename sa08_21    child_weight_kg
+
+. 
+. * Child sex must come from the Book C roster, ls04, as sex disagrees across o
+> ther books but the roster is correct.
+. preserve
+
+.     use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+.     keep folio ls ls04
+
+.     tempfile roster_sex
+
+.     save `roster_sex'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000002 saved
+    as .dta format
+
+. restore
+
+. merge 1:1 folio ls using `roster_sex', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. replace gender = ls04 if !missing(ls04)
+(1,081 real changes made)
+
+. drop ls04
+
+. 
+. *******************************************************************
+. * Calcualting HAZ, WAZ, BMIZ
+. *******************************************************************
+. 
+. * Grabbing the date
+. rename sa02_1 bday
+
+. rename sa02_2 bmonth
+
+. rename sa02_3 byear
+
+. 
+. 
+. * This code purely is for the missing "day" observations. It imputes a bday i
+> f we have both month and year, this allows us to keep roughly 200 observation
+> s for children get z-scores whereas before we dropped them and had no z-score
+> s. 
+. gen byte bday_imputed = !inrange(bday, 1, 31) & inrange(bmonth, 1, 12) & inra
+> nge(byear, 1900, 2007)
+
+. replace bday = 15 if bday_imputed == 1
+(569 real changes made)
+
+. 
+. * Children are weighed and measured in Book S. We use the last dated Book S v
+> isit as the measurement date, day = 15 
+. preserve
+
+.     use "$path/hh05dta_bc/c_conpor.dta", clear
+(VERSION 15 Jan 2008)
+
+.     keep folio secuencia anio mes
+
+.     sort folio secuencia
+
+.     by folio: keep if _n == _N
+(134 observations deleted)
+
+.     gen int_date = mdy(mes, 15, 2000 + anio)
+
+.     keep folio int_date
+
+.     tempfile visitdate
+
+.     save `visitdate'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000004 saved
+    as .dta format
+
+. restore
+
+. merge m:1 folio using `visitdate', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. 
+. * Children are weighed and measured in Book S, which has its own visit file, 
+> and for about a quarter of 2005 households the last Book S visit is 3 or more
+>  months after the last Book C visit. So we use the last dated Book S visit as
+>  the measurement date, day = 15 like Book C
+. preserve
+
+.     use "$path/hh05dta_bs/s_conpor.dta", clear
+(VERSION 14 Jan 2008)
+
+.     keep folio secuencia anio mes
+
+.     drop if missing(anio, mes)
+(0 observations deleted)
+
+.     sort folio secuencia
+
+.     by folio: keep if _n == _N
+(4,422 observations deleted)
+
+.     gen meas_date = mdy(mes, 15, 2000 + anio)
+
+.     keep folio meas_date
+
+.     tempfile measdate
+
+.     save `measdate'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000006 saved
+    as .dta format
+
+. restore
+
+. merge m:1 folio using `measdate', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. 
+. * IMPORTANT NOTE: THINKING ABOUT ADDING IN AGE AS A CONTROL????
+. gen age_days = int_date - mdy(bmonth, bday, byear)
+(3,669 missing values generated)
+
+. * Some Book S birth dates are wrong, so the computed age disagrees with the a
+> ge reported in Book S (sa03). For these we set age_days to missing so they ge
+> t no z-score, same rule as 2002 and 2009
+. replace age_days = . if !missing(age, age_days) & !inrange(age_days/365.25 - 
+> age, -0.5, 1.5)
+(1,807 real changes made, 1,807 to missing)
+
+. * The check above stays on the Book C date because the Book S age (sa03) is m
+> ostly the roster age from the Book C visit. Children who pass it get their ag
+> e at the Book S measurement date, and int_date becomes the measurement date, 
+> so the interview month FE and the November 2009 cutoff are also on the measur
+> ement date
+. replace age_days = meas_date - mdy(bmonth, bday, byear) if !missing(age_days,
+>  meas_date)
+(10,465 real changes made)
+
+. replace int_date = meas_date if !missing(meas_date)
+(13,429 real changes made)
+
+. drop meas_date
+
+. gen age_months_exact = age_days / 30.4375
+(5,476 missing values generated)
+
+. sum age_months_exact age_days
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+age_months~t |     26,024    348.1645    250.9653  -6.669405   1226.973
+    age_days |     26,024    10597.26    7638.756       -203      37346
+
+. 
+. * Just some variable recoding below
+. gen sex = 1 if gender == 1
+(16,351 missing values generated)
+
+. replace sex = 2 if gender == 3
+(16,351 real changes made)
+
+. * 2005's standing/lying flag
+. gen measure = "h" if sa07a == 1
+(4,811 missing values generated)
+
+. replace measure = "l" if sa07a == 3
+(685 real changes made)
+
+. gen str6 ageunit = "days"
+
+. * This refers to fluid swelling and is a variable in WHO but not MxFLS so eve
+> ryone gets a no
+. gen oedema = "n"
+
+. * Every is given equal weight
+. gen sw = 1
+
+. tempfile z_u5 z_5to19 z_all
+
+. 
+. * WHO's official macros (not on SSC): https://www.who.int/tools/child-growth-
+> standards/software
+. * and https://www.who.int/tools/growth-reference-data-for-5to19-years/applica
+> tion-tools
+. * Note: WHO reference files live in Data/Raw/WHO_reference and the z-score ou
+> tput goes to Data/Cleaned/WHO_zscores
+. global who_igrowup_dir "$raw_who/igrowup_stata"
+
+. global who_who2007_dir "$raw_who/who2007_stata"
+
+. adopath + "$who_igrowup_dir"
+  [1]  (BASE)      "/Applications/StataNow/ado/base/"
+  [2]  (SITE)      "/Applications/StataNow/ado/site/"
+  [3]              "."
+  [4]  (PERSONAL)  "/Users/zakserby/Documents/Stata/ado/personal/"
+  [5]  (PLUS)      "/Users/zakserby/Library/Application Support/Stata/ado/plus/
+> "
+  [6]  (OLDPLACE)  "~/ado/"
+  [7]              "/Users/zakserby/Documents/Documents (MAC)/Cornell Universit
+> y/Master's Thesis/Proposal 3 Mexico OG/Data/Raw/WHO_reference/who2007_stata"
+  [8]              "/Users/zakserby/Documents/Documents (MAC)/Cornell Universit
+> y/Master's Thesis/Proposal 3 Mexico OG/Data/Raw/WHO_reference/igrowup_stata"
+
+. adopath + "$who_who2007_dir"
+  [1]  (BASE)      "/Applications/StataNow/ado/base/"
+  [2]  (SITE)      "/Applications/StataNow/ado/site/"
+  [3]              "."
+  [4]  (PERSONAL)  "/Users/zakserby/Documents/Stata/ado/personal/"
+  [5]  (PLUS)      "/Users/zakserby/Library/Application Support/Stata/ado/plus/
+> "
+  [6]  (OLDPLACE)  "~/ado/"
+  [7]              "/Users/zakserby/Documents/Documents (MAC)/Cornell Universit
+> y/Master's Thesis/Proposal 3 Mexico OG/Data/Raw/WHO_reference/igrowup_stata"
+  [8]              "/Users/zakserby/Documents/Documents (MAC)/Cornell Universit
+> y/Master's Thesis/Proposal 3 Mexico OG/Data/Raw/WHO_reference/who2007_stata"
+
+. global who_output_dir "$clean_who"
+
+. 
+. * Same logic as 2002 cleaning script
+. preserve
+
+.     * Keep children under 5 and child must have at least one of weight
+.     keep if age_days >= 0 & age_days < 1857 & !missing(age_days, sex) & (!mis
+> sing(child_weight_kg) | !missing(child_height_cm))
+(29,152 observations deleted)
+
+.     gen str244 reflib = "$who_igrowup_dir"
+
+.     gen str244 datalib = "$who_output_dir"
+
+.     gen str30 datalab = "mxfls2005_u5"
+
+.     * Deleting last runs output so we don't have a silent error here
+.     capture erase "$who_output_dir/mxfls2005_u5_z_rc.dta"
+
+.     igrowup_restricted reflib datalib datalab sex age_days ageunit child_weig
+> ht_kg child_height_cm measure oedema sw
+
+Please wait, programme is running.............
+
+..............................................
+Note: z-scores are flagged according to the following rules:
+ 
+                            _zwfl = . if (_zwfl < -5 or _zwfl >5)
+                            _zlen = . if (_zlen < -6 or _zlen >6)
+                            _zwei = . if (_zwei < -6 or _zwei >5)
+                            _zbmi = . if (_zbmi < -5 or _zbmi >5)
+                            
+(file /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master's
+    Thesis/Proposal 3 Mexico
+    OG/Data/Cleaned/WHO_zscores/mxfls2005_u5_z_rc.dta not found)
+file /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master's
+    Thesis/Proposal 3 Mexico
+    OG/Data/Cleaned/WHO_zscores/mxfls2005_u5_z_rc.dta saved
+Note 1:     Original data plus z-scores are written to
+            /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master
+> 's Thesis/Proposal 3 Mexico OG/Data/Cleaned/WHO_zscores/mxfls2005_u5_z_rc.dta
+                            
+                            
+Note 2:     Original data plus z-scores are written to
+            /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master
+> 's Thesis/Proposal 3 Mexico OG/Data/Cleaned/WHO_zscores/mxfls2005_u5_z_rc.xls
+                            
+
+Please wait, programme is calculating prevalences.............
+
+..............................................
+
+Set 1:            Sexes combined
+
+Age groups        Weight-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI     Mean      SD
+Total    2055     1.3      .8     1.8     6.7     5.6     7.8    -.31    1.19
+  0-5     119     3.4       0       7    12.6     6.2      19    -.36    1.47
+ 6-11     161     1.2       0     3.3     4.3      .9     7.8     -.1    1.15
+12-23     418     1.4      .2     2.7       6     3.6     8.4    -.22    1.23
+24-35     420       1       0       2     8.3     5.6    11.1    -.38    1.15
+36-47     435     1.1       0     2.3     5.5     3.3     7.8    -.38    1.12
+48-60     502       1       0       2     6.2       4     8.4    -.31    1.18
+
+Age groups        Length/height-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI     Mean      SD
+Total    2055     8.3     7.1     9.5    21.6    19.8    23.4    -.75    1.64
+  0-5     119       5      .7     9.4    13.4     6.9      20    -.29    1.71
+ 6-11     161     4.3      .9     7.8    10.6     5.5    15.6     .15    1.89
+12-23     418     9.6     6.6    12.5    23.7    19.5    27.9    -.78    1.71
+24-35     420    13.8    10.4    17.2    27.4      23    31.8   -1.03    1.71
+36-47     435     6.7     4.2     9.1    23.7    19.6    27.8    -.84    1.52
+48-60     502       6     3.8     8.1    18.7    15.2    22.2    -.83    1.39
+
+Age groups        Weight-for-length/height
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    2055     1.8     1.2     2.5       6       5     7.1    24.2    22.3
+  0-5     119     6.7     1.8    11.6    14.3     7.6      21    23.5    15.5
+ 6-11     161     4.3      .9     7.8    11.8     6.5    17.1    22.4    15.6
+12-23     418     1.7      .3       3       6     3.6     8.4    27.5    23.1
+24-35     420      .5       0     1.3     5.2       3     7.5      24    19.8
+36-47     435     1.4      .2     2.6     4.4     2.3     6.4    20.9      17
+48-60     502     1.6      .4     2.8     4.4     2.5     6.3    25.1    21.2
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    26.1     8.4     7.2     9.6     2.7       2     3.5     .18    1.39
+  0-5    31.6    11.8     5.6      18     5.9     1.2    10.5    -.09    1.78
+ 6-11    29.1     7.5     3.1    11.8      .6       0     2.1    -.12    1.53
+12-23    31.9      10       7      13     2.9     1.2     4.6     .21     1.4
+24-35    28.3     7.4     4.8      10     2.4      .8       4     .23    1.28
+36-47    24.9     6.4       4     8.9     1.6      .3     2.9     .17    1.26
+48-60      29     9.2     6.5    11.8     3.8       2     5.6     .28    1.41
+
+Age groups        BMI-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    2055     2.3     1.7       3     6.3     5.2     7.4    27.2    25.2
+  0-5     119       5      .7     9.4      16       9      23    21.8      14
+ 6-11     161     6.8     2.6      11    14.3     8.6      20    21.1    14.5
+12-23     418     1.9      .5     3.3     5.7     3.4     8.1    31.1    26.5
+24-35     420     1.7      .3       3       5     2.8     7.2    31.7    27.1
+36-47     435     1.8      .5     3.2     5.1     2.9     7.2    23.4    19.4
+48-60     502     1.6      .4     2.8       4     2.2     5.8    26.5    22.5
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    29.1     9.8     8.5    11.1       3     2.2     3.7     .25    1.45
+  0-5    29.7    10.9     4.9    16.9     2.5       0     5.8    -.27     1.7
+ 6-11    27.7     6.8     2.6      11      .6       0     2.1    -.23    1.63
+12-23    35.7    12.7     9.4      16     3.6     1.7     5.5     .36     1.5
+24-35    36.2    10.7     7.6    13.8     3.3     1.5     5.2     .39     1.4
+36-47    27.5     7.4     4.8     9.9     2.3      .8     3.8     .26    1.32
+48-60    30.5     9.4     6.7      12     3.6     1.9     5.3     .33    1.39
+
+Set 2:            Males
+
+Age groups        Weight-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI     Mean      SD
+Total    1038     1.5      .7     2.3     7.3     5.7       9    -.35    1.21
+  0-5      57     3.5       0     9.2    15.8     5.4    26.1    -.51    1.59
+ 6-11      93     2.2       0     5.6     4.3       0       9    -.15    1.22
+12-23     206     2.4      .1     4.8    10.7     6.2    15.1    -.41    1.32
+24-35     219      .9       0     2.4     8.2     4.4    12.1    -.41    1.14
+36-47     216     1.4       0     3.2     5.1     1.9     8.3    -.39     1.1
+48-60     247      .8       0     2.1     4.9       2     7.7    -.27    1.18
+
+Age groups        Length/height-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI     Mean      SD
+Total    1038       9     7.2    10.7    22.4    19.9      25    -.78    1.68
+  0-5      57       7       0    14.5    15.8     5.4    26.1    -.26     1.9
+ 6-11      93     4.3       0       9      14     6.4    21.6     .05    1.99
+12-23     206    12.6     7.8    17.4    28.2    21.8    34.5    -.99    1.78
+24-35     219    13.2     8.5      18      26      20    32.1    -.97    1.71
+36-47     216     7.4     3.7    11.1    25.9    19.9      32    -.92    1.51
+48-60     247     5.7     2.6     8.8    16.2    11.4      21    -.76    1.38
+
+Age groups        Weight-for-length/height
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    1038     2.4     1.4     3.4     7.4     5.8     9.1    23.5    20.9
+  0-5      57       7       0    14.5    17.5     6.8    28.3    19.3     8.2
+ 6-11      93     4.3       0       9      14     6.4    21.6    21.5    12.6
+12-23     206     2.9      .4     5.5     9.2       5    13.4    28.6    22.2
+24-35     219      .9       0     2.4     5.5     2.2     8.7    21.9    16.2
+36-47     216     1.9       0     3.9     4.6     1.6     7.7    24.1    18.1
+48-60     247       2      .1       4     5.3     2.3     8.3    21.9    16.5
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    26.1     7.6     5.9     9.3     2.4     1.4     3.4     .13    1.42
+  0-5    30.4     8.8      .6      17       7       0    14.5     -.3    1.76
+ 6-11    30.4     7.5     1.6    13.4     1.1       0     3.7     -.1    1.53
+12-23    35.1    10.2     5.8    14.6     1.9       0     4.1      .1    1.52
+24-35    27.6     6.4     2.9     9.9      .9       0     2.4     .14    1.24
+36-47      30     7.4     3.7    11.1     1.4       0     3.2     .22    1.28
+48-60    27.2     6.5     3.2     9.7     4.5     1.7     7.2     .27    1.45
+
+Age groups        BMI-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    1038     3.2     2.1     4.3     7.2     5.6     8.8    27.3    24.5
+  0-5      57     3.5       0     9.2    17.5     6.8    28.3      14     4.1
+ 6-11      93     8.6     2.4    14.8    15.1     7.2    22.9    21.5    12.6
+12-23     206     3.4      .7     6.1     7.8     3.9    11.7      33    26.3
+24-35     219     1.8       0     3.8       5     1.9     8.1    31.1    24.7
+36-47     216     2.8      .4     5.2     5.6     2.3     8.8    25.9    19.9
+48-60     247     2.4      .3     4.6     4.9       2     7.7    25.5    19.9
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total      30     9.2     7.4    11.1       3     1.9     4.1     .22     1.5
+  0-5    23.9       7       0    14.5     3.5       0     9.2    -.52    1.69
+ 6-11    30.4     6.5      .9      12     1.1       0     3.7    -.22    1.64
+12-23    39.7    14.1     9.1    19.1     3.4      .7     6.1     .28    1.64
+24-35    37.4     9.1     5.1    13.2     1.8       0     3.8      .3    1.36
+36-47      32     8.3     4.4    12.3     2.8      .4     5.2     .33    1.35
+48-60    31.1     7.7     4.2    11.2     4.5     1.7     7.2     .35    1.45
+
+Set 3:            Females
+
+Age groups        Weight-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI     Mean      SD
+Total    1017       1      .3     1.6       6     4.5     7.5    -.26    1.17
+  0-5      62     3.2       0     8.4     9.7     1.5    17.8    -.22    1.34
+ 6-11      68       0       0      .7     4.4       0      10    -.04    1.05
+12-23     212      .5       0     1.6     1.4       0     3.2    -.04     1.1
+24-35     201       1       0     2.6     8.5     4.4    12.6    -.35    1.17
+36-47     219      .9       0     2.4     5.9     2.6     9.3    -.37    1.14
+48-60     255     1.2       0     2.7     7.5       4    10.9    -.35    1.19
+
+Age groups        Length/height-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI     Mean      SD
+Total    1017     7.6     5.9     9.2    20.7    18.2    23.3    -.72    1.61
+  0-5      62     3.2       0     8.4    11.3     2.6      20    -.32    1.54
+ 6-11      68     4.4       0      10     5.9       0    12.2     .29    1.75
+12-23     212     6.6       3    10.2    19.3    13.8    24.9    -.58    1.62
+24-35     201    14.4     9.3    19.5    28.9    22.3    35.4   -1.08    1.72
+36-47     219     5.9     2.6     9.3    21.5    15.8    27.1    -.77    1.53
+48-60     255     6.3     3.1     9.4    21.2      16    26.4    -.89     1.4
+
+Age groups        Weight-for-length/height
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    1017     1.3      .5       2     4.6     3.3       6    24.9    22.2
+  0-5      62     6.5       0    13.4    11.3     2.6      20    27.4    15.5
+ 6-11      68     4.4       0      10     8.8     1.3    16.3    23.5    12.7
+12-23     212      .5       0     1.6     2.8      .4     5.3    26.4    20.2
+24-35     201       0       0      .2       5     1.7     8.2    26.4      20
+36-47     219      .9       0     2.4     4.1     1.3       7    17.8    12.5
+48-60     255     1.2       0     2.7     3.5     1.1       6    28.2    22.5
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    27.6     9.2     7.4    11.1       3     1.9     4.2     .23    1.35
+  0-5    39.3    14.5     4.9    24.1     4.8       0      11      .1    1.79
+ 6-11    34.3     7.4      .4    14.3       0       0      .7    -.14    1.53
+12-23    32.6     9.9     5.6    14.2     3.8       1     6.6     .32    1.26
+24-35    32.7     8.5     4.4    12.6       4       1     6.9     .33    1.32
+36-47    23.1     5.5     2.2     8.7     1.8       0     3.8     .12    1.24
+48-60      34    11.8     7.6    15.9     3.1      .8     5.5     .29    1.37
+
+Age groups        BMI-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    1017     1.5      .7     2.3     5.3     3.9     6.7      27    24.3
+  0-5      62     6.5       0    13.4    14.5     4.9    24.1      29    16.9
+ 6-11      68     4.4       0      10    13.2     4.4      22    20.6    10.2
+12-23     212      .5       0     1.6     3.8       1     6.6    29.2    22.9
+24-35     201     1.5       0     3.4       5     1.7     8.2    32.3    25.6
+36-47     219      .9       0     2.4     4.6     1.6     7.6      21    15.4
+48-60     255      .8       0     2.1     3.1      .8     5.5    27.5    21.8
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    29.8    10.3     8.4    12.2     2.9     1.9       4     .29     1.4
+  0-5    41.1    14.5     4.9    24.1     1.6       0     5.6    -.03    1.68
+ 6-11    30.9     7.4      .4    14.3       0       0      .7    -.25    1.62
+12-23    35.6    11.3     6.8    15.8     3.8       1     6.6     .44    1.35
+24-35    39.1    12.4     7.6    17.2       5     1.7     8.2     .49    1.45
+36-47    26.6     6.4     2.9     9.9     1.8       0     3.8     .19    1.28
+48-60    33.1      11     6.9      15     2.7      .5     4.9     .31    1.33
+ 
+Note:       Prevalences are written to
+            /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master
+> 's Thesis/Proposal 3 Mexico OG/Data/Cleaned/WHO_zscores/mxfls2005_u5_prev_rc.
+> xls
+
+.     * This file also creates prevelance tables in the code provided from git 
+> and erases the data _zlen, _zwei, and _zbmi, so we just need to reload them
+.         use "$who_output_dir/mxfls2005_u5_z_rc.dta", clear
+(VERSION 7 Aug 2008)
+
+.     * The original ado computes flags but it doesn't implement the flags and 
+> remove implausible z-scores, here we implement it
+.     gen haz = _zlen if _flen == 0
+(222 missing values generated)
+
+.     gen waz = _zwei if _fwei == 0
+(32 missing values generated)
+
+.     gen bmiz = _zbmi if _fbmi == 0
+(273 missing values generated)
+
+.         * Implement a check to count how many got flagged/excluded as out-of-
+> range
+.     count if _flen == 1
+  10
+
+.     di "u5: `r(N)' HAZ obs flagged out of range (<-6 or >6)"
+u5: 10 HAZ obs flagged out of range (<-6 or >6)
+
+.     count if _fwei == 1
+  8
+
+.     di "u5: `r(N)' WAZ obs flagged out of range (<-6 or >5)"
+u5: 8 WAZ obs flagged out of range (<-6 or >5)
+
+.     count if _fbmi == 1
+  37
+
+.     di "u5: `r(N)' BMIZ obs flagged out of range (<-5 or >5)"
+u5: 37 BMIZ obs flagged out of range (<-5 or >5)
+
+.     keep folio ls haz waz bmiz
+
+.     save `z_u5'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000007 saved
+    as .dta format
+
+. restore
+
+. 
+. 
+. preserve
+
+.     * Keep children under 19 and child must have at least one of weight
+.     keep if age_months_exact >= 61 & age_months_exact <= 228 & !missing(age_d
+> ays, sex) & (!missing(child_weight_kg) | !missing(child_height_cm))
+(23,186 observations deleted)
+
+.     gen str244 reflib = "$who_who2007_dir"
+
+.     gen str244 datalib = "$who_output_dir"
+
+.     gen str30 datalab = "mxfls2005_5to19"
+
+.     capture erase "$who_output_dir/mxfls2005_5to19_z.dta"
+
+.     who2007 reflib datalib datalab sex age_days ageunit child_weight_kg child
+> _height_cm oedema sw
+
+Please wait, programme is running.............
+
+..............................................
+Note: z-scores are flagged according to the following rules:
+ 
+                            _zhfa = . if (_zhfa < -6 or _zhfa >6)
+                            _zwfa = . if (_zwfa < -6 or _zwfa >5)
+                            _zbfa = . if (_zbfa < -5 or _zbfa >5)
+                            
+(file /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master's
+    Thesis/Proposal 3 Mexico
+    OG/Data/Cleaned/WHO_zscores/mxfls2005_5to19_z.dta not found)
+file /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master's
+    Thesis/Proposal 3 Mexico
+    OG/Data/Cleaned/WHO_zscores/mxfls2005_5to19_z.dta saved
+Note 1:     Original data plus z-scores are written to
+            /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master
+> 's Thesis/Proposal 3 Mexico OG/Data/Cleaned/WHO_zscores/mxfls2005_5to19_z.dta
+                            
+                            
+Note 2:     Original data plus z-scores are written to
+            /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master
+> 's Thesis/Proposal 3 Mexico OG/Data/Cleaned/WHO_zscores/mxfls2005_5to19_z.xls
+                            
+
+Please wait, programme is calculating prevalences.............
+
+..............................................
+
+Set 1:            Sexes combined
+
+Age groups        Weight-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    2793     1.6     1.1     2.1     6.7     5.8     7.6    23.5    21.9
+    5     507     2.6     1.1       4     8.1     5.6    10.6    19.9    16.3
+    6     542      .7       0     1.6     4.8     2.9     6.7    23.2    19.6
+    7     548     1.8      .6       3       6     3.9     8.1    22.3    18.7
+    8     568     1.4      .4     2.5     6.5     4.4     8.6    24.1    20.5
+    9     578     1.4      .3     2.4     8.1     5.8    10.4      26    22.3
+   10      50       2       0     6.9       6       0    13.6      42    27.3
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    25.1     9.7     8.6    10.8     2.5     1.9     3.1    -.01    1.46
+    5    23.5     7.5     5.1     9.9     2.2      .8     3.5    -.19    1.48
+    6    26.9    10.7       8    13.4     2.8     1.3     4.2     .03    1.42
+    7    25.8     9.1     6.6    11.6     3.3     1.7     4.9       0    1.45
+    8    27.7    10.6     7.9    13.2     2.6     1.2       4     .01    1.45
+    9    29.6    10.2     7.7    12.8     1.9      .7     3.1     .06    1.48
+   10    56.7      12       2      22       0       0       1     .41    1.61
+
+Age groups        Height-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    8260     3.5     3.1     3.9    13.9    13.1    14.6     8.1     7.5
+    5     509     4.3     2.5     6.2    14.1      11    17.3    16.3      13
+    6     544     3.1     1.6     4.7      11     8.3    13.8    14.7    11.6
+    7     550       2      .7     3.3    10.2     7.6    12.8    14.5    11.5
+    8     570     3.3     1.8     4.9    11.2     8.5    13.9    12.5     9.7
+    9     579     4.1     2.4     5.9    13.3    10.4    16.2    10.7     8.1
+   10     606     3.1     1.7     4.6    10.4     7.9    12.9    11.1     8.5
+   11     638     3.8     2.2     5.3    15.5    12.6    18.4     7.4     5.3
+   12     655     4.4     2.8     6.1    12.2     9.6    14.8    10.7     8.2
+   13     655     3.2     1.8     4.6    13.6    10.9    16.3     4.1     2.5
+   14     650     4.3     2.7     5.9    16.5    13.5    19.4     3.5       2
+   15     613     3.3     1.8     4.8    14.4    11.5    17.2     2.8     1.4
+   16     599     2.2      .9     3.4    16.4    13.3    19.4     3.3     1.8
+   17     546     2.4       1     3.8    14.7    11.6    17.7     3.3     1.7
+   18     546     4.9       3     6.9    20.7    17.2    24.2     1.1      .1
+   19       0     -69     -69     -69     -69     -69     -69     -69     -69
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total     8.7     2.1     1.7     2.4      .6      .4      .8    -.72    1.27
+    5    19.6     5.9     3.7       8     2.9     1.4     4.5    -.46    1.57
+    6    17.8       5       3     6.9       2      .7     3.3    -.45    1.43
+    7    17.6       6     3.9     8.1     1.8      .6       3    -.37     1.4
+    8    15.3     3.7     2.1     5.3      .9       0     1.7    -.51    1.37
+    9    13.3     2.4     1.1     3.8      .5       0     1.2    -.61    1.34
+   10    13.6     1.3      .3     2.3      .2       0      .6    -.54    1.26
+   11     9.5     1.4      .4     2.4      .2       0      .5    -.66    1.28
+   12    13.1     2.6     1.3     3.9      .6       0     1.3    -.61    1.32
+   13     5.7      .8       0     1.5       0       0      .1    -.73    1.12
+   14       5      .8       0     1.5       0       0      .1    -.88    1.16
+   15     4.2       0       0      .1       0       0      .1    -.92    1.03
+   16     4.9       0       0      .1       0       0      .1   -1.03    1.02
+   17     4.9      .2       0      .6       0       0      .1   -1.05    1.03
+   18     2.1       0       0      .1       0       0      .1   -1.16    1.05
+   19     -69     -69     -69     -69     -69     -69     -69     -69     -69
+
+Age groups        BMI-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    8169      .8      .6       1     2.7     2.4     3.1      33      32
+    5     489     1.8      .5     3.1     4.5     2.6     6.4    26.8    22.8
+    6     535     1.5      .4     2.6     3.2     1.6     4.8    30.5    26.5
+    7     537      .9       0     1.8     3.5     1.9     5.2    28.9    24.9
+    8     559     1.3      .2     2.3     3.6     1.9     5.2    31.8    27.9
+    9     570     1.4      .4     2.5     3.3     1.8     4.9    38.4    34.3
+   10     601      .8       0     1.6     3.2     1.7     4.6    39.3    35.3
+   11     636      .8       0     1.6     2.7     1.3       4    35.2    31.4
+   12     652      .9      .1     1.7     2.6     1.3     3.9    40.6    36.8
+   13     654      .3       0      .8     2.8     1.4     4.1    34.3    30.5
+   14     647      .2       0      .5     1.2      .3     2.2    34.3    30.6
+   15     609      .8       0     1.6     2.1      .9     3.4      32    28.2
+   16     592      .3       0      .9     1.9      .7       3    27.4    23.7
+   17     542      .4       0       1     1.7      .5     2.8    30.3    26.3
+   18     546      .7       0     1.5     2.7     1.3     4.2    28.9      25
+   19       0     -69     -69     -69     -69     -69     -69     -69     -69
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total      34    12.4    11.7    13.2     2.2     1.9     2.5     .47     1.3
+    5    30.8    11.9     8.9    14.8     4.3     2.4     6.2     .31    1.44
+    6    34.5    15.1      12    18.3     4.3     2.5     6.1     .44    1.41
+    7    32.8    12.1     9.3      15     3.7       2     5.4      .4    1.38
+    8    35.8    14.8    11.8    17.9     3.9     2.2     5.6     .48    1.41
+    9    42.5    15.8    12.7    18.9     2.8     1.4     4.3     .57    1.39
+   10    43.3    16.8    13.7    19.9     2.5     1.2     3.8     .59     1.4
+   11      39    13.4    10.6    16.1       2      .9     3.2     .45    1.37
+   12    44.5      16    13.1    18.8     1.1      .2     1.9      .6    1.28
+   13      38    11.9     9.4    14.5     1.2      .3     2.1     .52    1.22
+   14      38     9.6     7.2    11.9     1.2      .3     2.2     .52    1.17
+   15    35.8    10.5       8      13     1.1      .2     2.1     .47    1.18
+   16      31     8.6     6.3      11     1.5      .5     2.6     .38    1.13
+   17    34.2     7.7     5.4    10.1      .4       0       1     .39    1.11
+   18    32.8     9.5       7    12.1     1.6      .5     2.8      .4    1.21
+   19     -69     -69     -69     -69     -69     -69     -69     -69     -69
+
+Set 2:            Males
+
+Age groups        Weight-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    1374     1.3      .7     1.9     7.3     5.9     8.7    22.9    20.6
+    5     251       2      .1     3.9       8     4.4    11.5    19.1    14.1
+    6     257      .4       0     1.3     5.1     2.2     7.9    22.2    16.9
+    7     270     1.5       0     3.1     8.1     4.7    11.6    22.6    17.4
+    8     269     1.5       0     3.1     6.3     3.2     9.4    22.7    17.5
+    9     300     1.3       0     2.8       9     5.6    12.4    23.7    18.7
+   10      27       0       0     1.9     3.7       0    12.7    59.3    38.9
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    25.1    11.3     9.6      13     3.3     2.3     4.3       0    1.49
+    5    24.2     8.8     5.1    12.5     3.2      .8     5.6    -.15     1.5
+    6    27.5    10.9     6.9    14.9     2.3      .3     4.4       0    1.36
+    7    27.8    11.1     7.2      15     4.8     2.1     7.6    -.04    1.54
+    8    27.9    13.8     9.5    18.1     4.1     1.5     6.6     .06    1.52
+    9    28.6      11     7.3    14.7     2.3      .5     4.2     .02    1.51
+   10    79.6    18.5       2      35       0       0     1.9     .87    1.47
+
+Age groups        Height-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    3988     3.5     2.9     4.1    13.7    12.6    14.8     8.9       8
+    5     253     5.5     2.5     8.5      17    12.2    21.8    15.8    11.1
+    6     258     2.3      .3     4.4    12.8     8.5    17.1    10.9     6.9
+    7     273     2.6      .5     4.6    14.3      10    18.6      15    10.6
+    8     269     2.2      .3     4.2     9.3     5.6    12.9    14.5    10.1
+    9     299     4.7     2.1     7.2    14.7    10.5    18.9     9.4     5.9
+   10     311     2.6      .7     4.5     8.4     5.1    11.6    12.2     8.4
+   11     314     3.2     1.1     5.3    13.1     9.2    16.9     7.6     4.5
+   12     333     4.8     2.4     7.3    13.2     9.4      17    15.3    11.3
+   13     322       4     1.7     6.3    12.4     8.7    16.2     5.9     3.2
+   14     304     5.3     2.6     7.9    17.1    12.7    21.5     4.9     2.3
+   15     286     3.1      .9     5.3    13.3     9.2    17.4     3.5     1.2
+   16     274     2.2      .3     4.1    12.8     8.6    16.9     4.4     1.8
+   17     249       2      .1       4    14.5     9.9      19     2.8      .6
+   18     243     4.1     1.4     6.8    20.6    15.3    25.9      .4       0
+   19       0     -69     -69     -69     -69     -69     -69     -69     -69
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total     9.7     2.5       2       3      .7      .5       1    -.69     1.3
+    5    20.5     6.3     3.1     9.5     2.8      .5       5    -.53    1.66
+    6    14.8     3.1      .8     5.4     1.2       0     2.7    -.55    1.33
+    7    19.4       7     3.8    10.2     2.6      .5     4.6    -.46    1.54
+    8    18.9     4.8     2.1     7.6     1.5       0     3.1    -.42    1.42
+    9    12.8     3.3     1.1     5.5      .7       0     1.8    -.65    1.35
+   10      16     1.6       0     3.2      .3       0     1.1    -.49    1.22
+   11    10.7     1.9      .2     3.6      .3       0     1.1    -.62    1.26
+   12    19.3     4.5     2.1     6.9     1.2       0     2.5    -.54    1.44
+   13     8.6      .3       0     1.1       0       0      .2    -.65    1.17
+   14     7.5     1.6      .1     3.2       0       0      .2     -.8    1.27
+   15     5.8       0       0      .2       0       0      .2    -.87    1.06
+   16       7       0       0      .2       0       0      .2    -.93    1.06
+   17     5.1       0       0      .2       0       0      .2   -1.07     .98
+   18     1.4       0       0      .2       0       0      .2   -1.18    1.01
+   19     -69     -69     -69     -69     -69     -69     -69     -69     -69
+
+Age groups        BMI-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    3946     1.1      .8     1.5     3.2     2.6     3.8      34    32.5
+    5     245     3.3      .8     5.7     6.5     3.2     9.8    29.4    23.5
+    6     254       2      .1     3.9     3.9     1.3     6.5    32.7    26.7
+    7     265      .4       0     1.3     4.9     2.1     7.7    30.2    24.5
+    8     265     2.3      .3     4.2     4.2     1.6     6.7    30.9    25.2
+    9     294     1.7      .1     3.3     2.7      .7     4.8    38.1    32.4
+   10     309     1.3       0     2.7     2.9      .9     4.9    42.7      37
+   11     314       1       0     2.2     1.9      .2     3.6    37.6    32.1
+   12     330     1.5       0       3     2.7      .8     4.6    43.3    37.8
+   13     322      .3       0     1.1     2.8      .8     4.8    35.7    30.3
+   14     301       0       0      .2       0       0      .2    35.5      30
+   15     286       1       0     2.4     3.1      .9     5.3    31.1    25.6
+   16     270      .4       0     1.3       3      .8     5.2    23.7    18.4
+   17     248      .4       0     1.4     2.8      .6     5.1    29.8    23.9
+   18     243      .8       0     2.2     4.5     1.7     7.3    28.8    22.9
+   19       0     -69     -69     -69     -69     -69     -69     -69     -69
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    35.5    14.2    13.1    15.3       3     2.5     3.6     .48    1.38
+    5    35.3    13.9     9.3    18.4     5.7     2.6     8.8     .35    1.56
+    6    38.6    14.6      10    19.1     4.7     1.9     7.5     .47    1.48
+    7    35.9      14     9.6    18.3     6.4     3.3     9.6     .45     1.5
+    8    36.7    17.4    12.6    22.1     6.8     3.6      10     .52    1.53
+    9    43.8    16.3    11.9    20.7     3.7     1.4     6.1     .59    1.45
+   10    48.4    23.3    18.4    28.2     4.2     1.8     6.6      .7    1.55
+   11    43.1    17.2    12.9    21.5     3.5     1.3     5.7     .54    1.45
+   12    48.8    19.1    14.7    23.5     1.5       0       3     .61    1.37
+   13    41.1    12.4     8.7    16.2      .9       0     2.1     .53    1.22
+   14    41.1    13.3     9.3    17.3     1.7      .1     3.3     .59    1.21
+   15    36.7    10.5     6.8    14.2       1       0     2.4      .4    1.25
+   16      29     6.3     3.2     9.4     1.1       0     2.5     .24    1.14
+   17    35.7     6.9     3.5    10.2      .4       0     1.4      .3    1.17
+   18    34.7    10.7     6.6    14.8     1.6       0     3.5     .36    1.28
+   19     -69     -69     -69     -69     -69     -69     -69     -69     -69
+
+Set 3:            Females
+
+Age groups        Weight-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    1419     1.8     1.1     2.6     6.1     4.8     7.4    24.2    21.9
+    5     256     3.1      .8     5.5     8.2     4.6    11.8    20.7    15.5
+    6     285     1.1       0     2.4     4.6       2     7.2    24.2    19.1
+    7     278     2.2      .3       4       4     1.5     6.4    21.9    16.9
+    8     299     1.3       0     2.8     6.7     3.7     9.7    25.4    20.3
+    9     278     1.4       0       3     7.2       4    10.4    28.4    22.9
+   10      23     4.3       0    14.9     8.7       0    22.4    21.7     2.7
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    26.4     8.2     6.7     9.6     1.8       1     2.5    -.01    1.43
+    5    25.9     6.3     3.1     9.4     1.2       0     2.7    -.24    1.47
+    6    29.4    10.5     6.8    14.3     3.2       1     5.4     .06    1.46
+    7      27     7.2       4    10.4     1.8      .1     3.5     .03    1.36
+    8    30.5     7.7     4.5    10.9     1.3       0     2.8    -.03    1.38
+    9    33.9     9.4     5.7      13     1.4       0       3      .1    1.45
+   10    40.8     4.3       0    14.9       0       0     2.2    -.14    1.62
+
+Age groups        Height-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    4272     3.4     2.9       4      14      13    15.1     7.4     6.6
+    5     256     3.1      .8     5.5    11.3     7.3    15.4    16.8      12
+    6     286     3.8     1.4     6.2     9.4     5.9      13    18.2    13.5
+    7     277     1.4       0       3     6.1     3.1     9.1    14.1     9.8
+    8     301     4.3     1.9     6.8      13       9    16.9    10.6       7
+    9     280     3.6     1.2     5.9    11.8     7.8    15.7    12.1     8.1
+   10     295     3.7     1.4     6.1    12.5     8.6    16.5     9.8     6.3
+   11     324     4.3       2     6.7    17.9    13.6    22.2     7.1     4.1
+   12     322       4     1.7     6.3    11.2     7.6    14.8     5.9     3.2
+   13     333     2.4      .6     4.2    14.7    10.8    18.7     2.4      .6
+   14     346     3.5     1.4     5.5    15.9    11.9    19.9     2.3      .6
+   15     327     3.4     1.3     5.5    15.3    11.2    19.3     2.1      .4
+   16     325     2.2      .4     3.9    19.4    14.9    23.8     2.5      .6
+   17     297     2.7      .7     4.7    14.8    10.6      19     3.7     1.4
+   18     303     5.6     2.9     8.4    20.8    16.1    25.5     1.7      .1
+   19       0     -69     -69     -69     -69     -69     -69     -69     -69
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total     8.2     1.7     1.3     2.1      .5      .3      .7    -.74    1.24
+    5    21.6     5.5     2.5     8.4     3.1      .8     5.5     -.4    1.48
+    6    22.8     6.6     3.6     9.7     2.8      .7     4.9    -.36    1.52
+    7    18.4     5.1     2.3     7.8     1.1       0     2.5    -.27    1.25
+    8    14.3     2.7      .7     4.6      .3       0     1.1    -.59    1.32
+    9    16.1     1.4       0       3      .4       0     1.2    -.58    1.33
+   10    13.4       1       0     2.3       0       0      .2    -.59     1.3
+   11      10      .9       0     2.1       0       0      .2     -.7     1.3
+   12     8.6      .6       0     1.6       0       0      .2    -.68    1.17
+   13     4.2     1.2       0     2.5       0       0      .2    -.81    1.06
+   14       4       0       0      .1       0       0      .1    -.95    1.05
+   15     3.9       0       0      .2       0       0      .2    -.97       1
+   16     4.3       0       0      .2       0       0      .2   -1.11     .98
+   17       6      .3       0     1.2       0       0      .2   -1.04    1.08
+   18     3.2       0       0      .2       0       0      .2   -1.16    1.08
+   19     -69     -69     -69     -69     -69     -69     -69     -69     -69
+
+Age groups        BMI-for-age
+
+            N  %<-3SD     95%     CI   %<-2SD     95%     CI    %>1SD     95%
+Total    4223      .6      .3      .8     2.3     1.9     2.8    32.1    30.7
+    5     244      .4       0     1.4     2.5      .3     4.6    24.2    18.6
+    6     281     1.1       0     2.4     2.5      .5     4.5    28.5      23
+    7     272     1.5       0     3.1     2.2      .3     4.1    27.6    22.1
+    8     294      .3       0     1.2     3.1      .9     5.2    32.7    27.1
+    9     276     1.1       0     2.5       4     1.5     6.5    38.8    32.8
+   10     292      .3       0     1.2     3.4     1.2     5.7    35.6      30
+   11     322      .6       0     1.6     3.4     1.3     5.6    32.9    27.6
+   12     322      .3       0     1.1     2.5      .6     4.3    37.9    32.4
+   13     332      .3       0       1     2.7      .8     4.6    32.8    27.6
+   14     346      .3       0       1     2.3      .6       4    33.2    28.1
+   15     323      .6       0     1.6     1.2       0     2.6    32.8    27.5
+   16     322      .3       0     1.1      .9       0     2.1    30.4    25.3
+   17     294      .3       0     1.2      .7       0     1.8    30.6    25.2
+   18     303      .7       0     1.7     1.3       0     2.8      29    23.8
+   19       0     -69     -69     -69     -69     -69     -69     -69     -69
+
+          CI    %>2SD     95%     CI    %>3SD     95%     CI     Mean      SD
+Total    33.5    10.8     9.8    11.7     1.4     1.1     1.8     .46    1.21
+    5    29.8     9.8     5.9    13.8     2.9      .6     5.2     .27    1.31
+    6    33.9    15.7    11.2    20.1     3.9     1.5     6.4     .42    1.34
+    7    33.1    10.3     6.5    14.1     1.1       0     2.5     .35    1.25
+    8    38.2    12.6     8.6    16.5     1.4       0     2.9     .44    1.29
+    9    44.7    15.2    10.8    19.6     1.8      .1     3.6     .54    1.32
+   10    41.3     9.9     6.3    13.5      .7       0     1.8     .48    1.21
+   11    38.2     9.6     6.3      13      .6       0     1.6     .36    1.28
+   12    43.3    12.7     8.9    16.5      .6       0     1.6     .59    1.18
+   13      38    11.4     7.9      15     1.5       0       3     .51    1.23
+   14    38.3     6.4     3.6     9.1      .9       0       2     .46    1.13
+   15    38.1    10.5       7      14     1.2       0     2.6     .53    1.12
+   16    35.6    10.6       7    14.1     1.9      .2     3.5      .5    1.12
+   17    36.1     8.5     5.1    11.9      .3       0     1.2     .47    1.05
+   18    34.3     8.6     5.3    11.9     1.7      .1     3.2     .43    1.15
+   19     -69     -69     -69     -69     -69     -69     -69     -69     -69
+ 
+Note:       Prevalences are written to
+            /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master
+> 's Thesis/Proposal 3 Mexico OG/Data/Cleaned/WHO_zscores/mxfls2005_5to19_prev.
+> xls
+
+.         use "$who_output_dir/mxfls2005_5to19_z.dta", clear
+(VERSION 7 Aug 2008)
+
+.     gen haz = _zhfa if _fhfa == 0
+(54 missing values generated)
+
+.     gen waz = _zwfa if _fwfa == 0 & age_months_exact <= 120   // WHO 2007 has
+>  no WAZ past age 10
+(5,571 missing values generated)
+
+.     gen bmiz = _zbfa if _fbfa == 0
+(145 missing values generated)
+
+.     count if _fhfa == 1
+  5
+
+.     di "5to19: `r(N)' HAZ obs flagged out of range (<-6 or >6)"
+5to19: 5 HAZ obs flagged out of range (<-6 or >6)
+
+.     count if _fwfa == 1
+  9
+
+.     di "5to19: `r(N)' WAZ obs flagged out of range (<-6 or >5)"
+5to19: 9 WAZ obs flagged out of range (<-6 or >5)
+
+.     count if _fbfa == 1
+  43
+
+.     di "5to19: `r(N)' BMIZ obs flagged out of range (<-5 or >5)"
+5to19: 43 BMIZ obs flagged out of range (<-5 or >5)
+
+.     keep folio ls haz waz bmiz
+
+.     save `z_5to19'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000008 saved
+    as .dta format
+
+. restore
+
+. 
+. preserve
+
+.     use `z_u5', clear
+(VERSION 7 Aug 2008)
+
+.     append using `z_5to19'
+
+.     save `z_all'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000009 saved
+    as .dta format
+
+. restore
+
+. merge 1:1 folio ls using `z_all', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        20,838
+        from master                    20,838  
+        from using                          0  
+
+    Matched                            10,662  
+    -----------------------------------------
+
+. label variable haz "Height-for-age z-score (HAZ)"
+
+. label variable waz "Weight-for-age z-score (WAZ)"
+
+. label variable bmiz "BMI-for-age z-score (BMIZ)"
+
+. label variable age "Age (years, not in regression)"
+
+. 
+. 
+. * Keep birth month and birth year for birth month and birth year fixed effect
+> s.
+. label variable bmonth "Birth month of child"
+
+. label variable byear "Birth year of child"
+
+. * Keep the household interview date
+. gen int_year = year(int_date)
+
+. gen int_month = month(int_date)
+
+. format int_date %td
+
+. label variable int_date "Measurement date (last Book S visit, else last Book 
+> C visit, day = 15)" 
+
+. label variable int_year "Interview year"
+
+. label variable int_month "Interview month"
+
+. keep folio ls age gender height_cm weight_kg_gr blood_pressure_systole blood_
+> pressure_diastole hemoglobin_g_dl child_weight_kg child_height_cm age_days ag
+> e_months_exact haz waz bmiz bday_imputed bmonth byear int_date int_year int_m
+> onth
+
+. 
+. tempfile temp_biomarkers
+
+. save `temp_biomarkers'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000d saved
+    as .dta format
+
+. 
+. 
+. *******************************************************************
+. * Child Health Module
+. *******************************************************************
+. 
+. * NOTE LET'S HOLD OFF RUNNING THE REGRESSION WITH THIS FOR NOW
+. use "$path/hh05dta_b5/v_esn.dta", clear
+(VERSION 15 Jan 2008)
+
+. rename esn01     health_of_child
+
+. rename esn07_1b  has_asthma
+
+. rename esn07_1d  other_chronic_illness
+
+. rename esn08a1   listening_problem
+
+. 
+. keep folio ls health_of_child has_asthma other_chronic_illness listening_prob
+> lem
+
+. sum health_of_child has_asthma other_chronic_illness listening_problem
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+health_of_~d |     10,126    2.052736    .5887706          1          5
+  has_asthma |     10,111    2.971714    .3006604          1          8
+other_chro~s |     10,110    2.971909    .3328582          1          8
+listening_~m |         61    2.311475    2.566067          1          8
+
+. tempfile temp_child_health
+
+. save `temp_child_health'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000e saved
+    as .dta format
+
+. 
+. *******************************************************************
+. * Household Transfers & Expenses (bad proxy)
+. *******************************************************************
+. 
+. * Parent transfers
+. use "$path/hh05dta_bx/p_tp.dta", clear
+(VERSION 10 Jan 2008)
+
+. rename tp24a_2  p_g_expense_health
+
+. rename tp24b_2  p_g_other_money
+
+. rename tp24c_2  p_g_food_clothes_products
+
+. rename tp26a_2  p_r_expense_health
+
+. rename tp26b_2  p_r_other_money
+
+. rename tp26c_2  p_r_food_clothes_products
+
+. sum folio ls p_g_expense_health p_g_other_money p_g_food_clothes_products p_r
+> _expense_health p_r_other_money p_r_food_clothes_products
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       folio |          0
+          ls |          0
+p_g_expens~h |         53    4890.943    10383.83         80      67200
+p_g_other_~y |         26    7957.692    10953.47        300      48000
+p_g_food_c~s |         32      3087.5    5542.563        150      30000
+-------------+---------------------------------------------------------
+p_r_expens~h |         12    3191.667    3726.187        200      10000
+p_r_other_~y |         14    719514.1     2671124        300    9999997
+p_r_food_c~s |          9    10138.89    20193.75        150      60000
+
+. 
+. * Child transfers
+. use "$path/hh05dta_bx/p_thi2.dta", clear
+(VERSION 10 Jan 2008)
+
+. rename thi24b1_2 g_expense_health
+
+. rename thi24b2_2 g_tuition
+
+. rename thi24b4_2 g_food_clothes_products
+
+. rename thi24d1_2 r_expense_health
+
+. rename thi24d2_2 r_tuition
+
+. rename thi24d4_2 r_food_clothes_products
+
+. 
+. * Sum transfers across all reported children for each person (folio ls)
+. collapse (sum) g_expense_health g_tuition g_food_clothes_products r_expense_h
+> ealth r_tuition r_food_clothes_products, by(folio ls)
+
+. sum folio ls g_expense_health g_tuition g_food_clothes_products r_expense_hea
+> lth r_tuition r_food_clothes_products
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       folio |          0
+          ls |          0
+g_expense_~h |        339    546.6077    4900.695          0      84000
+   g_tuition |        339    11.65192    142.9453          0       2500
+g_food_clo~s |        339    89.79351    1030.345          0      17000
+-------------+---------------------------------------------------------
+r_expense_~h |        339    809.7345    5136.941          0      68000
+   r_tuition |        339     6.19469     90.9677          0       1600
+r_food_clo~s |        339    98.96755    1014.236          0      17000
+
+. 
+. *******************************************************************
+. 
+. 
+. ********** 8888888 IMPORTANT I AM STILL FIXING THIS PROXY AS IT FALSELY SETS 
+> SOME ZEROS BUT IT'S MOSTLY CORRECT, not main variable so it's fine for now. N
+> ote: This has way too few observations too viably use. 888888 ***************
+> ***********
+. 
+. 
+. * International US Specific Remittance Proxy that includes non-cash
+. * Combines (a) "family member in the US" with (b) a transfer actually receive
+> d from that relative 
+. * Only mother and father allow a clean country-of-residence + transfer match.
+>  NOTE that this is the household receives help from a member's parent living 
+> in the US, not the child's parent sends remittances. AKA could be grandparent
+>  of the child 
+. *******************************************************************
+. 
+. * Relatives in USA - yes/no (module iiib_re)
+. use "$path/hh05dta_b3b/iiib_re.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls re01
+
+. tempfile temp_re
+
+. save `temp_re'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000f saved
+    as .dta format
+
+. 
+. * Relationship of relative(s) in USA (module iiib_re1)
+. * Restrict to spouse/father/mother/child (re03_1 1,2,3,5) to match A&C's TRN 
+> definition
+. * Collapsed by folio ls because a respondent can report more than one relativ
+> e in the US
+. use "$path/hh05dta_b3b/iiib_re1.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls re03_1
+
+. gen close_relative_us = inlist(re03_1, 1, 2, 3, 5)
+
+. collapse (max) close_relative_us, by(folio ls)
+
+. tempfile temp_re1
+
+. save `temp_re1'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000g saved
+    as .dta format
+
+. 
+. * Parent transfers + parent's country of residence (module iiib_tp)
+. * NOTE: mirrors the confirmed tp18pp_1/tp18pp_2 (father) coding for mother (t
+> p18mp_1/tp18mp_2);
+. use "$path/hh05dta_b3b/iiib_tp.dta", clear
+(VERSION 10 Jan 2008)
+
+. * We specifically look at remmittances in the united states because it has a 
+> overwhelming frequncy of 301/310, the other countries are barely any
+. * We code the missing appropiately. 1 is US, 0 is same location aka Mexico or
+>  a different country, . missing is categorized as don't know or genuinely mis
+> sing. Note: Need to add upper also its Estados unidos, but in 2002 it is Unit
+> ed States
+. gen mother_us = .
+(20,607 missing values generated)
+
+. replace mother_us = 0 if tp18mp_1 == 3
+(13,422 real changes made)
+
+. replace mother_us = 0 if tp18mp_1 == 1 & upper(tp18mp_2) != "ESTADOS UNIDOS" 
+> & !missing(tp18mp_2)
+(4 real changes made)
+
+. replace mother_us = 1 if tp18mp_1 == 1 & upper(tp18mp_2) == "ESTADOS UNIDOS"
+(116 real changes made)
+
+. 
+. gen father_us = .
+(20,607 missing values generated)
+
+. replace father_us = 0 if tp18pp_1 == 3
+(14,228 real changes made)
+
+. replace father_us = 0 if tp18pp_1 == 1 & upper(tp18pp_2) != "ESTADOS UNIDOS" 
+> & !missing(tp18pp_2)
+(5 real changes made)
+
+. replace father_us = 1 if tp18pp_1 == 1 & upper(tp18pp_2) == "ESTADOS UNIDOS"
+(295 real changes made)
+
+. 
+. * TP02 = 1, parent lives in the household, need to code bc of skip logic in q
+> uestionaire
+. * TP03 = 1, parent died more than 12 months ago, need to code bc of skip logi
+> c in questionaire
+. replace mother_us = 0 if tp02m == 1 | tp03m == 1
+(6,948 real changes made)
+
+. replace father_us = 0 if tp02p == 1 | tp03p == 1
+(5,713 real changes made)
+
+. 
+. * tp25 accounts for the majority of responses and that's a joint (mother & fa
+> ther) response. tp25m is for mothers, and tp25p is for fathers, thus we fill 
+> in receiving from mother's (recv_m) with tp25m first and tp25 if joint mother
+>  and father live together. Similarly for father
+. gen recv_m = tp25m
+(17,272 missing values generated)
+
+. replace recv_m = tp25 if missing(recv_m) & tp22 == 1
+(5,101 real changes made)
+
+. gen recv_p = tp25p
+(17,930 missing values generated)
+
+. replace recv_p = tp25 if missing(recv_p) & tp22 == 1
+(5,101 real changes made)
+
+. 
+. * remittance_us_family: 1 if either parent is confirmed in the US and sent he
+> lp; 0 only
+. * if both parents are resolved as not sending; missing if unresolved and neit
+> her side is
+. * a confirmed 1 (don't silently code DK as "no"). So both parents have to fai
+> l the criteria
+. gen remittance_us_family = .
+(20,607 missing values generated)
+
+. replace remittance_us_family = 1 if (mother_us==1 & recv_m==1) | (father_us==
+> 1 & recv_p==1)
+(152 real changes made)
+
+. replace remittance_us_family = 0 if (mother_us==0 | (mother_us==1 & recv_m==3
+> )) & (father_us==0 | (father_us==1 & recv_p==3))
+(20,015 real changes made)
+
+. keep folio ls remittance_us_family mother_us father_us
+
+. tempfile temp_tp_re
+
+. save `temp_tp_re'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000h saved
+    as .dta format
+
+. 
+. 
+. 
+. * Combine the three pieces at the person level
+. use `temp_re', clear
+(VERSION 10 Jan 2008)
+
+. merge 1:1 folio ls using `temp_re1', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        13,606
+        from master                    13,606  
+        from using                          0  
+
+    Matched                             7,001  
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_tp_re', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            20,607  
+    -----------------------------------------
+
+. * Genuinely a 0 because the missing are known values. They just changed to mi
+> ssing based on our code above. We actually know all of these and if missing i
+> t means its 0
+. replace close_relative_us = 0 if missing(close_relative_us)
+(13,606 real changes made)
+
+. label variable close_relative_us "Has spouse/parent/child in the US (A&C-styl
+> e TRN)"
+
+. label variable remittance_us_family "Received transfer confirmed from parent 
+> living in US (A&C-style REM, parent-only)"
+note: label truncated to 80 characters
+
+. tempfile temp_ac_remittance
+
+. save `temp_ac_remittance'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000i saved
+    as .dta format
+
+. 
+. * Collapse to household level to match the rest of the migration block
+. collapse (max) close_relative_us remittance_us_family, by(folio)
+
+. tempfile temp_ac_remittance_hh
+
+. save `temp_ac_remittance_hh'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000j saved
+    as .dta format
+
+. 
+. 
+. *******************************************************************
+. * Domestic and International Remittances
+. * Remittances from anyone in the last 12 months outside the household in cash
+>  only. This is to at least one household member aged 15 or older 
+. * We use Book IIIB TP26 (parents), TH20d (siblings), THI24d (children). As th
+> e questionaire directly states these as transfers to non-residents. We accoun
+> t for both the survey respondents interviewed and people not interviewed via 
+> the proxy as they still are a part of the household. 
+. * Cash only means money for health, school tuition, or any other money. Food/
+> clothes and time are not included
+. * Also we only look at the receiving end of variables as we care about indivi
+> duals who have received remittances, and don't need both sides
+. *******************************************************************
+. 
+. * Parents remittances are TP26: tp26a/tp26ma/tp26pa = money for health and tp
+> 26b/tp26mb/tp26pb = any other money. This includes mom, father, and joint. NO
+> TE: cash_tp is all 0's and 1's and I will handle impute missing later. It is 
+> this way bc a skip pattern causes individuals who's parents died or lives in 
+> the household as skip thus they truly should be zero. Note: That there is no 
+> binary parent transfers, whereas 2009 as the binary parent transfers
+. use "$path/hh05dta_b3b/iiib_tp.dta", clear
+(VERSION 10 Jan 2008)
+
+. gen cash_tp = 0
+
+. foreach v in tp26a tp26b tp26ma tp26mb tp26pa tp26pb {
+  2.     replace cash_tp = 1 if `v' > 0 & !missing(`v')
+  3. }
+(267 real changes made)
+(41 real changes made)
+(149 real changes made)
+(23 real changes made)
+(142 real changes made)
+(51 real changes made)
+
+. * We account for a false zero here. TP25 aka if received help from parents ha
+> s to be answered if a parent lives outside the household (tp20m or tp20p = 2)
+> . If its blank that means TP section not filled out and they are unresolved a
+> ka missing
+. gen miss_tp = missing(tp21) | ((tp20m == 2 | tp20p == 2) & !inlist(tp25, 1, 3
+> ) & !inlist(tp25m, 1, 3) & !inlist(tp25p, 1, 3))
+
+. keep folio ls cash_tp miss_tp
+
+. tempfile temp_cash_tp
+
+. save `temp_cash_tp'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000k saved
+    as .dta format
+
+. 
+. * Sibiling remittances are TH20d. d1 = health, d2 = tuition, d3 = other money
+> . th20c = 7 or 8 is didn't want to answer. The 2005 data only has 7, so 8 is 
+> a harmless addition. 
+. use "$path/hh05dta_b3b/iiib_th2.dta", clear
+(VERSION 10 Jan 2008)
+
+. gen cash_th = (th20d1 > 0 & !missing(th20d1)) | (th20d2 > 0 & !missing(th20d2
+> )) | (th20d3 > 0 & !missing(th20d3))
+
+. * th20c is skipped for children younger than 7. A blank th20c for a child 7 a
+> nd older or age unknown is unresolved
+. gen refuse_th = inlist(th20c, 7, 8) | (missing(th20c) & !(th18_2 < 7))
+
+. collapse (max) cash_th refuse_th, by(folio ls)
+
+. tempfile temp_cash_th
+
+. save `temp_cash_th'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000l saved
+    as .dta format
+
+. 
+. * Children remittances are THI24d. Same coding as siblings
+. use "$path/hh05dta_b3b/iiib_thi2.dta", clear
+(VERSION 10 Jan 2008)
+
+. gen cash_thi = (thi24d1 > 0 & !missing(thi24d1)) | (thi24d2 > 0 & !missing(th
+> i24d2)) | (thi24d3 > 0 & !missing(thi24d3))
+
+. * thi24c is skipped for children younger than 7. A blank thi24c for a child 7
+>  and older or age unknown is unresolved
+. gen refuse_thi = inlist(thi24c, 7, 8) | (missing(thi24c) & !(thi22_2 < 7))
+
+. collapse (max) cash_thi refuse_thi, by(folio ls)
+
+. tempfile temp_cash_thi
+
+. save `temp_cash_thi'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000m saved
+    as .dta format
+
+. 
+. * We don't use TO aka anyone else because in 2002/2005 TO03 was only asked of
+>  people who gave help while 2009 asked everyone, so it isn't measured the sam
+> e way across waves and would bias the household fixed effects
+. 
+. * Combine at the person level for everyone with a Book IIIB. rel = 20 is "Com
+> plete and correct", this will be another way we can check for true missing va
+> riables. Book b3b and C questionaires have this exact wording.  We rename in 
+> order not to conflict with other vars
+. use "$path/hh05dta_b3b/iiib_portad.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls rel
+
+. rename rel rel_3b
+
+. merge 1:1 folio ls using `temp_cash_tp', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            20,607  
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_cash_th', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         3,782
+        from master                     3,782  
+        from using                          0  
+
+    Matched                            16,825  
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_cash_thi', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        16,597
+        from master                    16,597  
+        from using                          0  
+
+    Matched                             4,010  
+    -----------------------------------------
+
+. 
+. 
+. * Creating new "total" variables cash3b and resolved_b to capture whethera ho
+> usehold received remittances or whether a true missing.
+. foreach v in cash_tp cash_th refuse_th cash_thi refuse_thi {
+  2.     replace `v' = 0 if missing(`v')
+  3. }
+(0 real changes made)
+(3,782 real changes made)
+(3,782 real changes made)
+(16,597 real changes made)
+(16,597 real changes made)
+
+. egen cash_3b = rowmax(cash_tp cash_th cash_thi)
+
+. gen resolved_3b = (rel_3b == 20 & refuse_th == 0 & refuse_thi == 0 & miss_tp 
+> == 0)
+
+. keep folio ls cash_3b resolved_3b
+
+. tempfile temp_cash_3b
+
+. save `temp_cash_3b'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000n saved
+    as .dta format
+
+. 
+. 
+. 
+. * We must use THE PROXY BOOK in order to account for absent household members
+>  or we will have a lot of false zeros. 
+. * First we do parents. Additonally we account for don't know responses. Also,
+>  made sure the variables are equal to 1 as long as they are not missing or do
+> n't know. NOTE: The naming is the same as above but the p in front is for pro
+> xy 
+. use "$path/hh05dta_bx/p_tp.dta", clear
+(VERSION 10 Jan 2008)
+
+. gen cash_ptp = 0
+
+. foreach v in tp26a tp26b tp26ma tp26mb tp26pa tp26pb {
+  2.     replace cash_ptp = 1 if (`v'_2 > 0 & !missing(`v'_2)) | (!missing(`v'_
+> 1) & `v'_1 != 8 & missing(`v'_2))
+  3. }
+(13 real changes made)
+(12 real changes made)
+(9 real changes made)
+(4 real changes made)
+(13 real changes made)
+(3 real changes made)
+
+. * DK if they don't know whether help was received TP25 = 8, or they know help
+>  was received but not what type, stored as tp26g_1/tp26mg_1/tp26pg_1. Thus we
+>  don't know if its money or not so we code as missing. 
+. * In 2005 tp26g_1/tp26mg_1/tp26pg_1 are coded 1 = "Don't know type of help" a
+> nd 3 = knows the type 
+. gen dk_ptp = (tp25 == 8 | tp25m == 8 | tp25p == 8) | tp26g_1 == 1 | tp26mg_1 
+> == 1 | tp26pg_1 == 1
+
+. replace dk_ptp = 1 if missing(tp21) | ((tp20m == 2 | tp20p == 2) & !inlist(tp
+> 25, 1, 3) & !inlist(tp25m, 1, 3) & !inlist(tp25p, 1, 3))
+(4 real changes made)
+
+. keep folio ls cash_ptp dk_ptp
+
+. tempfile temp_cash_ptp
+
+. save `temp_cash_ptp'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000o saved
+    as .dta format
+
+. 
+. 
+. * We do similar thing as with siblings. In the 2005 proxy th20c = 8 is DK 
+. use "$path/hh05dta_bx/p_th2.dta", clear
+(VERSION 10 Jan 2008)
+
+. gen cash_pth = 0
+
+. foreach v in th20d1 th20d2 th20d3 {
+  2.     replace cash_pth = 1 if (`v'_2 > 0 & !missing(`v'_2)) | (!missing(`v'_
+> 1) & `v'_1 != 8 & missing(`v'_2))
+  3. }
+(37 real changes made)
+(4 real changes made)
+(46 real changes made)
+
+. gen dk_pth = inlist(th20c, 7, 8) | (missing(th20c) & !(th18_2 < 7))
+
+. collapse (max) cash_pth dk_pth, by(folio ls)
+
+. tempfile temp_cash_pth
+
+. save `temp_cash_pth'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000p saved
+    as .dta format
+
+. 
+. 
+. * We do a similar thing with children
+. use "$path/hh05dta_bx/p_thi2.dta", clear
+(VERSION 10 Jan 2008)
+
+. gen cash_pthi = 0
+
+. foreach v in thi24d1 thi24d2 thi24d3 {
+  2.     replace cash_pthi = 1 if (`v'_2 > 0 & !missing(`v'_2)) | (!missing(`v'
+> _1) & `v'_1 != 8 & missing(`v'_2))
+  3. }
+(41 real changes made)
+(1 real change made)
+(65 real changes made)
+
+. gen dk_pthi = inlist(thi24c, 7, 8) | (missing(thi24c) & !(thi22_2 < 7))
+
+. collapse (max) cash_pthi dk_pthi, by(folio ls)
+
+. merge 1:1 folio ls using "$path/hh05dta_bx/p_thi.dta", keepusing(thi02 thi04)
+>  nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         2,414
+        from master                         0  
+        from using                      2,414  
+
+    Matched                               339  
+    -----------------------------------------
+
+. replace dk_pthi = 1 if thi02 == 8 | thi04 == 8
+(25 real changes made)
+
+. drop thi02 thi04
+
+. tempfile temp_cash_pthi
+
+. save `temp_cash_pthi'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000q saved
+    as .dta format
+
+. 
+. 
+. 
+. * Merging everything in proxy together
+. use "$path/hh05dta_bx/p_portad.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls rel
+
+. rename rel rel_px
+
+. merge 1:1 folio ls using `temp_cash_ptp', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           142
+        from master                       142  
+        from using                          0  
+
+    Matched                             2,753  
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_cash_pth', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           845
+        from master                       845  
+        from using                          0  
+
+    Matched                             2,050  
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_cash_pthi', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           142
+        from master                       142  
+        from using                          0  
+
+    Matched                             2,753  
+    -----------------------------------------
+
+. gen miss_px = missing(cash_ptp)
+
+. foreach v in cash_ptp dk_ptp cash_pth dk_pth cash_pthi dk_pthi {
+  2.     replace `v' = 0 if missing(`v')
+  3. }
+(142 real changes made)
+(142 real changes made)
+(845 real changes made)
+(845 real changes made)
+(2,556 real changes made)
+(2,531 real changes made)
+
+. egen cash_px = rowmax(cash_ptp cash_pth cash_pthi)
+
+. gen resolved_px = (rel_px == 20 & dk_ptp == 0 & dk_pth == 0 & dk_pthi == 0 & 
+> miss_px == 0)
+
+. keep folio ls cash_px resolved_px
+
+. tempfile temp_cash_px
+
+. save `temp_cash_px'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000r saved
+    as .dta format
+
+. 
+. * We grab the roster of the household that should contain everybody. ls01a: 1
+>  still lives here, 4 new member, 6 returned. And we merge it with how respond
+> ents responded to receiving remittances. We use this in order to determine a 
+> true 0 rather than assign someone a false zero of no remittances. 
+. * NOTE: In 2005 ls01a only has 0/1/3/4 (no 6), so the 6 is harmless
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. * We keep individuals in the household with this line
+. keep if inlist(ls01a, 1, 4, 6) & ls02_2 >= 15 & !missing(ls02_2)
+(13,937 observations deleted)
+
+. * Merge keeps everyone by default, so anyone with a Book IIIB still counts ev
+> en if they dropped out of the roster filter 
+. merge 1:1 folio ls using `temp_cash_3b', nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         4,065
+        from master                     3,872  
+        from using                        193  
+
+    Matched                            20,414  
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_cash_px', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        21,653
+        from master                    21,653  
+        from using                          0  
+
+    Matched                             2,826  
+    -----------------------------------------
+
+. gen cash_any = (cash_3b == 1 | cash_px == 1)
+
+. gen resolved = (resolved_3b == 1 | resolved_px == 1 | cash_any == 1)
+
+. collapse (max) cash_any (min) resolved, by(folio)
+
+. 
+. * We create our remittance variable. This is for individualks who are above t
+> he age of 15
+. gen remittance_hh = .
+(8,367 missing values generated)
+
+. replace remittance_hh = 1 if cash_any == 1
+(1,745 real changes made)
+
+. replace remittance_hh = 0 if cash_any == 0 & resolved == 1
+(5,835 real changes made)
+
+. label variable remittance_hh "Household received remittances, proxy (indicato
+> r)" 
+
+. keep folio remittance_hh
+
+. tempfile temp_remit_hh
+
+. save `temp_remit_hh'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000s saved
+    as .dta format
+
+. 
+. *******************************************************************
+. * Migration & Individual Remittances, not in use right now 
+. *******************************************************************
+. 
+. * Base Income/Aid file
+. use "$path/hh05dta_b3a/iiia_iin.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls iin01d_1 iin01d_2
+
+. rename iin01d_1 ind_aid_donations_gifts
+
+. rename iin01d_2 val_aid_donations_gifts
+
+. 
+. * Merge Migration
+. merge 1:1 folio ls using "$path/hh05dta_b3a/iiia_mg.dta", keep(master match)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            20,691  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. rename mg01p_1 country_born
+
+. rename mg04p_1 lived_upto_12
+
+. 
+. * Merge Migration Details collapse to person level with egen max()
+. preserve
+
+.     use "$path/hh05dta_b3a/iiia_mg1.dta", clear
+(VERSION 10 Jan 2008)
+
+.     * Episode-level flag: was this specific episode a move to the US?
+.     gen us_episode = mg30 == 1
+
+.     * Person-level: did they move to the US in ANY episode?
+.     sort folio ls
+
+.     by folio ls: egen moved_us = max(us_episode)
+
+.     * Person-level: documentation type reported in the US-move episode.
+.     gen us_doc_temp = mg31_1 if us_episode == 1
+(2,192 missing values generated)
+
+.     by folio ls: egen us_doc = max(us_doc_temp)
+(2,129 missing values generated)
+
+.     sort folio ls
+
+.     by folio ls: keep if _n == _N
+(576 observations deleted)
+
+.     keep folio ls moved_us us_doc
+
+.     tempfile temp_mg1
+
+.     save `temp_mg1'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000u saved
+    as .dta format
+
+. restore
+
+. 
+. merge 1:1 folio ls using `temp_mg1', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        18,975
+        from master                    18,975  
+        from using                          0  
+
+    Matched                             1,716  
+    -----------------------------------------
+
+. 
+. * This equivalent coding to using val_aid_donations_gits > 1
+. gen remittance_binary = .
+(20,691 missing values generated)
+
+. replace remittance_binary = 1 if ind_aid_donations_gifts == 1
+(172 real changes made)
+
+. replace remittance_binary = 0 if ind_aid_donations_gifts == 3
+(12,327 real changes made)
+
+. label variable remittance_binary "Household Received Aid/Donations (1=Yes, 0=
+> No)"
+
+. drop ind_aid_donations_gifts
+
+. tempfile temp_migration
+
+. save `temp_migration'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000v saved
+    as .dta format
+
+. 
+. * We collapse to household level because these variables are for adults, thus
+>  to match with the kids biomarkers we need to collapse. Thus, we do so and do
+>  a many to one merge
+. collapse (max) remittance_binary val_aid_donations_gifts country_born lived_u
+> pto_12 moved_us us_doc, by(folio)
+
+. tempfile temp_migration_hh
+
+. save `temp_migration_hh'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000w saved
+    as .dta format
+
+. 
+. *******************************************************************
+. * We need linking key across waves
+. *******************************************************************
+. 
+. * We specifically take the pid_link in this one because it has the most nonmi
+> ssing pid_link rows, on second thought I don't think it needs to be this one,
+>  but it doesn't hurt to do so
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls pid_link
+
+. tempfile temp_pidlink
+
+. save `temp_pidlink'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00000x saved
+    as .dta format
+
+. 
+. *******************************************************************
+. * Demographics & Control Variables
+. *******************************************************************
+. 
+. * We keep only the state code (ent) from the Book IIIA cover, collapsed to th
+> e household, because the state fill-in block further down uses it. Same file,
+>  rows and collapse as before, so ent is unchanged
+. use "$path/hh05dta_b3a/iiia_portad.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ent
+
+. collapse (max) ent, by(folio)
+
+. tempfile temp_controls_hh
+
+. save `temp_controls_hh'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000010 saved
+    as .dta format
+
+. 
+. *******************************************************************
+. * Child-Level Controls: Vaccination, Delivery & Breastfeeding
+. *******************************************************************
+. 
+. * Child Vaccination (Book 5, v_vac), this is a clean individual child level c
+> ontrol
+. * NOTE THIS CONTROL IS RATHER CUMBERSOME
+. use "$path/hh05dta_b5/v_vac.dta", clear
+(VERSION 15 Jan 2008)
+
+. * Does the child have a vaccination card, dates copied off the card, and then
+>  a recall quesiton asking the parents if their child was vaccinated.
+. * NOTE: Different from 2009 as 2005 has only ONE card (vac02). There is no va
+> c02_a (previous card), and the card dates are vac03a-vac03u with no _1/_2 suf
+> fix. 
+. keep folio ls vac02 vac03a-vac03u vac04a vac04b vac04c vac04d vac04e vac04f v
+> ac04g vac04h
+
+. rename vac02 has_vaccination_card
+
+. * IMPORTANT NOTE: Skip pattern, VAC04 is asked ONLY when no card is seen. If 
+> a card is seen VAC02 = 1 the interviewer copies the dates into VAC03 and skip
+> s VAC04.
+. 
+. * This generates a categorical variable that denotes if 1 = you had a card, 2
+>  = a previous card, or 3 = a recall.
+. * Note: No previous card in 2005, so there is no card_src = 2 line. We keep t
+> he same numbering as 2009 (1 = card, 3 = recall)
+. gen byte card_src = 1 if has_vaccination_card == 1
+(6,725 missing values generated)
+
+. replace card_src = 3 if inlist(has_vaccination_card, 2, 3)
+(5,117 real changes made)
+
+. 
+. * Writing a loop to check if there is a date corresponding with if the child 
+> is vaccinated. So r_ = 1 if the card shows the dose was given a real date, or
+>  "44" = given but date not recorded, and 0 if the box is blank or "45". 45 me
+> ans not vaccinateed because too young
+. foreach v of varlist vac03a-vac03u {
+  2.     gen byte r_`v' = (trim(`v') != "" & substr(trim(`v'), 1, 2) != "45")
+  3. }
+
+. 
+. * Combining doses into vaccines, so if a child got any of these doses and the
+> ir card was seen (card_src = 1) then it is 1.
+. * Note: The 2005 card has the same layout as the 2009 PREVIOUS card, so we us
+> e that here
+. * Also note: many children aged 7-10 in 2005 were born before the 1999 pentav
+> alent rollout (they got DPT instead), so their fully_vaccinated is lower. Thi
+> s is the real schedule, not a coding error
+. gen byte v_penta = max(r_vac03i, r_vac03j, r_vac03k) if card_src == 1
+(6,725 missing values generated)
+
+. gen byte v_bcg = r_vac03a if card_src == 1
+(6,725 missing values generated)
+
+. gen byte v_polio = max(r_vac03b, r_vac03c, r_vac03d, r_vac03e, r_vac03f, r_va
+> c03g, r_vac03h) if card_src == 1
+(6,725 missing values generated)
+
+. gen byte v_dpt = max(v_penta, r_vac03l, r_vac03m, r_vac03n, r_vac03o, r_vac03
+> p) if card_src == 1
+(6,725 missing values generated)
+
+. gen byte v_mmr = max(r_vac03r, r_vac03s) if card_src == 1
+(6,725 missing values generated)
+
+. gen byte v_measles = max(v_mmr, r_vac03q) if card_src == 1
+(6,725 missing values generated)
+
+. gen byte v_hepb = max(v_penta, r_vac03t) if card_src == 1
+(6,725 missing values generated)
+
+. 
+. 
+. * For recall (card_src = 3), we use a nesting condition. Basicall if parent a
+> nswered yes then 1, no(3) then 0, and don't know or missing is set to missing
+> .
+. replace v_bcg = cond(vac04a == 1, 1, cond(vac04a == 3, 0, .)) if card_src == 
+> 3
+(4,913 real changes made)
+
+. replace v_polio = cond(vac04b == 1, 1, cond(vac04b == 3, 0, .)) if card_src =
+> = 3
+(4,893 real changes made)
+
+. replace v_dpt = cond(vac04c == 1, 1, cond(vac04c == 3, 0, .)) if card_src == 
+> 3
+(4,787 real changes made)
+
+. replace v_penta = cond(vac04d == 1, 1, cond(vac04d == 3, 0, .)) if card_src =
+> = 3
+(4,662 real changes made)
+
+. replace v_mmr = cond(vac04e == 1, 1, cond(vac04e == 3, 0, .)) if card_src == 
+> 3
+(4,700 real changes made)
+
+. replace v_measles = cond(vac04f == 1 | vac04e == 1, 1, cond(vac04f == 3 & vac
+> 04e == 3, 0, .)) if card_src == 3
+(4,799 real changes made)
+
+. replace v_hepb = cond(vac04g == 1, 1, cond(vac04g == 3, 0, .)) if card_src ==
+>  3
+(4,762 real changes made)
+
+. 
+. 
+. * We now use egen to calulate the number of vaccines taken by a child. Fully 
+> vaccinated is 0 if any of the 7 is known NOT received. 1 if all 7 received. M
+> issing otherwise
+. egen byte vac_min7 = rowmin(v_bcg v_polio v_dpt v_penta v_mmr v_measles v_hep
+> b)
+(1,760 missing values generated)
+
+. egen byte vac_nmiss7 = rowmiss(v_bcg v_polio v_dpt v_penta v_mmr v_measles v_
+> hepb)
+
+. gen fully_vaccinated = 1 if vac_min7 == 1 & vac_nmiss7 == 0
+(5,935 missing values generated)
+
+. replace fully_vaccinated = 0 if vac_min7 == 0
+(3,872 real changes made)
+
+. label variable fully_vaccinated "Fully vaccinated (indicator)" 
+
+. drop r_vac03* vac03* vac_nmiss7 vac_min7 v_* card_src
+
+. tempfile temp_vaccination
+
+. save `temp_vaccination'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000011 saved
+    as .dta format
+
+. 
+. 
+. * NOTE: THIS IS A HUGE DIFFERENCE TO 2002 bc no child line number recorded th
+> us we have to do it ourselves. 
+. * NOTE: Unlike 2002, the 2005 pregnancy records don't say which child each pr
+> egnancy belongs to. So we link them using the mother's line number plus the b
+> aby's sex and birth month and year (or birth order when no dates exist), and 
+> drop any link that isn't unique. Children also in 2002 then get their exact 2
+> 002 values, so the matching mainly fills in children born after 2002.
+. 
+. * This codechunk is grabbing the child's characteristics and only keeping mot
+> hers that are in the household and not dead. Also we make both child_ls and m
+> other_ls. Note child_ls is not just for children it's for all individuals but
+>  we name it child_ls because we are going to use it for matching
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls ls07 ls03_21 ls03_22 ls04
+
+. gen mother_ls = string(ls07, "%02.0f") if ls07 < 51
+(18,452 missing values generated)
+
+. drop if mother_ls == ""
+(18,452 observations deleted)
+
+. rename ls child_ls
+
+. tempfile temp_kids_mother
+
+. save `temp_kids_mother'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000012 saved
+    as .dta format
+
+. * Here we are calculating the full histories. The first codechunk is calculat
+> ing household, mother's line, and number of pregnancies belonging to a mother
+. use "$path/hh05dta_b4/iv_he1.dta", clear
+(VERSION 10 Jan 2008)
+
+. bysort folio ls: egen n_preg = max(secuencia)
+
+. preserve
+
+.     keep folio ls n_preg
+
+.     duplicates drop
+
+Duplicates in terms of all variables
+
+(1,185 observations deleted)
+
+.     rename ls mother_ls
+
+.     tempfile temp_he1_women
+
+.     save `temp_he1_women'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000014 saved
+    as .dta format
+
+. restore
+
+. * Keep live births only and remove deaths or miscarriages
+. * Number births by secuencia, not birth dates, because about 13% of live birt
+> hs have no birth year
+. * Note: a twin/multiple birth is sometimes ONE pregnancy row, but that's abou
+> t 49 obs and coding it in is more tedious work than the payoff.
+. keep if he10b == 2
+(333 observations deleted)
+
+. sort folio ls secuencia
+
+. by folio ls: gen byte birth_order = _n
+
+. gen byte oldest_child = (birth_order == 1)
+
+. * Delivered at home, same code as 2002
+. gen byte delivered_home = inlist(he15_1, 10, 11, 12) if !missing(he15_1)
+(6 missing values generated)
+
+. keep folio ls secuencia birth_order oldest_child delivered_home he11 he12_22 
+> he12_23
+
+. rename ls mother_ls
+
+. * Link to the roster child with the same mother, birth year, birth month and 
+> sex. A pregnancy matching more than one child, or a child matching more than 
+> one pregnancy, is dropped
+. * NOTE: THIS FIRST MERGE GIVES US birth order, oldest child and delivered at 
+> home, the variables that live in the full history.
+. joinby folio mother_ls using `temp_kids_mother'
+
+. keep if he12_23 == ls03_22 & he12_22 == ls03_21 & he11 == ls04 & !missing(he1
+> 2_23, he12_22, he11)
+(3,606 observations deleted)
+
+. bysort folio mother_ls secuencia: keep if _N == 1
+(10 observations deleted)
+
+. bysort folio child_ls: keep if _N == 1
+(6 observations deleted)
+
+. keep folio mother_ls secuencia child_ls birth_order oldest_child delivered_ho
+> me
+
+. tempfile temp_he1_link
+
+. save `temp_he1_link'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000015 saved
+    as .dta format
+
+. 
+. 
+. * Baby birthweight
+. use "$path/hh05dta_b4/iv_he2.dta", clear
+(VERSION 10 Jan 2008)
+
+. * Only keeping babies that were born alive 
+. keep if he20b == 2
+(455 observations deleted)
+
+. * 2005 difference: birth weight he46_2 is already in kg, while 2002 was in gr
+> ams. Codebook is wrong for 2005 it makes it seem like 2005 is in grams but th
+> e data shows that it is not
+. gen birth_weight_kg = he46_2 if he46_1 == 1
+(234 missing values generated)
+
+. * Implausible weights are set to missing, we air on the side of caution and h
+> ave a large upper bound of 8 kg or more
+. replace birth_weight_kg = . if birth_weight_kg >= 8
+(2 real changes made, 2 to missing)
+
+. 
+. 
+. * Weeks for predominantly breastfed. Meaning milk, tea, or water. Typically t
+> his could be shorter than just total breastfed which no variable exists here 
+> to capture the duration
+. gen predominant_breastfed = he48_2 / 7 if he48_1 == 1
+(3,092 missing values generated)
+
+. replace predominant_breastfed = he48_3 if he48_1 == 2
+(72 real changes made)
+
+. replace predominant_breastfed = he48_4 * 30.4375 / 7 if he48_1 == 3
+(2,151 real changes made)
+
+. replace predominant_breastfed = 0 if he47 == 3
+(311 real changes made)
+
+. gen byte still_breastfed = (he48_1 == 4) if !missing(he47)
+(6 missing values generated)
+
+. 
+. 
+. * Iron during pregnancy
+. gen iron_pregnancy = .
+(3,198 missing values generated)
+
+. replace iron_pregnancy = 1 if he26a == 1
+(2,634 real changes made)
+
+. replace iron_pregnancy = 0 if he26a == 3
+(552 real changes made)
+
+. 
+. * Premature birth
+. gen premature = .
+(3,198 missing values generated)
+
+. replace premature = 1 if he30 == 1
+(411 real changes made)
+
+. replace premature = 0 if he30 == 3
+(2,756 real changes made)
+
+. 
+. * We build a second delivered at home for women with no full history because 
+> they don't have a he15_1
+. gen byte delivered_home_he2 = inlist(he31_1, 10, 11, 12) if inrange(he31_1, 1
+> , 13) | he31_1 == 15
+(19 missing values generated)
+
+. rename ls mother_ls
+
+. 
+. 
+. * Keeping the relevant variables and then merging in order to label if the mo
+> ther is matched or not. Which 1 is matched and 0 is not
+. keep folio mother_ls secuencia birth_weight_kg predominant_breastfed still_br
+> eastfed iron_pregnancy premature delivered_home_he2
+
+. merge m:1 folio mother_ls using `temp_he1_women', keep(master match)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,136
+        from master                     1,136  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                             2,062  (_merge==3)
+    -----------------------------------------
+
+. gen byte has_he1 = (_merge == 3)
+
+. drop _merge
+
+. tempfile temp_he2_vars
+
+. save `temp_he2_vars'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000016 saved
+    as .dta format
+
+. 
+. 
+. 
+. *** Currently CHECKING REVISING CODE BELOW UNTIL THE END OF THE SECTION, BUT 
+> NOT USING IN DID RN *** 
+. 
+. 
+. * NOTE: THIS SECOND MERGE GIVES US birth weight, breastfeeding, iron and prem
+> ature, aren't in the full history. They're in a different file, the recent-pr
+> egnancy file
+. * Step A
+. * We keep only women who have a full history otherwise they go to Step B
+. keep if has_he1 == 1
+(1,136 observations deleted)
+
+. * Converts each recent record's number into the full-history number.
+. gen secuencia_he1 = n_preg - secuencia + 1
+
+. drop secuencia
+
+. rename secuencia_he1 secuencia
+
+. * Swaps in the converted number under the same name as in temp_he1_link, so t
+> he two files can be merged on it.
+. merge 1:1 folio mother_ls secuencia using `temp_he1_link', keepusing(child_ls
+> ) keep(match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             1,305  
+    -----------------------------------------
+
+. tempfile temp_he2_a
+
+. save `temp_he2_a'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000017 saved
+    as .dta format
+
+. 
+. * Step B
+. * Handle mothers who skipped the full history
+. use `temp_kids_mother', clear
+(VERSION 15 Jan 2008)
+
+. * we only keep babies born after 2001
+. keep if ls03_22 >= 2001 & !missing(ls03_22, ls03_21)
+(16,963 observations deleted)
+
+. * gsort with minus signs: sorts each mother's children by birth year, then mo
+> nth, newest first, the minus means descending. Then we count the kids rank ak
+> a k and the number of kids
+. gsort folio mother_ls -ls03_22 -ls03_21
+
+. by folio mother_ls: gen k = _n
+
+. by folio mother_ls: gen n_kids = _N
+
+. keep folio mother_ls k n_kids child_ls
+
+. tempfile temp_kids_order
+
+. save `temp_kids_order'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000018 saved
+    as .dta format
+
+. use `temp_he2_vars', clear
+(VERSION 10 Jan 2008)
+
+. keep if has_he1 == 0
+(2,062 observations deleted)
+
+. sort folio mother_ls secuencia
+
+. * Counts how many live births since 2001 she reported
+. by folio mother_ls: gen k = _n
+
+. by folio mother_ls: gen n_births = _N
+
+. * Pairs birth k with child k for the same mother: newest birth to youngest ch
+> ild, second-newest to second-youngest.
+. merge 1:1 folio mother_ls k using `temp_kids_order', keep(match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               908  
+    -----------------------------------------
+
+. * Only keep a mother's links if she reported exactly as many births as she ha
+> s children born since 2001 on the roster
+. keep if n_births == n_kids
+(167 observations deleted)
+
+. append using `temp_he2_a'
+(variable secuencia was byte, now double to accommodate using data's values)
+
+. * A child linked twice is ambiguous, so both links are dropped
+. bysort folio child_ls: drop if _N > 1
+(0 observations deleted)
+
+. keep folio child_ls birth_weight_kg predominant_breastfed still_breastfed iro
+> n_pregnancy premature delivered_home_he2
+
+. tempfile temp_he2_link
+
+. save `temp_he2_link'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000019 saved
+    as .dta format
+
+. 
+. * Combines the two link tables into one file with one row per child and all t
+> he Book IV variables, ready to merge onto the 2005 children
+. use `temp_he1_link', clear
+(VERSION 10 Jan 2008)
+
+. keep folio child_ls birth_order oldest_child delivered_home
+
+. merge 1:1 folio child_ls using `temp_he2_link', nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           991
+        from master                       250  
+        from using                        741  
+
+    Matched                             1,305  
+    -----------------------------------------
+
+. replace delivered_home = delivered_home_he2 if missing(delivered_home)
+(740 real changes made)
+
+. drop delivered_home_he2
+
+. rename child_ls ls
+
+. label variable birth_order "Birth order" 
+
+. label variable oldest_child "Oldest child (indicator)" 
+
+. label variable birth_weight_kg "Birth weight (kilograms)" 
+
+. label variable delivered_home "Delivered at home (indicator)" 
+
+. label variable predominant_breastfed "Weeks predominantly breastfed" 
+
+. label variable still_breastfed "Still being breastfed at interview"
+
+. label variable iron_pregnancy "Iron during pregnancy (indicator)" 
+
+. label variable premature "Premature, mother reported (indicator)"
+
+. tempfile temp_bookiv_child
+
+. save `temp_bookiv_child'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001a saved
+    as .dta format
+
+. 
+. 
+. *******************************************************************
+. * Parent Controls: at the child level 
+. *******************************************************************
+. 
+. * Mother's and father's height. We use measured height, not self-reported hei
+> ght to match the child's height. Overarching idea is that book s has parents 
+> heights but it doesn't tell us who the childs parent is, thus we merge it to 
+> book c which does
+. * IMPORTANT NOTE: Father's height is a bit sketchy bc a lot of them are missi
+> ng. And this could be due to migration. Thus, it might be better to not use i
+> t in the regression. Could omit both and see the results as well.
+. * The difference between wave 2002 is that it's sa07_21 not sa07_2 and it's l
+> s not ls00 
+. use "$path/hh05dta_bs/s_sa.dta", clear
+(VERSION 7 Aug 2008)
+
+. keep folio ls sa03 sa07_21
+
+. * We must make sure that the book S person is the same person by checking if 
+> their age is within 5 years, we also keep gender for later
+. merge 1:1 folio ls using "$path/hh05dta_bc/c_ls.dta", keepusing(ls02_2 ls04) 
+> keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. replace sa07_21 = . if abs(sa03 - ls02_2) > 5 | missing(sa03, ls02_2)
+(368 real changes made, 368 to missing)
+
+. * We set heights that are not possible to missing, only a handful
+. replace sa07_21 = . if !inrange(sa07_21, 120, 210)
+(3,514 real changes made, 3,514 to missing)
+
+. keep folio ls sa07_21 ls04
+
+. tempfile temp_heights
+
+. save `temp_heights'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001b saved
+    as .dta format
+
+. * We replace observations who correspond to the wrong sex
+. replace sa07_21 = . if ls04 != 3
+(10,588 real changes made, 10,588 to missing)
+
+. drop ls04
+
+. rename (ls sa07_21) (mother_ls mother_height_cm)
+
+. tempfile temp_mother_height
+
+. save `temp_mother_height'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001c saved
+    as .dta format
+
+. use `temp_heights', clear
+(VERSION 7 Aug 2008)
+
+. replace sa07_21 = . if ls04 != 1
+(13,073 real changes made, 13,073 to missing)
+
+. drop ls04
+
+. rename (ls sa07_21) (father_ls father_height_cm)
+
+. tempfile temp_father_height
+
+. save `temp_father_height'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001d saved
+    as .dta format
+
+. * We merge in the parents heights to their children. Also not that we use les
+> s than 51 because that means the parent is dead or not living in the househol
+> d. This is put here just bc this is missing data. We understand that it doesn
+> 't matter if a parent is dead or alive to contribute to child height. Note ls
+>  is a string for 2005 wave but is a number for 2002
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls ls06 ls07
+
+. gen mother_ls = string(ls07, "%02.0f") if ls07 < 51
+(18,452 missing values generated)
+
+. gen father_ls = string(ls06, "%02.0f") if ls06 < 51
+(22,013 missing values generated)
+
+. merge m:1 folio mother_ls using `temp_mother_height', keep(master match) noge
+> n
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        20,604
+        from master                    20,604  
+        from using                          0  
+
+    Matched                            17,619  
+    -----------------------------------------
+
+. merge m:1 folio father_ls using `temp_father_height', keep(master match) noge
+> n
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        24,332
+        from master                    24,332  
+        from using                          0  
+
+    Matched                            13,891  
+    -----------------------------------------
+
+. keep folio ls mother_height_cm father_height_cm
+
+. label variable mother_height_cm "Mother's height (centimeters)" 
+
+. label variable father_height_cm "Father's height (centimeters)" 
+
+. tempfile temp_parent_height
+
+. save `temp_parent_height'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001e saved
+    as .dta format
+
+. 
+. *****************************************************************************
+. * TO DO NOTE: Perhaps add mother's and father's WEIGHT, not currently done
+. *****************************************************************************
+. 
+. 
+. * Mother's and father's age at the child's birth, in years. Computed as the p
+> arent's roster age minus the child's roster age, since MxFLS 2005 has no dire
+> ct question for this. Roster ages are in whole years, so this can be off by u
+> p to 1 year
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls ls02_1 ls02_2 ls04
+
+. * 2005 difference: ls02_1 is only 1 = age given in years or 8 = DK, there are
+>  no months or days units like 2002.
+. gen age_years = ls02_2 if ls02_1 == 1
+(1,101 missing values generated)
+
+. keep folio ls age_years ls04
+
+. tempfile temp_ages
+
+. save `temp_ages'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001f saved
+    as .dta format
+
+. * The gender must match across files. Similar to the code above for height
+. replace age_years = . if ls04 != 3
+(17,884 real changes made, 17,884 to missing)
+
+. drop ls04
+
+. rename (ls age_years) (mother_ls mother_age)
+
+. tempfile temp_mother_age
+
+. save `temp_mother_age'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001g saved
+    as .dta format
+
+. use `temp_ages', clear
+(VERSION 15 Jan 2008)
+
+. replace age_years = . if ls04 != 1
+(19,238 real changes made, 19,238 to missing)
+
+. drop ls04
+
+. rename (ls age_years) (father_ls father_age)
+
+. tempfile temp_father_age
+
+. save `temp_father_age'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001h saved
+    as .dta format
+
+. * Link each child to their mother and father. 51 = parent dead or not living 
+> in the household, so their age is not known and it stays missing, not 0. Unli
+> ke 2002 wave, here the ls is a character 
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls ls06 ls07
+
+. merge 1:1 folio ls using `temp_ages', keepusing(age_years) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            38,223  
+    -----------------------------------------
+
+. gen mother_ls = string(ls07, "%02.0f") if ls07 < 51
+(18,452 missing values generated)
+
+. gen father_ls = string(ls06, "%02.0f") if ls06 < 51
+(22,013 missing values generated)
+
+. merge m:1 folio mother_ls using `temp_mother_age', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        18,452
+        from master                    18,452  
+        from using                          0  
+
+    Matched                            19,771  
+    -----------------------------------------
+
+. merge m:1 folio father_ls using `temp_father_age', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        22,013
+        from master                    22,013  
+        from using                          0  
+
+    Matched                            16,210  
+    -----------------------------------------
+
+. gen mother_age_at_birth = mother_age - age_years
+(18,776 missing values generated)
+
+. gen father_age_at_birth = father_age - age_years
+(22,494 missing values generated)
+
+. * Implausible ages at birth are set to missing, same bounds as 2002
+. replace mother_age_at_birth = . if !inrange(mother_age_at_birth, 10, 60)
+(28 real changes made, 28 to missing)
+
+. replace father_age_at_birth = . if !inrange(father_age_at_birth, 10, 80)
+(16 real changes made, 16 to missing)
+
+. keep folio ls mother_age_at_birth father_age_at_birth
+
+. label variable mother_age_at_birth "Mother's age at birth (years)" 
+
+. label variable father_age_at_birth "Father's age at birth (years)" 
+
+. tempfile temp_parent_age
+
+. save `temp_parent_age'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001i saved
+    as .dta format
+
+. 
+. 
+. * Mother's and father's employment last week
+. use "$path/hh05dta_b3a/iiia_tb.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls tb02_1 tb03 tb04 tb05
+
+. * We use proxy to account for individuals that were not present at interview.
+>  This saves over 1,200 fathers. We only keep one row per individual
+. append using "$path/hh05dta_bx/p_tb.dta", keep(folio ls tb02_1 tb03 tb04 tb05
+> ) gen(proxy)
+
+. gen employed = 0 if tb05 == 3
+(12,268 missing values generated)
+
+. replace employed = 1 if tb02_1 == 1 | tb03 == 1 | tb04 == 1 | tb05 == 1
+(12,260 real changes made)
+
+. * We only keep one row per individual, we sort so we have priority of Book II
+> IA with answer, Proxy with answer, Book IIIA with no answer, and then proxy w
+> ith no answer
+. gen byte noans = missing(employed)
+
+. sort folio ls noans proxy
+
+. by folio ls: keep if _n == 1
+(0 observations deleted)
+
+. drop noans
+
+. * We merge to bring in the sex checks
+. merge 1:1 folio ls using "$path/hh05dta_bc/c_ls.dta", keepusing(ls04) keep(ma
+> ster match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             1
+        from master                         1  
+        from using                          0  
+
+    Matched                            23,433  
+    -----------------------------------------
+
+. keep folio ls employed ls04
+
+. tempfile temp_employed
+
+. save `temp_employed'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001j saved
+    as .dta format
+
+. replace employed = . if ls04 != 3
+(10,992 real changes made, 10,992 to missing)
+
+. drop ls04
+
+. rename (ls employed) (mother_ls mother_employed)
+
+. tempfile temp_mother_employed
+
+. save `temp_mother_employed'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001k saved
+    as .dta format
+
+. use `temp_employed', clear
+(VERSION 10 Jan 2008)
+
+. replace employed = . if ls04 != 1
+(12,394 real changes made, 12,394 to missing)
+
+. drop ls04
+
+. rename (ls employed) (father_ls father_employed)
+
+. tempfile temp_father_employed
+
+. save `temp_father_employed'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001l saved
+    as .dta format
+
+. * Link each child to their mother and father. 51 = parent dead or not living 
+> in the household, so employment is not known and stays missing, not 0. A pare
+> nt under 15 or with no Book IIIA or Proxy answer also stays missing. Unlike 2
+> 002 wave, here the ls is a character 
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls ls06 ls07
+
+. gen mother_ls = string(ls07, "%02.0f") if ls07 < 51
+(18,452 missing values generated)
+
+. gen father_ls = string(ls06, "%02.0f") if ls06 < 51
+(22,013 missing values generated)
+
+. merge m:1 folio mother_ls using `temp_mother_employed', keep(master match) no
+> gen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        19,553
+        from master                    19,553  
+        from using                          0  
+
+    Matched                            18,670  
+    -----------------------------------------
+
+. merge m:1 folio father_ls using `temp_father_employed', keep(master match) no
+> gen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        23,532
+        from master                    23,532  
+        from using                          0  
+
+    Matched                            14,691  
+    -----------------------------------------
+
+. keep folio ls mother_employed father_employed
+
+. label variable mother_employed "Mother employed (indicator)" 
+
+. label variable father_employed "Father employed (indicator)" 
+
+. tempfile temp_parent_employed
+
+. save `temp_parent_employed'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001m saved
+    as .dta format
+
+. 
+. 
+. * Mother's and father's years of education completed in years
+. * We add the proxy book for household members not present. Also we rename the
+> se variables bc they are the exact same in the b3 not proxy.
+. use "$path/hh05dta_bx/p_ed.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls ed04 ed05 ed06_1 ed07
+
+. rename (ed04 ed05 ed06_1 ed07) (ed05 ed06 ed07_1 ed08)
+
+. tempfile temp_proxy_ed
+
+. save `temp_proxy_ed'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001n saved
+    as .dta format
+
+. use "$path/hh05dta_b3a/iiia_ed.dta", clear
+(VERSION 10 Jan 2008)
+
+. keep folio ls ed05 ed06 ed07_1 ed08
+
+. * Same rule as 2002 and 2009, we keep the row with an answer (Book IIIA if bo
+> th are answered), see the step after edu_years below
+. append using `temp_proxy_ed', gen(proxy)
+
+. * We code ED05 = 3 (never attended school) and ED06 = 1 or 2 (no instruction,
+>  preschool) as 0 years
+. gen edu_years = 0 if ed05 == 3 | inlist(ed06, 1, 2)
+(20,908 missing values generated)
+
+. * First line is for elementary school and is just the value associate ed with
+>  ed07_1
+. * Second line is elementary school which is 6 years in mexico plus the additi
+> onal years of middle school that goes up until 3. If it is above 3 then it is
+>  set to missing. 
+. * Third line works the same but for highschool. 
+. replace edu_years = ed07_1 if ed06 == 3 & inrange(ed07_1, 0, 6)
+(8,422 real changes made)
+
+. replace edu_years = 6 + ed07_1 if ed06 == 4 & inrange(ed07_1, 0, 3)
+(6,045 real changes made)
+
+. replace edu_years = 9 + ed07_1 if ed06 == 6 & inrange(ed07_1, 0, 3)
+(3,340 real changes made)
+
+. * Here the open highschool, open secondary, normal basic (which means high sc
+> hool in the questionaire), college, and graduate are not asked how many years
+>  completed rather we are just given a metric for complted or not aka we skip 
+> ED07 and only ask ED08, whether they got the degree.
+. * Also note we take the lower bound, if not completed we basically say they j
+> ust finished the previous degree and started the new degree (e.g. highschool 
+> not completed means they get coded a completed middle school level education)
+> . Similar strategy with college.
+. replace edu_years = 9 if ed06 == 5 & ed08 == 1
+(211 real changes made)
+
+. replace edu_years = 6 if ed06 == 5 & inlist(ed08, 2, 3)
+(115 real changes made)
+
+. replace edu_years = 12 if inlist(ed06, 7, 8) & ed08 == 1
+(285 real changes made)
+
+. replace edu_years = 9 if inlist(ed06, 7, 8) & inlist(ed08, 2, 3)
+(204 real changes made)
+
+. replace edu_years = 16 if ed06 == 9 & ed08 == 1
+(1,082 real changes made)
+
+. replace edu_years = 12 if ed06 == 9 & inlist(ed08, 2, 3)
+(1,025 real changes made)
+
+. * We take 18 years if they had graduate school as this is the most common gra
+> duate program. It's possible to be 1 year, but I think 2 years is a safe choi
+> ce still. Lower bound for PhD
+. replace edu_years = 18 if ed06 == 10 & ed08 == 1
+(65 real changes made)
+
+. replace edu_years = 16 if ed06 == 10 & inlist(ed08, 2, 3)
+(31 real changes made)
+
+. * Drop duplicates only now that edu_years is built, keeping the row that has 
+> an answer
+. gen byte noans = missing(edu_years)
+
+. sort folio ls noans proxy
+
+. by folio ls: keep if _n == 1
+(0 observations deleted)
+
+. drop noans
+
+. merge 1:1 folio ls using "$path/hh05dta_bc/c_ls.dta", keepusing(ls04) keep(ma
+> ster match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             1
+        from master                         1  
+        from using                          0  
+
+    Matched                            23,433  
+    -----------------------------------------
+
+. keep folio ls edu_years ls04
+
+. tempfile temp_edu_years
+
+. save `temp_edu_years'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001o saved
+    as .dta format
+
+. * Making sure gender match for mother and father. Same as the code above. 
+. replace edu_years = . if ls04 != 3
+(10,964 real changes made, 10,964 to missing)
+
+. drop ls04
+
+. rename (ls edu_years) (mother_ls mother_edu_years)
+
+. tempfile temp_mother_edu
+
+. save `temp_mother_edu'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001p saved
+    as .dta format
+
+. use `temp_edu_years', clear
+(VERSION 10 Jan 2008)
+
+. replace edu_years = . if ls04 != 1
+(12,391 real changes made, 12,391 to missing)
+
+. drop ls04
+
+. rename (ls edu_years) (father_ls father_edu_years)
+
+. tempfile temp_father_edu
+
+. save `temp_father_edu'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001q saved
+    as .dta format
+
+. * Link each child to their mother and father. 51 = parent dead or not living 
+> in the household, so education is not known and stays missing, not 0. Unlike 
+> 2002 wave, here the ls is a character 
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio ls ls06 ls07
+
+. gen mother_ls = string(ls07, "%02.0f") if ls07 < 51
+(18,452 missing values generated)
+
+. gen father_ls = string(ls06, "%02.0f") if ls06 < 51
+(22,013 missing values generated)
+
+. merge m:1 folio mother_ls using `temp_mother_edu', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        19,553
+        from master                    19,553  
+        from using                          0  
+
+    Matched                            18,670  
+    -----------------------------------------
+
+. merge m:1 folio father_ls using `temp_father_edu', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        23,532
+        from master                    23,532  
+        from using                          0  
+
+    Matched                            14,691  
+    -----------------------------------------
+
+. keep folio ls mother_edu_years father_edu_years
+
+. label variable mother_edu_years "Mother's years of schooling" 
+
+. label variable father_edu_years "Father's years of schooling" 
+
+. tempfile temp_parent_edu
+
+. save `temp_parent_edu'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001r saved
+    as .dta format
+
+. 
+. 
+. 
+. *******************************************************************
+. * Household-Level Controls: Household Head & Dwelling
+. *******************************************************************
+. 
+. 
+. * Dwelling characteristics: Electricity and household floor are proxies of we
+> alth
+. use "$path/hh05dta_bc/c_cvo.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep folio cvo04 cvo05_1 cvo07_1 cvo03a cvo03b cvo03c cvo03d cvo03e cvo03f
+
+. 
+. * Electricity (binary)
+. gen dwell_electricity = (cvo04 == 1) if !missing(cvo04)
+(176 missing values generated)
+
+. label variable dwell_electricity "Dwelling has electricity (indicator)" 
+
+. * Good floor quality
+. gen dwell_floor_good = inlist(cvo05_1, 1, 2) if inrange(cvo05_1, 1, 4)
+(177 missing values generated)
+
+. label variable dwell_floor_good "Good floor quality (indicator)" 
+
+. 
+. 
+. * Good roof quality = 1 if beam/polyurethane, concrete/brick, slate/tile, met
+> al/fiberglass/plastic sheets, or palm/shingle/wood (codes 1, 2, 3, 6, 7). 0 i
+> f asbestos, reed-grass/bamboo, cardboard, waste material or other (codes 4, 5
+> , 8, 9, 10)
+. gen dwell_roof_good = inlist(cvo07_1, 1, 2, 3, 6, 7) if inrange(cvo07_1, 1, 1
+> 0)
+(177 missing values generated)
+
+. label variable dwell_roof_good "Good roof quality (indicator)" 
+
+. 
+. 
+. * Good ventilation. We grab all the HH dwelling 6 options so if its present w
+> e can code it as 0 and if all missing we can code it as missing. ==4 is the o
+> ne about ventilation. And the 3rd line of code corrects for a contradiction b
+> twn none of the above and dwelling has enough ventilation
+. egen cvo03_n = rownonmiss(cvo03a cvo03b cvo03c cvo03d cvo03e cvo03f)
+
+. gen dwell_ventilation_good = (cvo03d == 4) if cvo03_n > 0
+(201 missing values generated)
+
+. replace dwell_ventilation_good = . if cvo03d == 4 & cvo03f == 6
+(0 real changes made)
+
+. label variable dwell_ventilation_good "Enough ventilation (indicator)" 
+
+. 
+. keep folio dwell_*
+
+. tempfile temp_dwell_cvo
+
+. save `temp_dwell_cvo'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001s saved
+    as .dta format
+
+. 
+. * Rooms per person is rooms used for sleeping / household size. 
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. * Roster members who currently live in the household. We filter to only ppl l
+> iving in the household, new and old household members. ls09 is not in this wa
+> ve unlike 2002. Thus, we count rows with a 1 instead of counting ls
+. keep if inlist(ls01a, 1, 4)
+(3,134 observations deleted)
+
+. gen byte one = 1
+
+. collapse (sum) hh_size = one, by(folio)
+
+. * CV07 is asked of every household. 0 rooms is a real answer as 1 household, 
+> they sleep in the kitchen. 14 households report exactly 10 rooms although the
+> y have only 1 to 6 members and only 1 household reports 9, so 10 looks like a
+>  code or typing error and we set it to missing
+. * We cap households with rooms for sleeping under 10, this is reasonable gets
+>  rid of these huge outliers
+. merge 1:1 folio using "$path/hh05dta_bc/c_cv.dta", keepusing(cv07) keep(maste
+> r match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             8,376  
+    -----------------------------------------
+
+. replace cv07 = . if cv07 >= 10 & !missing(cv07)
+(37 real changes made, 37 to missing)
+
+. gen rooms_per_person = cv07 / hh_size
+(140 missing values generated)
+
+. label variable rooms_per_person "Sleeping rooms per household member" 
+
+. keep folio rooms_per_person
+
+. tempfile temp_rooms
+
+. save `temp_rooms'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001t saved
+    as .dta format
+
+. 
+. * Monthly per capita household expenditure. Total monthly household expenditu
+> re / household size, in pesos per person per month
+. * Note we don't include gifts given away or school spending on non fimily mem
+> bers
+. use "$path/hh05dta_b1/i_cs.dta", clear
+(VERSION 9 Jan 2008)
+
+. merge 1:1 folio using "$path/hh05dta_b1/i_cs1.dta", nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             8,116  
+    -----------------------------------------
+
+. foreach f of varlist cs02?_?1 cs04?_*1 cs16?_1 cs18_1 cs22?_1 cs24?_1 cs27?_1
+>  cs29_1 cs34a_11 cs34a_21 cs35a_11 cs35a_21 cs36a_11 cs36a_21 {
+  2.     local v = substr("`f'", 1, strlen("`f'") - 1) + "2"
+  3.     replace `v' = 0 if inlist(`v', 99, 999, 9999, 99999)
+  4.     gen byte dk_tmp = (`f' == 8 | inlist(`v', 98, 998, 9998, 99998))
+  5.     replace `v' = . if dk_tmp == 1
+  6.     egen med_tmp = median(`v')
+  7.     replace `v' = med_tmp if dk_tmp == 1
+  8.     drop med_tmp dk_tmp
+  9. }
+(0 real changes made)
+(0 real changes made)
+(72 real changes made)
+(0 real changes made)
+(0 real changes made)
+(73 real changes made)
+(0 real changes made)
+(0 real changes made)
+(64 real changes made)
+(0 real changes made)
+(0 real changes made)
+(67 real changes made)
+(0 real changes made)
+(0 real changes made)
+(73 real changes made)
+(0 real changes made)
+(0 real changes made)
+(73 real changes made)
+(0 real changes made)
+(0 real changes made)
+(63 real changes made)
+(0 real changes made)
+(0 real changes made)
+(61 real changes made)
+(0 real changes made)
+(0 real changes made)
+(53 real changes made)
+(0 real changes made)
+(0 real changes made)
+(54 real changes made)
+(0 real changes made)
+(0 real changes made)
+(58 real changes made)
+(0 real changes made)
+(0 real changes made)
+(67 real changes made)
+(0 real changes made)
+(0 real changes made)
+(68 real changes made)
+(0 real changes made)
+(0 real changes made)
+(57 real changes made)
+(0 real changes made)
+(0 real changes made)
+(49 real changes made)
+(0 real changes made)
+(0 real changes made)
+(60 real changes made)
+(0 real changes made)
+(0 real changes made)
+(60 real changes made)
+(0 real changes made)
+(0 real changes made)
+(48 real changes made)
+(0 real changes made)
+(0 real changes made)
+(63 real changes made)
+(0 real changes made)
+(0 real changes made)
+(60 real changes made)
+(0 real changes made)
+(0 real changes made)
+(68 real changes made)
+(0 real changes made)
+(0 real changes made)
+(57 real changes made)
+(0 real changes made)
+(0 real changes made)
+(52 real changes made)
+(0 real changes made)
+(0 real changes made)
+(44 real changes made)
+(0 real changes made)
+(0 real changes made)
+(64 real changes made)
+(0 real changes made)
+(0 real changes made)
+(53 real changes made)
+(0 real changes made)
+(0 real changes made)
+(76 real changes made)
+(0 real changes made)
+(0 real changes made)
+(110 real changes made)
+(0 real changes made)
+(0 real changes made)
+(86 real changes made)
+(0 real changes made)
+(0 real changes made)
+(20 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(28 real changes made)
+(0 real changes made)
+(0 real changes made)
+(25 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(15 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+(15 real changes made)
+(0 real changes made)
+(0 real changes made)
+(25 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 real changes made)
+(0 real changes made)
+(0 real changes made)
+(14 real changes made)
+(0 real changes made)
+(0 real changes made)
+(16 real changes made)
+(0 real changes made)
+(0 real changes made)
+(20 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+(15 real changes made)
+(0 real changes made)
+(0 real changes made)
+(16 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(16 real changes made)
+(0 real changes made)
+(0 real changes made)
+(16 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 real changes made)
+(0 real changes made)
+(0 real changes made)
+(25 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(23 real changes made)
+(0 real changes made)
+(0 real changes made)
+(16 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 real changes made)
+(0 real changes made)
+(0 real changes made)
+(20 real changes made)
+(0 real changes made)
+(0 real changes made)
+(20 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 real changes made)
+(0 real changes made)
+(0 real changes made)
+(130 real changes made)
+(0 real changes made)
+(0 real changes made)
+(137 real changes made)
+(0 real changes made)
+(0 real changes made)
+(147 real changes made)
+(0 real changes made)
+(0 real changes made)
+(101 real changes made)
+(0 real changes made)
+(0 real changes made)
+(74 real changes made)
+(0 real changes made)
+(0 real changes made)
+(81 real changes made)
+(0 real changes made)
+(0 real changes made)
+(75 real changes made)
+(0 real changes made)
+(0 real changes made)
+(70 real changes made)
+(0 real changes made)
+(0 real changes made)
+(96 real changes made)
+(0 real changes made)
+(0 real changes made)
+(28 real changes made)
+(0 real changes made)
+(0 real changes made)
+(130 real changes made)
+(0 real changes made)
+(0 real changes made)
+(112 real changes made)
+(0 real changes made)
+(0 real changes made)
+(99 real changes made)
+(0 real changes made)
+(0 real changes made)
+(96 real changes made)
+(0 real changes made)
+(0 real changes made)
+(97 real changes made)
+(0 real changes made)
+(0 real changes made)
+(81 real changes made)
+(0 real changes made)
+(0 real changes made)
+(78 real changes made)
+(0 real changes made)
+(0 real changes made)
+(180 real changes made)
+(0 real changes made)
+(0 real changes made)
+(12 real changes made)
+(0 real changes made)
+(0 real changes made)
+(15 real changes made)
+(0 real changes made)
+(0 real changes made)
+(9 real changes made)
+(0 real changes made)
+(0 real changes made)
+(5 real changes made)
+(0 real changes made)
+(0 real changes made)
+(4 real changes made)
+(0 real changes made)
+(0 real changes made)
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+(3 real changes made)
+(0 real changes made)
+(0 real changes made)
+(65 real changes made)
+(0 real changes made)
+(0 real changes made)
+(61 real changes made)
+(0 real changes made)
+(0 real changes made)
+(71 real changes made)
+(0 real changes made)
+(0 real changes made)
+(84 real changes made)
+(0 real changes made)
+(0 real changes made)
+(243 real changes made)
+(0 real changes made)
+(0 real changes made)
+(76 real changes made)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(87 real changes made)
+(0 real changes made)
+(0 real changes made)
+(94 real changes made)
+(0 real changes made)
+(0 real changes made)
+(111 real changes made)
+(0 real changes made)
+(0 real changes made)
+(106 real changes made)
+(0 real changes made)
+(0 real changes made)
+(95 real changes made)
+(0 real changes made)
+(0 real changes made)
+(91 real changes made)
+
+. * We set cs15 to missing if the household said no they didn't buy that good a
+> ka cs08 isn't 1
+. foreach L in a b c d e f g h i j {
+  2.     replace cs15`L' = . if cs08`L' != 1
+  3.     replace cs15`L' = . if inlist(cs15`L', 98, 99, 998, 999, 9998, 9999, 9
+> 9998, 99999)
+  4.     egen med_tmp = median(cs15`L')
+  5.     replace cs15`L' = med_tmp if cs08`L' == 1 & missing(cs15`L')
+  6.     drop med_tmp
+  7. }
+(139 real changes made, 139 to missing)
+(0 real changes made)
+(127 real changes made)
+(652 real changes made, 652 to missing)
+(0 real changes made)
+(15 real changes made)
+(666 real changes made, 666 to missing)
+(0 real changes made)
+(10 real changes made)
+(736 real changes made, 736 to missing)
+(0 real changes made)
+(10 real changes made)
+(229 real changes made, 229 to missing)
+(0 real changes made)
+(40 real changes made)
+(370 real changes made, 370 to missing)
+(0 real changes made)
+(9 real changes made)
+(309 real changes made, 309 to missing)
+(0 real changes made)
+(13 real changes made)
+(510 real changes made, 510 to missing)
+(0 real changes made)
+(7 real changes made)
+(530 real changes made, 530 to missing)
+(0 real changes made)
+(15 real changes made)
+(432 real changes made, 432 to missing)
+(0 real changes made)
+(59 real changes made)
+
+. 
+. * We add up each row, then convert every unit to months
+. egen food_week = rowtotal(cs02?_?2 cs15? cs04?_*2)
+
+. egen month_items = rowtotal(cs16?_2 cs18_2)
+
+. egen quarter_items = rowtotal(cs22?_2 cs24?_2)
+
+. egen year_items = rowtotal(cs27?_2 cs29_2)
+
+. egen school_year = rowtotal(cs34a_12 cs34a_22 cs35a_12 cs35a_22)
+
+. egen school_transport = rowtotal(cs36a_12 cs36a_22)
+
+. * School transport is converted to years and then months, same with food week
+> . Also the school_year is just divided by 12 for months not by 10.5 as we spr
+> ead out the cost (also we already double checked why we are using this 12 ins
+> tead of 10.5)
+. gen hh_expend_month = food_week * 52 / 12 + month_items + quarter_items / 3 +
+>  year_items / 12 + school_year / 12 + school_transport * 10.5 / 12
+
+. * Rowtotal counts blanks as 0, which is right for items that were skipped, bu
+> t 14 households did not finish the section - a filter question is blank, so t
+> heir total stays missing not 0
+. replace hh_expend_month = . if missing(cs03, cs17, cs23, cs28, cs32, cs08a, c
+> s08b, cs08c, cs08d, cs08e, cs08f, cs08g, cs08h, cs08i, cs08j)
+(3 real changes made, 3 to missing)
+
+. keep folio hh_expend_month
+
+. tempfile temp_expend
+
+. save `temp_expend'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001u saved
+    as .dta format
+
+. * Household size to create the monthly expenditure for a household. This uses
+>  ls01a instead of ls09 like wave 2002
+. use "$path/hh05dta_bc/c_ls.dta", clear
+(VERSION 15 Jan 2008)
+
+. keep if inlist(ls01a, 1, 4)
+(3,134 observations deleted)
+
+. gen byte one = 1
+
+. collapse (sum) hh_size = one, by(folio)
+
+. merge 1:1 folio using `temp_expend', keep(match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             8,113  
+    -----------------------------------------
+
+. gen pc_expend_month = hh_expend_month / hh_size
+(3 missing values generated)
+
+. label variable pc_expend_month "Monthly per capita household expenditure in p
+> esos"
+
+. * Log of per capita expenditure for the regressions since the level is very s
+> kewed
+. gen ln_pc_expend_month = ln(pc_expend_month)
+(12 missing values generated)
+
+. label variable ln_pc_expend_month "Ln (monthly expenditure per capita, pesos)
+> , proxy" 
+
+. keep folio pc_expend_month ln_pc_expend_month
+
+. tempfile temp_pc_expend
+
+. save `temp_pc_expend'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001v saved
+    as .dta format
+
+. 
+. *******************************************************************
+. * Merging all datasets
+. *******************************************************************
+. 
+. use `temp_biomarkers', clear
+(VERSION 7 Aug 2008)
+
+. merge 1:1 folio ls using `temp_vaccination', keep(master match) gen(_merge_va
+> ccination)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        22,114
+        from master                    22,114  (_merge_vaccination==1)
+        from using                          0  (_merge_vaccination==2)
+
+    Matched                             9,386  (_merge_vaccination==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_controls_hh', keep(master match) gen(_merge_contr
+> ols)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           219
+        from master                       219  (_merge_controls==1)
+        from using                          0  (_merge_controls==2)
+
+    Matched                            31,281  (_merge_controls==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_migration_hh', keep(master match) gen(_merge_migr
+> ation)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           219
+        from master                       219  (_merge_migration==1)
+        from using                          0  (_merge_migration==2)
+
+    Matched                            31,281  (_merge_migration==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_ac_remittance_hh', keep(master match) gen(_merge_
+> ac_remittance)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           234
+        from master                       234  (_merge_ac_remittance==1)
+        from using                          0  (_merge_ac_remittance==2)
+
+    Matched                            31,266  (_merge_ac_remittance==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_remit_hh', keep(master match) gen(_merge_remit_hh
+> )
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             2
+        from master                         2  (_merge_remit_hh==1)
+        from using                          0  (_merge_remit_hh==2)
+
+    Matched                            31,498  (_merge_remit_hh==3)
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_pidlink', keep(master match) gen(_merge_pidlin
+> k)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_pidlink==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_dwell_cvo', keep(master match) gen(_merge_dwell)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_dwell==3)
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_bookiv_child', keep(master match) gen(_merge_b
+> ookiv)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        29,466
+        from master                    29,466  (_merge_bookiv==1)
+        from using                          0  (_merge_bookiv==2)
+
+    Matched                             2,034  (_merge_bookiv==3)
+    -----------------------------------------
+
+. * Same as 2002: a child still being breastfed at the interview has been predo
+> minantly breastfed for at least their age, so we use their age in weeks
+. replace predominant_breastfed = age_days / 7 if still_breastfed == 1 & age_da
+> ys >= 0 & !missing(age_days)
+(310 real changes made)
+
+. * Predominant breastfeeding over 5 years is not plausible, so we set it to mi
+> ssing. This is a conservative cutoff, only about 15-20 children per wave are 
+> above it
+. replace predominant_breastfed = . if predominant_breastfed > 5 * 365.25 / 7 &
+>  !missing(predominant_breastfed)
+(1 real change made, 1 to missing)
+
+. merge 1:1 folio ls using `temp_parent_height', keep(master match) gen(_merge_
+> parent_height)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_parent_height==3)
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_parent_age', keep(master match) gen(_merge_par
+> ent_age)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_parent_age==3)
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_parent_employed', keep(master match) gen(_merg
+> e_parent_employed)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_parent_employed==3)
+    -----------------------------------------
+
+. merge 1:1 folio ls using `temp_parent_edu', keep(master match) gen(_merge_par
+> ent_edu)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_parent_edu==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_rooms', keep(master match) gen(_merge_rooms)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  (_merge_rooms==3)
+    -----------------------------------------
+
+. merge m:1 folio using `temp_pc_expend', keep(master match) gen(_merge_pc_expe
+> nd)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           365
+        from master                       365  (_merge_pc_expend==1)
+        from using                          0  (_merge_pc_expend==2)
+
+    Matched                            31,135  (_merge_pc_expend==3)
+    -----------------------------------------
+
+. 
+. * Ent only came from the Book IIIA cover, iiia_portad, in the controls collap
+> se, so a household where no adult has a Book IIIA got a missing state and was
+>  dropped from the rainfall merge. We fill this in with this book below. This 
+> matches the other waves
+. preserve
+
+.     use "$path/hh05dta_bc/c_portad.dta", clear
+(VERSION 15 Jan 2008)
+
+.     keep folio ent
+
+.     rename ent ent_c
+
+.     tempfile temp_ent_c
+
+.     save `temp_ent_c'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.00001x saved
+    as .dta format
+
+. restore
+
+. merge m:1 folio using `temp_ent_c', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. replace ent = ent_c if missing(ent)
+(219 real changes made)
+
+. drop ent_c
+
+. 
+. *******************************************************************
+. * Municipality
+. *******************************************************************
+. 
+. preserve
+
+.     use "$path/hh05dta_bc/c_portad.dta", clear
+(VERSION 15 Jan 2008)
+
+.     keep folio ent mpio
+
+.         * 4 households have a 2005 code that is not a real INEGI municipality
+>  checked against INEGI catalog. 3 replaced with the code the same household h
+> as in another wave
+.     * 00631003 are coded 23-025, but Quintana Roo has no municipality 025, on
+> ly 001-011. In 2009 the same household as 00631003 is in 23-005
+.     replace mpio = 5 if folio == "00631003" & ent == 23 & mpio == 25
+(1 real change made)
+
+.     * 00624005 is also coded 23-025, but it has no record in Quintana Roo in 
+> any other wave, so we cannot observe its real municipality. We set it to miss
+> ing
+.     replace mpio = . if folio == "00624005" & ent == 23 & mpio == 25
+(1 real change made, 1 to missing)
+
+.     * 02492002 is coded 15-424, but Estado de Mexico only has municipalities 
+> 001-125. Its origin household in 2002 and the same household in 2009 are in 1
+> 5-106, Toluca
+.     replace mpio = 106 if folio == "02492002" & ent == 15 & mpio == 424
+(1 real change made)
+
+.     * We set it to missing instead of guessing 25-014
+.     replace mpio = . if folio == "07005000" & ent == 25 & mpio == 20
+(1 real change made, 1 to missing)
+
+.     gen str5 cvegeo = string(ent, "%02.0f") + string(mpio, "%03.0f") if !miss
+> ing(ent, mpio)
+(2 missing values generated)
+
+.     label variable mpio "Municipality of residence, INEGI code (Book C cover)
+> "
+
+.     label variable cvegeo "INEGI municipality key: state (2 digits) + municip
+> ality (3 digits)"
+
+.     keep folio mpio cvegeo
+
+.     tempfile temp_mun_c
+
+.     save `temp_mun_c'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000021 saved
+    as .dta format
+
+. restore
+
+. merge m:1 folio using `temp_mun_c', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. 
+. * Rural vs urban locality, from estrato in the Book C cover. We code rural = 
+> 1 for below 2,500 (estrato 4) which is INEGI's standard rural cutoff. This is
+>  a household variable with no skip pattern, the 3 rows with no folio have a m
+> issing estrato and are dropped, so the 3 households with no Book C cover stay
+>  missing, not 0
+. preserve
+
+.     use "$path/hh05dta_bc/c_portad.dta", clear
+(VERSION 15 Jan 2008)
+
+.     keep folio estrato
+
+.     collapse (max) estrato, by(folio)
+
+.     gen rural = (estrato == 4) if !missing(estrato)
+
+.     label variable rural "Rural locality (indicator)" 
+
+.     keep folio rural
+
+.     tempfile temp_rural
+
+.     save `temp_rural'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000023 saved
+    as .dta format
+
+. restore
+
+. merge m:1 folio using `temp_rural', keep(master match) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            31,500  
+    -----------------------------------------
+
+. 
+. *******************************************************************
+. * Summary stats
+. *******************************************************************
+. 
+. * Restrict to children, matching MxFLS's own Book 5 (<15) scope (no obs when 
+> we do this)
+. *keep if age < 15
+. describe age gender height_cm weight_kg_gr blood_pressure_systole blood_press
+> ure_diastole hemoglobin_g_dl remittance_binary val_aid_donations_gifts moved_
+> us us_doc child_weight_kg child_height_cm
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+age             float   %9.0g                 Age (years, not in regression)
+gender          float   %9.0g                 SEX
+height_cm       float   %9.0g                 HEIGHT CMS
+weight_kg_gr    float   %9.0g                 WEIGHT KG
+blood_pr~ystole float   %9.0g                 SYSTOLE
+blood_pr~astole float   %9.0g                 DIASTOLE
+hemoglobin_g_dl float   %9.0g                 HEMOGLOBINE
+remittance_bi~y double  %10.0g                (max) remittance_binary
+val_aid_donat~s float   %9.0g                 (max) val_aid_donations_gifts
+moved_us        double  %10.0g                (max) moved_us
+us_doc          double  %10.0g                (max) us_doc
+child_weight_kg float   %9.0g                 WEIGHT KG
+child_height_cm float   %9.0g                 HEIGHT CM
+
+. 
+. summarize age gender height_cm weight_kg_gr blood_pressure_systole blood_pres
+> sure_diastole hemoglobin_g_dl remittance_binary val_aid_donations_gifts moved
+> _us us_doc child_weight_kg child_height_cm
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+         age |     28,293    28.70597    21.01209          0        110
+      gender |     31,500    2.038159    .9992876          1          3
+   height_cm |     10,816    60.71533    10.64079          0         98
+weight_kg_gr |     12,057    68.25661    14.71475         32        138
+blood~ystole |     18,760    116.9501    16.11652         60        230
+-------------+---------------------------------------------------------
+blood~astole |     18,760    75.24712    11.09924         30        140
+hemoglobin~l |     20,249    13.87133    1.960009          6         22
+remittanc~ry |     27,370    .0275119    .1635725          0          1
+val_aid_do~s |        753    10724.23    17652.36        100     120003
+    moved_us |      4,941     .085003    .2789144          0          1
+-------------+---------------------------------------------------------
+      us_doc |        416    3.538462    1.014812          1          4
+child_weig~g |     27,769     55.5692    23.56394        2.7        147
+child_heig~m |     27,543    148.0414    23.69563       45.7        195
+
+. 
+. * Summary stats for the new age precision / z-score variables
+. describe age_days age_months_exact haz waz bmiz
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+age_days        double  %10.0g                
+age_months_ex~t double  %10.0g                
+haz             double  %10.0g                Height-for-age z-score (HAZ)
+waz             double  %10.0g                Weight-for-age z-score (WAZ)
+bmiz            double  %10.0g                BMI-for-age z-score (BMIZ)
+
+. summarize age_days age_months_exact haz waz bmiz
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    age_days |     26,024    10597.26    7638.756       -203      37346
+age_months~t |     26,024    348.1645    250.9653  -6.669405   1226.973
+         haz |     10,386   -.7203591    1.370976       -5.6       5.99
+         waz |      5,059    -.135428    1.424988      -5.92       4.98
+        bmiz |     10,244    .4275957    1.335403      -4.95       4.97
+
+. 
+. * Correlation Matrix
+. pwcorr child_height_cm remittance_binary age, sig star(0.05)
+
+             | child_~m remit~ry      age
+-------------+---------------------------
+child_heig~m |   1.0000 
+             |
+             |
+remittanc~ry |  -0.0003   1.0000 
+             |   0.9604
+             |
+         age |   0.5055*  0.0281*  1.0000 
+             |   0.0000   0.0000
+             |
+
+. 
+. * Testing Regressions
+. regress child_weight_kg remittance_binary, robust
+
+Linear regression                               Number of obs     =     24,479
+                                                F(1, 24477)       =       0.00
+                                                Prob > F          =     0.9612
+                                                R-squared         =     0.0000
+                                                Root MSE          =     23.436
+
+------------------------------------------------------------------------------
+             |               Robust
+child_weig~g | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |  -.0415069    .853855    -0.05   0.961    -1.715115    1.632101
+       _cons |   56.11622   .1521934   368.72   0.000     55.81791    56.41452
+------------------------------------------------------------------------------
+
+. regress child_weight_kg remittance_binary age, robust
+
+Linear regression                               Number of obs     =     24,438
+                                                F(2, 24435)       =    4828.15
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.3670
+                                                Root MSE          =     18.652
+
+------------------------------------------------------------------------------
+             |               Robust
+child_weig~g | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |  -2.481601   .7237461    -3.43   0.001    -3.900188   -1.063015
+         age |   .6951346   .0070763    98.23   0.000     .6812646    .7090046
+       _cons |   36.28371    .227503   159.49   0.000     35.83779    36.72963
+------------------------------------------------------------------------------
+
+. * Added test regressions on the new HAZ/WAZ/BMIZ outcomes
+. regress haz remittance_binary, robust
+
+Linear regression                               Number of obs     =      9,058
+                                                F(1, 9056)        =       0.02
+                                                Prob > F          =     0.9013
+                                                R-squared         =     0.0000
+                                                Root MSE          =     1.3632
+
+------------------------------------------------------------------------------
+             |               Robust
+         haz | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |    .009513   .0766978     0.12   0.901    -.1408319    .1598579
+       _cons |  -.7341769   .0145684   -50.40   0.000    -.7627343   -.7056195
+------------------------------------------------------------------------------
+
+. regress haz remittance_binary age, robust
+
+Linear regression                               Number of obs     =      9,056
+                                                F(2, 9053)        =      36.64
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0092
+                                                Root MSE          =     1.3571
+
+------------------------------------------------------------------------------
+             |               Robust
+         haz | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |   .0152183   .0764673     0.20   0.842     -.134675    .1651116
+         age |  -.0249756   .0029182    -8.56   0.000    -.0306959   -.0192552
+       _cons |  -.4887623   .0361759   -13.51   0.000    -.5596752   -.4178494
+------------------------------------------------------------------------------
+
+. regress waz remittance_binary, robust
+
+Linear regression                               Number of obs     =      4,250
+                                                F(1, 4248)        =       0.43
+                                                Prob > F          =     0.5102
+                                                R-squared         =     0.0001
+                                                Root MSE          =     1.4215
+
+------------------------------------------------------------------------------
+             |               Robust
+         waz | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |   .0862893   .1310132     0.66   0.510     -.170565    .3431437
+       _cons |  -.1431163    .022116    -6.47   0.000    -.1864751   -.0997574
+------------------------------------------------------------------------------
+
+. regress waz remittance_binary age, robust
+
+Linear regression                               Number of obs     =      4,250
+                                                F(2, 4247)        =      24.10
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0121
+                                                Root MSE          =     1.4131
+
+------------------------------------------------------------------------------
+             |               Robust
+         waz | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |    .089188   .1314342     0.68   0.497    -.1684918    .3468678
+         age |   .0553434   .0079961     6.92   0.000     .0396669    .0710199
+       _cons |  -.4035746   .0435486    -9.27   0.000    -.4889526   -.3181966
+------------------------------------------------------------------------------
+
+. regress bmiz remittance_binary, robust
+
+Linear regression                               Number of obs     =      8,933
+                                                F(1, 8931)        =       1.66
+                                                Prob > F          =     0.1971
+                                                R-squared         =     0.0002
+                                                Root MSE          =     1.3325
+
+------------------------------------------------------------------------------
+             |               Robust
+        bmiz | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |  -.1161087   .0900078    -1.29   0.197    -.2925445    .0603272
+       _cons |   .4195851   .0142785    29.39   0.000     .3915959    .4475742
+------------------------------------------------------------------------------
+
+. regress bmiz remittance_binary age, robust
+
+Linear regression                               Number of obs     =      8,931
+                                                F(2, 8928)        =      10.22
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0024
+                                                Root MSE          =     1.3312
+
+------------------------------------------------------------------------------
+             |               Robust
+        bmiz | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+remittanc~ry |   -.119757   .0899972    -1.33   0.183    -.2961721    .0566581
+         age |   .0119301   .0027422     4.35   0.000     .0065547    .0173055
+       _cons |   .3018845   .0327053     9.23   0.000     .2377745    .3659944
+------------------------------------------------------------------------------
+
+. 
+. *******************************************************************
+. * Panel Identifiers & Save
+. *******************************************************************
+. 
+. * This code converts the pid_link to a string and generates a variable to den
+> ote the wave 2005. I think already a string so can delete this line but it do
+> esn't hurt anything.
+. capture confirm string variable pid_link
+
+. if _rc tostring pid_link, replace format(%010.0f)
+
+. gen wave = 2005
+
+. gen pid_link_canonical = pid_link
+
+. 
+. * We open the 2002 do file to carry over the birth-related variables that we 
+> list.
+. * Drop any individuals that are missing but it should be zero, we also only k
+> eep 1 individual
+. * We add _02 ending so the merge doesn't clash and we can check 
+. * Then we merge, attaches the 2002 values to each 2005 child with the same ID
+> . Note we only keep the master since we don't want to double count the wave 2
+> 002 (note that's only part of the reason but a good one)
+. * For each of these six variables, if the child has a 2002 value, use it, ove
+> rwriting the 2005 value. If there's no 2002 value, the 2005 one stays. 2002 l
+> inked pregnancies to children by exact line number, and these traits can't ch
+> ange after birth, so 2002 is the more reliable source
+. preserve
+
+.     use pid_link_canonical birth_order oldest_child birth_weight_kg delivered
+> _home predominant_breastfed still_breastfed iron_pregnancy premature using "$
+> clean_mxfls/mxfls_2002_master.dta", clear
+
+.     drop if pid_link_canonical == ""
+(0 observations deleted)
+
+.     bysort pid_link_canonical: keep if _N == 1
+(0 observations deleted)
+
+.     foreach v in birth_order oldest_child birth_weight_kg delivered_home pred
+> ominant_breastfed still_breastfed iron_pregnancy premature {
+  2.         rename `v' `v'_02
+  3.     }
+
+.     tempfile temp_bookiv_2002
+
+.     save `temp_bookiv_2002'
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000025 saved
+    as .dta format
+
+. restore
+
+. merge 1:1 pid_link_canonical using `temp_bookiv_2002', keep(master match) nog
+> en
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         5,992
+        from master                     5,992  
+        from using                          0  
+
+    Matched                            25,508  
+    -----------------------------------------
+
+. foreach v in birth_order oldest_child birth_weight_kg delivered_home iron_pre
+> gnancy premature {
+  2.     replace `v' = `v'_02 if !missing(`v'_02)
+  3. }
+(9,811 real changes made)
+(9,811 real changes made)
+(5,538 real changes made)
+(9,655 real changes made)
+(6,075 real changes made)
+(6,076 real changes made)
+
+. replace predominant_breastfed = predominant_breastfed_02 if !missing(predomin
+> ant_breastfed_02) & (still_breastfed_02 != 1 | missing(predominant_breastfed)
+> )
+(6,107 real changes made)
+
+. drop *_02
+
+. 
+. * Household fixed effects, don't need cause its already a string but just in 
+> case, because it doesn't hurt i.e. we have the if statement 
+. capture confirm string variable folio
+
+. if _rc tostring folio, replace format(%08.0f)
+
+. gen folio_canonical = folio
+
+. save "$clean_mxfls/mxfls_2005_master.dta", replace
+file /Users/zakserby/Documents/Documents (MAC)/Cornell University/Master's
+    Thesis/Proposal 3 Mexico OG/Data/Cleaned/MxFLS/mxfls_2005_master.dta
+    saved
+
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+end of do-file
+.     log close clean05
+      name:  clean05
+       log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
+> r's Thesis/Proposal 3 Mexico OG/Output/Logs/Miscellaneous/cleaning_mxfls_2005
+> .log
+  log type:  text
+ closed on:  26 Oct 2026, 03:49:24
+-------------------------------------------------------------------------------

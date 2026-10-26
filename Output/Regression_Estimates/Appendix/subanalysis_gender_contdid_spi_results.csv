@@ -1,0 +1,79 @@
+"outcome","specification","term","coef","se_clustered","p_clustered","p_wild_bootstrap","n_children","children_in_group","municipalities_in_group","untreated_municipalities"
+"haz","contdid with the SPI dose (a.), boys","Average ACRT (needs strong parallel trends)",-0.3478,0.4172,0.404,NA,1188,478,46,75
+"haz","Average ATT: dry (z <= -1) vs near normal, boys","dry",-0.0054,0.1134,0.962,0.965,1188,478,46,75
+"haz","Groups: moderately dry, severely dry or worse, boys","mod_dry",0.1758,0.1337,0.191,0.21,1188,234,23,75
+"haz","Groups: moderately dry, severely dry or worse, boys","sev_dry",-0.1791,0.1513,0.239,0.278,1188,244,23,75
+"haz","Groups: all three SPI dry classes, boys","mod_dry",0.1758,0.1338,0.191,0.21,1188,234,23,75
+"haz","Groups: all three SPI dry classes, boys","sev_only",-0.2929,0.1725,0.092,0.138,1188,196,17,75
+"haz","Groups: all three SPI dry classes, boys","ext_dry",0.2855,0.216,0.189,0.285,1188,48,6,75
+"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, boys","mod_dry",-0.1994,0.1606,0.217,0.229,624,110,21,64
+"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, boys","sev_dry",-0.1925,0.1568,0.222,0.242,624,127,19,64
+"haz","Remittance buffer: dry x 2002 remittances, boys","dry",-0.0412,0.1247,0.742,0.757,900,360,40,69
+"haz","Remittance buffer: dry x 2002 remittances, boys","remittance_hh_02",-0.0438,0.1327,0.742,0.746,900,324,87,69
+"haz","Remittance buffer: dry x 2002 remittances, boys","dry:remittance_hh_02",-0.2775,0.2221,0.214,0.225,900,107,35,69
+"haz","Main average ATT from 6): any deficit vs none, boys","D_any",-0.1776,0.1115,0.114,0.132,1208,952,93,30
+"waz","contdid with the SPI dose (a.), boys","Average ACRT (needs strong parallel trends)",-0.1471,0.6099,0.809,NA,551,220,41,63
+"waz","Average ATT: dry (z <= -1) vs near normal, boys","dry",-0.2121,0.1697,0.214,0.241,551,220,41,63
+"waz","Groups: moderately dry, severely dry or worse, boys","mod_dry",0.0112,0.1806,0.951,0.953,551,105,19,63
+"waz","Groups: moderately dry, severely dry or worse, boys","sev_dry",-0.4159,0.2441,0.091,0.128,551,115,22,63
+"waz","Groups: all three SPI dry classes, boys","mod_dry",0.0112,0.1807,0.951,0.953,551,105,19,63
+"waz","Groups: all three SPI dry classes, boys","sev_only",-0.4463,0.2867,0.123,0.178,551,96,17,63
+"waz","Groups: all three SPI dry classes, boys","ext_dry",-0.2622,0.1679,0.121,0.307,551,19,5,63
+"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, boys","mod_dry",0.3506,0.324,0.284,0.3,125,27,13,31
+"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, boys","sev_dry",0.5451,0.3809,0.158,0.22,125,26,14,31
+"waz","Remittance buffer: dry x 2002 remittances, boys","dry",-0.2963,0.2607,0.259,0.316,377,151,35,55
+"waz","Remittance buffer: dry x 2002 remittances, boys","remittance_hh_02",-0.0998,0.2052,0.628,0.647,377,160,64,55
+"waz","Remittance buffer: dry x 2002 remittances, boys","dry:remittance_hh_02",0.063,0.2981,0.833,0.842,377,62,26,55
+"waz","Main average ATT from 6): any deficit vs none, boys","D_any",-0.0639,0.1546,0.68,0.692,556,442,80,26
+"bmiz","contdid with the SPI dose (a.), boys","Average ACRT (needs strong parallel trends)",-0.3381,0.3439,0.326,NA,1158,462,46,75
+"bmiz","Average ATT: dry (z <= -1) vs near normal, boys","dry",-0.1708,0.1008,0.093,0.105,1158,462,46,75
+"bmiz","Groups: moderately dry, severely dry or worse, boys","mod_dry",-0.1997,0.1558,0.202,0.275,1158,222,23,75
+"bmiz","Groups: moderately dry, severely dry or worse, boys","sev_dry",-0.1441,0.0995,0.15,0.171,1158,240,23,75
+"bmiz","Groups: all three SPI dry classes, boys","mod_dry",-0.1997,0.1559,0.202,0.275,1158,222,23,75
+"bmiz","Groups: all three SPI dry classes, boys","sev_only",-0.1539,0.1123,0.173,0.207,1158,193,17,75
+"bmiz","Groups: all three SPI dry classes, boys","ext_dry",-0.1035,0.1259,0.413,0.475,1158,47,6,75
+"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, boys","mod_dry",0.3357,0.2984,0.263,0.408,574,98,21,62
+"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, boys","sev_dry",0.3095,0.1339,0.023,0.028,574,117,19,62
+"bmiz","Remittance buffer: dry x 2002 remittances, boys","dry",-0.3669,0.1599,0.024,0.029,879,349,40,69
+"bmiz","Remittance buffer: dry x 2002 remittances, boys","remittance_hh_02",-0.0573,0.1163,0.623,0.63,879,315,86,69
+"bmiz","Remittance buffer: dry x 2002 remittances, boys","dry:remittance_hh_02",0.5414,0.3085,0.082,0.107,879,103,34,69
+"bmiz","Main average ATT from 6): any deficit vs none, boys","D_any",-0.0088,0.1154,0.939,0.935,1177,928,93,30
+"haz","contdid with the SPI dose (a.), girls","Average ACRT (needs strong parallel trends)",-0.0142,0.2397,0.953,NA,1212,465,46,74
+"haz","Average ATT: dry (z <= -1) vs near normal, girls","dry",-0.0041,0.112,0.971,0.972,1212,465,46,74
+"haz","Groups: moderately dry, severely dry or worse, girls","mod_dry",0.1399,0.1371,0.31,0.392,1212,207,25,74
+"haz","Groups: moderately dry, severely dry or worse, girls","sev_dry",-0.1196,0.127,0.348,0.41,1212,258,21,74
+"haz","Groups: all three SPI dry classes, girls","mod_dry",0.1399,0.1372,0.31,0.392,1212,207,25,74
+"haz","Groups: all three SPI dry classes, girls","sev_only",-0.2029,0.1414,0.154,0.217,1212,193,16,74
+"haz","Groups: all three SPI dry classes, girls","ext_dry",0.1277,0.1548,0.411,0.465,1212,65,5,74
+"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, girls","mod_dry",-0.1679,0.1288,0.195,0.222,649,106,21,68
+"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, girls","sev_dry",0.1387,0.134,0.303,0.333,649,133,20,68
+"haz","Remittance buffer: dry x 2002 remittances, girls","dry",-0.1067,0.139,0.444,0.473,914,347,41,69
+"haz","Remittance buffer: dry x 2002 remittances, girls","remittance_hh_02",-0.0887,0.1205,0.463,0.473,914,338,78,69
+"haz","Remittance buffer: dry x 2002 remittances, girls","dry:remittance_hh_02",0.1186,0.1731,0.495,0.506,914,113,27,69
+"haz","Main average ATT from 6): any deficit vs none, girls","D_any",-0.2343,0.1073,0.031,0.036,1228,966,92,30
+"waz","contdid with the SPI dose (a.), girls","Average ACRT (needs strong parallel trends)",-0.0879,0.3215,0.784,NA,524,178,42,60
+"waz","Average ATT: dry (z <= -1) vs near normal, girls","dry",-0.2103,0.1075,0.053,0.058,524,178,42,60
+"waz","Groups: moderately dry, severely dry or worse, girls","mod_dry",-0.2031,0.0952,0.035,0.049,524,86,22,60
+"waz","Groups: moderately dry, severely dry or worse, girls","sev_dry",-0.217,0.163,0.186,0.235,524,92,20,60
+"waz","Groups: all three SPI dry classes, girls","mod_dry",-0.2031,0.0953,0.035,0.049,524,86,22,60
+"waz","Groups: all three SPI dry classes, girls","sev_only",-0.1977,0.1893,0.299,0.358,524,65,15,60
+"waz","Groups: all three SPI dry classes, girls","ext_dry",-0.2637,0.2736,0.337,0.681,524,27,5,60
+"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, girls","mod_dry",-0.0334,0.2629,0.899,0.902,145,30,17,36
+"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, girls","sev_dry",-0.2355,0.2582,0.365,0.392,145,27,13,36
+"waz","Remittance buffer: dry x 2002 remittances, girls","dry",-0.1828,0.1777,0.306,0.325,339,113,35,53
+"waz","Remittance buffer: dry x 2002 remittances, girls","remittance_hh_02",0.2138,0.1859,0.253,0.262,339,131,54,53
+"waz","Remittance buffer: dry x 2002 remittances, girls","dry:remittance_hh_02",-0.3094,0.2748,0.263,0.263,339,42,20,53
+"waz","Main average ATT from 6): any deficit vs none, girls","D_any",-0.0195,0.1083,0.857,0.855,528,397,81,23
+"bmiz","contdid with the SPI dose (a.), girls","Average ACRT (needs strong parallel trends)",-0.2962,0.3075,0.336,NA,1190,453,45,74
+"bmiz","Average ATT: dry (z <= -1) vs near normal, girls","dry",-0.0845,0.0814,0.301,0.309,1190,453,45,74
+"bmiz","Groups: moderately dry, severely dry or worse, girls","mod_dry",-0.0468,0.125,0.709,0.75,1190,200,24,74
+"bmiz","Groups: moderately dry, severely dry or worse, girls","sev_dry",-0.1143,0.0899,0.206,0.239,1190,253,21,74
+"bmiz","Groups: all three SPI dry classes, girls","mod_dry",-0.0468,0.125,0.709,0.75,1190,200,24,74
+"bmiz","Groups: all three SPI dry classes, girls","sev_only",-0.0599,0.0946,0.528,0.546,1190,188,16,74
+"bmiz","Groups: all three SPI dry classes, girls","ext_dry",-0.2715,0.166,0.105,0.248,1190,65,5,74
+"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, girls","mod_dry",-0.0211,0.2205,0.924,0.935,605,99,19,68
+"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, girls","sev_dry",0.2255,0.1374,0.104,0.113,605,125,20,68
+"bmiz","Remittance buffer: dry x 2002 remittances, girls","dry",0.0486,0.0987,0.623,0.626,895,337,40,69
+"bmiz","Remittance buffer: dry x 2002 remittances, girls","remittance_hh_02",0.1753,0.0864,0.045,0.043,895,332,78,69
+"bmiz","Remittance buffer: dry x 2002 remittances, girls","dry:remittance_hh_02",-0.3875,0.1693,0.024,0.03,895,110,27,69
+"bmiz","Main average ATT from 6): any deficit vs none, girls","D_any",-0.0425,0.0901,0.638,0.67,1206,948,91,30
