@@ -2,7 +2,7 @@
 
 **Zachary Serby, Cornell University**
 
-> **This project is fully reproducible. All data needed to run the analysis are included in this repository, and every file path is relative and detected automatically, so the project can be downloaded to any computer and run as is, with no paths or settings to change. Running a single file, `Scripts/00_Master.do`, rebuilds the cleaned survey data and every regression, table, figure, and the results PDF from the raw data.**
+> **This project is fully reproducible. All data needed to run the analysis are included in this repository, and every file path is relative. Thus, the project can be downloaded to any computer and run as is, with no paths or settings to change. Running the single master file, `Scripts/00_Master.do`, rebuilds the cleaned survey data and every regression, table, figure, and the results PDF from the raw data.**
 
 **Paper:** [Writing Sample.pdf](Writing%20Sample.pdf) (current draft of the results, also at [Paper/Results.pdf](Paper/Results.pdf))
 **Code:** [Scripts/](Scripts) (start with [Scripts/00_Master.do](Scripts/00_Master.do))
