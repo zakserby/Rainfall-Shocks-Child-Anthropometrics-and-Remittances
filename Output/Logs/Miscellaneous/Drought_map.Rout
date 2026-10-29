@@ -1,0 +1,11 @@
+Loading required package: sf
+Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE
+Loading required package: haven
+Loading required package: RColorBrewer
+          sf        haven RColorBrewer 
+        TRUE         TRUE         TRUE 
+Warning message:
+package 'sf' was built under R version 4.4.3 
+[1] 133
+null device 
+          1 

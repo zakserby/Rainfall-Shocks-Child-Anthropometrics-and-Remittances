@@ -17,7 +17,7 @@ This thesis studies how the 2009 drought in Mexico affected child health, measur
 
 1. Download or clone this repository.
 2. Open `Scripts/00_Master.do` (double-clicking it sets Stata's working folder to `Scripts`; if Stata is already open, `cd` to the project or `Scripts` folder first). The project root is found automatically.
-3. Run it. The full pipeline takes about 7 minutes and runs, in order: MxFLS cleaning (2002, 2005, 2009), the DID analysis data, summary statistics, DID/DDD and event studies, continuous DID (R), subanalyses by sex and by rural vs urban (Stata, then R), the regression tables, and the results document (R, compiled to `Paper/Results.pdf`).
+3. Run it. The full pipeline takes about 7 minutes and runs, in order: MxFLS cleaning (2002, 2005, 2009), the DID analysis data, summary statistics, the drought map (R), DID/DDD and event studies, continuous DID (R), subanalyses by sex and by rural vs urban (Stata, then R), the regression tables, and the results document (R, compiled to `Paper/Results.pdf`).
 
 Each step can be switched on or off with the `run_*` switches at the top of `00_Master.do` (all are on). The master calls R through `Rscript` and finds it automatically in the usual Mac locations; on another system, set `global Rscript` in `00_Master.do`.
 
@@ -44,6 +44,7 @@ Scripts/
   Statistics/
     Summary Stats DID.do            Summary statistics, sample sizes, attrition tables
     Regression Stats.do             All regression tables in LaTeX
+    Drought_map.R                   Map of the 2009 drought by municipality
   Regressions/
     DID_Regs.do                     Binary DID, triple difference, event studies, robustness
     Contdid_regs.R                  Continuous DID, SPI drought classes, remittance buffer
@@ -62,7 +63,7 @@ Data/
 Output/
   Tables/                 Summary statistics and regression tables (.tex), Main and Appendix
   Regression_Estimates/   Event study coefficients (.dta) and continuous DID estimates (.csv)
-  Figures/                Trends, event studies, continuous DID figures (.png)
+  Figures/                Trends, event studies, continuous DID figures, 2009 drought map (.png)
   Logs/                   Every Stata and R log
 
 Paper/
@@ -83,7 +84,7 @@ Writing Sample.pdf                  Copy of Paper/Results.pdf
 ## Software requirements
 
 - **Stata** (tested with Stata 19 MP). reghdfe, ftools, require, estout and distinct install automatically.
-- **R** 4.x (tested with R 4.4.2). terra, sf, data.table, readxl, haven, did (>= 2.5.0), BMisc, sandwich and tinytex install automatically. contdid 0.1.1 installs from GitHub (bcallaway11/contdid) and needs ptetools >= 1.0.1. fwildclusterboot 0.13.0 and summclust 0.7.2 install from the CRAN archive and need the Xcode command line tools and gfortran on a Mac.
+- **R** 4.x (tested with R 4.4.2). terra, sf, data.table, readxl, haven, did (>= 2.5.0), BMisc, sandwich, RColorBrewer and tinytex install automatically. contdid 0.1.1 installs from GitHub (bcallaway11/contdid) and needs ptetools >= 1.0.1. fwildclusterboot 0.13.0 and summclust 0.7.2 install from the CRAN archive and need the Xcode command line tools and gfortran on a Mac.
 - **TinyTeX** compiles Results.pdf; `Build_Results.R` installs it if no LaTeX is found.
 
 Bootstrap results are reproducible: `set.seed(1234)` is set before every bootstrap in R.

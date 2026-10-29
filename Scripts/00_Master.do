@@ -52,6 +52,7 @@ global run_R           0   // Rebuild the municipality rainfall data in R. Note:
 global run_cleaning    1   // MxFLS cleans all waves and appends them 
 global run_build_did   1   // Builds the DID analysis data once. Note: The summary stats, DID, continuous DID and subanalyses all load it
 global run_sumstats_did 1  // DID summary statistics 
+global run_map         1   // Map of the 2009 drought by municipality in R
 global run_did         1   // DID regressions
 global run_contdid     1   // Continuous DID in R. Slow bc the wild cluster bootstrap uses 9,999 draws
 global run_sub_gender_did     1   // Subanalyses: DID regressions for boys and girls separately
@@ -77,7 +78,7 @@ if _rc {
     }
 }
 capture confirm file "$Rscript"
-if _rc & ($run_R | $run_contdid | $run_sub_gender_contdid | $run_sub_rural_contdid | $run_paper) {
+if _rc & ($run_R | $run_map | $run_contdid | $run_sub_gender_contdid | $run_sub_rural_contdid | $run_paper) {
     di as error "Rscript was not found. Set global Rscript to the path of Rscript on this computer"
     exit 601
 }
@@ -128,6 +129,12 @@ if $run_sumstats_did {
     log using "$out_logs/Main/summary_stats_did.log", replace text name(sumstats_did)
     do "$scripts/Statistics/Summary Stats DID.do"
     log close sumstats_did
+}
+
+* Map of the 2009 drought by municipality, it loads the DID analysis data for the sample municipalities
+if $run_map {
+    cd "$scripts"
+    shell "$Rscript" "$scripts/Statistics/Drought_map.R" > "$out_logs/Miscellaneous/Drought_map.Rout" 2>&1
 }
 
 
