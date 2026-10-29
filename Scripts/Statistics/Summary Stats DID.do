@@ -157,7 +157,7 @@ preserve
         posthead("\midrule") prefoot("") ///
         postfoot("\bottomrule" ///
             "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} Sample is children with the outcome measured in MxFLS-2 (2005) and MxFLS-3 (2009), aged 10 or younger (Panel A) or 15 or younger (Panel B)" ///
-            "in both rounds, with a 2005 municipality and not measured in MxFLS-3 before November 2009. Each row is a child, and Obs. counts children. Statistics are at the 2005 baseline, except" ///
+            "in both rounds, with a 2005 municipality and not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Each row is a child, and Obs. counts children. Statistics are at the 2005 baseline, except" ///
             "remittances and household variables (2002). Panel B reports BMIZ for the HAZ sample, as the BMIZ sample is similar and slightly smaller, at `n_bmiz' children." ///
             "The continuous DID uses these samples, and binary DID Model 1 excludes `single_waz' (Panel A) and `single_haz' (Panel B) children in singleton" ///
             "interview-month cells. Model 3, the main binary DID, adds 2005--2008 droughts and 2002 household and 2005 child and mother controls and includes" ///
@@ -327,7 +327,7 @@ foreach c in mod sev sevonly ext {
 file write cnt "\bottomrule" _n
 file write cnt "\addlinespace[6pt]\multicolumn{3}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} Counts are children, households, or 2005 municipalities in each regression sample, at the 2005 baseline." _n
 file write cnt "The estimation samples are children with the outcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009), aged 15 or younger (HAZ and BMIZ) or 10 or younger (WAZ) in both rounds." _n
-file write cnt "Children have a 2005 municipality and were not measured in MxFLS-3 before November 2009. In Panel A, treated children's 2005 municipality had a drought in 2009, with annual CHIRPS" _n 
+file write cnt "Children have a 2005 municipality and were not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. In Panel A, treated children's 2005 municipality had a drought in 2009, with annual CHIRPS" _n 
 file write cnt "rainfall below its 1981--2004 20th percentile. Model 1 drops children alone in their interview-month cell, and the continuous DID, with no interview-month fixed effects, uses the full sample. Model 3 adds the 2005--2008 droughts and 2002 household" _n 
 file write cnt "and 2005 child and mother controls, and keeps children with all of them observed. Model 5 adds 2002 remittances times post and the drought times post times 2002 remittances, and keeps children" _n
 file write cnt "with 2002 remittances observed, so Model 5 children not in remittance households are the Model 5 count minus the remittance row. In Panel B, treated children's 2005 municipality had 2009" _n
@@ -443,7 +443,7 @@ file write cnt "\bottomrule" _n
 file write cnt "\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} Counts of children in each wave. The DID only uses MxFLS-2 (2005) and MxFLS-3 (2009), and the event studies" _n
 file write cnt "use all three waves. The continuous DID uses the same samples. Each row starts from the children who meet the regression sample rules in its first wave and could stay in the sample, not" _n
 file write cnt "from all children measured. They are under the age cutoff in every wave, 15 or younger (HAZ and BMIZ) or 10 or younger (WAZ), have a municipality, and were not measured in MxFLS-3 before" _n 
-file write cnt "November 2009. Later columns count the children still in the sample, so the drop across columns is attrition. This is not the same as the children the regressions drop as singletons, with" _n
+file write cnt "November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Later columns count the children still in the sample, so the drop across columns is attrition. This is not the same as the children the regressions drop as singletons, with" _n
 file write cnt "only one wave in the sample, as these also include children who aged out or are only in a later wave. The DID 2009 count is the estimation sample, and the event study 2009 count is the" _n
 file write cnt "children in all three waves. For children not measured in a later wave, the age then comes from their birth date and their household's MxFLS-3 measurement date, as MxFLS-3 interviews ran" _n 
 file write cnt "over several years. Children not in MxFLS-3, or whose birth date does not agree with their reported age, get their last measured age plus the median age gap between the waves, `gap0509' years" _n

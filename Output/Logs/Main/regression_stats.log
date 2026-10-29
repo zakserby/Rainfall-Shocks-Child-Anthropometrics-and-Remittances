@@ -3,8 +3,9 @@
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/regression_stats.log
   log type:  text
- opened on:  26 Oct 2026, 03:52:36
-.     do "$scripts/Statistics/Regression Stats.do"
+ opened on:  29 Oct 2026, 07:36:04
+
+. do "$scripts/Statistics/Regression Stats.do"
 
 . *******************************************************************
 . * Regression tables in LaTeX for the 2009 drought DID
@@ -507,33 +508,37 @@
 > extwidth}}{\scriptsize \textit{Notes:} This table reports the effect of the 2
 > 009 drought on the WHO `low_`v'' with the binary DID. Regressions are at the 
 > child-wave level. `sample_note'," "aged `age_`v'' in both rounds. Children ha
-> ve a 2005 municipality and were not measured in MxFLS-3 before November 2009.
->  Drought equals 1 if annual CHIRPS rainfall in 2009 in the child's 2005 munic
-> ipality was below its 1981--2004 20th percentile," "and post equals 1 in MxFL
-> S-3. Remittances equal 1 if the household received cash in the last 12 months
->  from parents, siblings, or children living outside the household in MxFLS-1 
-> (2002), a proxy for remittances. Cols. 1--4 report the average drought" "effe
-> ct. Col. 1 is the basic DID, Col. 2 adds the 2005--2008 droughts, and Col. 3 
-> adds `hh_note' and `child_note'. Col. 4 adds the 2005 father and birth contro
-> ls (father's height, schooling, age at birth and employment, birth order, old
-> est child," "birth weight, delivered at home, weeks predominantly breastfed, 
-> iron in pregnancy, premature), which are missing for many children, often bec
-> ause the father migrated. All controls are interacted with post. Col. 5 is th
-> e triple difference: it keeps the controls of Col. 3" "and adds 2002 remittan
-> ces \ensuremath{\times} post and drought \ensuremath{\times} post \ensuremath
-> {\times} 2002 remittances, the difference in the drought effect for children 
-> in 2002 remittance households. `extra_note' All regressions include child and
->  interview year-month" "fixed effects, children in singleton cells are droppe
-> d, and standard errors are clustered by 2005 municipality, where the drought 
-> is assigned. `stars'}\\" "\end{longtable}" "\endgroup" "'
+> ve a 2005 municipality and were not measured in MxFLS-3 before November 2009,
+>  as the July--October 2009 rainfall deficit had not yet fully occurred. Dropp
+> ing them from both groups equalizes treated and control measurement timing. D
+> rought equals 1 if annual CHIRPS rainfall in 2009 in the child's 2005 municip
+> ality was below its 1981--2004 20th percentile," "and post equals 1 in MxFLS-
+> 3. Remittances equal 1 if the household received cash in the last 12 months f
+> rom parents, siblings, or children living outside the household in MxFLS-1 (2
+> 002), a proxy for remittances. Cols. 1--4 report the average drought" "effect
+> . Col. 1 is the basic DID, Col. 2 adds the 2005--2008 droughts, and Col. 3 ad
+> ds `hh_note' and `child_note'. Col. 4 adds the 2005 father and birth controls
+>  (father's height, schooling, age at birth and employment, birth order, oldes
+> t child," "birth weight, delivered at home, weeks predominantly breastfed, ir
+> on in pregnancy, premature), which are missing for many children, often becau
+> se the father migrated. All controls are interacted with post. Col. 5 is the 
+> triple difference: it keeps the controls of Col. 3" "and adds 2002 remittance
+> s \ensuremath{\times} post and drought \ensuremath{\times} post \ensuremath{\
+> times} 2002 remittances, the difference in the drought effect for children in
+>  2002 remittance households. `extra_note' All regressions include child and i
+> nterview year-month" "fixed effects, children in singleton cells are dropped,
+>  and standard errors are clustered by 2005 municipality, where the drought is
+>  assigned. `stars'}\\" "\end{longtable}" "\endgroup" "'
  51.         if "`t'" != "main" local pf `" "\bottomrule" "\addlinespace[6pt]\m
 > ulticolumn{6}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} `reason' The tab
 > le reports the effect of the 2009 drought on the WHO `low_`v'' with the binar
 > y DID for `sample_short', aged `age_`v'' in both rounds, with a 2005 municipa
-> lity and not measured in MxFLS-3 before November 2009." "Columns, variables a
-> nd controls are as in the main binary DID tables`ctrl_diff'. All regressions 
-> include child and interview year-month fixed effects, and standard errors are
->  clustered by 2005 municipality. `stars'}\\" "\end{longtable}" "\endgroup" "'
+> lity and not measured in MxFLS-3 before November 2009, as the July--October 2
+> 009 rainfall deficit had not yet fully occurred. Dropping them from both grou
+> ps equalizes treated and control measurement timing." "Columns, variables and
+>  controls are as in the main binary DID tables`ctrl_diff'. All regressions in
+> clude child and interview year-month fixed effects, and standard errors are c
+> lustered by 2005 municipality. `stars'}\\" "\end{longtable}" "\endgroup" "'
  52. 
 .                 * This is the line that actually writes the table. It takes t
 > he five saved regressions (m1–m5) and writes them into the .tex file as five 
@@ -2815,15 +2820,17 @@ added macro:
 > the 2009 drought. Regressions are at the child-wave level and use MxFLS-1 (20
 > 02), MxFLS-2 (2005) and MxFLS-3 (2009), with 2005 as the" "reference wave. Th
 > e sample is children aged `age_`v'' in each wave they are in, with a 2005 mun
-> icipality, and not measured in MxFLS-3 before November 2009. Col. 1 regresses
->  the outcome on the drought times the 2002 wave (the lead) and times the 2009
-> " "wave. Col. 2 adds the same terms times 2002 remittances, and the 2002 remi
-> ttance terms on their own (not shown), for children with 2002 remittances obs
-> erved. The P-value of the lead tests the drought lead in Col. 1 and the tripl
-> e difference lead in Col. 2." "The effect for remittance households is the su
-> m of the two 2009 drought terms. All regressions include child and interview 
-> year-month fixed effects, and standard errors are clustered by 2005 municipal
-> ity. `stars'}\\" "\end{longtable}" "\endgroup" "'
+> icipality, and not measured in MxFLS-3 before November 2009, as the July--Oct
+> ober 2009 rainfall deficit had not yet fully occurred. Dropping them from bot
+> h groups equalizes treated and control measurement timing. Col. 1 regresses t
+> he outcome on the drought times the 2002 wave (the lead) and times the 2009" 
+> "wave. Col. 2 adds the same terms times 2002 remittances, and the 2002 remitt
+> ance terms on their own (not shown), for children with 2002 remittances obser
+> ved. The P-value of the lead tests the drought lead in Col. 1 and the triple 
+> difference lead in Col. 2." "The effect for remittance households is the sum 
+> of the two 2009 drought terms. All regressions include child and interview ye
+> ar-month fixed effects, and standard errors are clustered by 2005 municipalit
+> y. `stars'}\\" "\end{longtable}" "\endgroup" "'
  24. 
 .         * Here we actually writing the table
 .     esttab es ddd using "$out_sumstats/Appendix/regression_tables_appendix.te
@@ -3069,33 +3076,33 @@ added scalar:
   7. }
 (encoding automatically selected: ISO-8859-1)
 (7 vars, 15 obs)
-(file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 not
+(file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 not
     found)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 39 obs)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (7 vars, 30 obs)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 78 obs)
 (variable children_in_group was str3, now str4 to accommodate using data's
        values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (7 vars, 30 obs)
 (variable file was str42, now str47 to accommodate using data's values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 78 obs)
 (variable file was str46, now str47 to accommodate using data's values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
     as .dta format
 
 . * This turns each number column from text back into numbers
@@ -3511,10 +3518,11 @@ variable group was str4 now str5
 . 
 . 
 end of do-file
-.     log close regstats
+
+. log close regstats
       name:  regstats
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/regression_stats.log
   log type:  text
- closed on:  26 Oct 2026, 03:52:47
+ closed on:  29 Oct 2026, 07:36:15
 -------------------------------------------------------------------------------

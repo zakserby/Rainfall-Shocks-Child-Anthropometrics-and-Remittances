@@ -3,8 +3,9 @@
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/summary_stats_did.log
   log type:  text
- opened on:  26 Oct 2026, 03:49:33
-.     do "$scripts/Statistics/Summary Stats DID.do"
+ opened on:  29 Oct 2026, 07:36:02
+
+. do "$scripts/Statistics/Summary Stats DID.do"
 
 . *******************************************************************
 . * Summary statistics for the 2009 drought DID
@@ -273,8 +274,10 @@
 > 5) and MxFLS-3 (2009), aged 10 or younger (Panel A) or 15 or younger (Panel B
 > )" ///
 >             "in both rounds, with a 2005 municipality and not measured in MxF
-> LS-3 before November 2009. Each row is a child, and Obs. counts children. Sta
-> tistics are at the 2005 baseline, except" ///
+> LS-3 before November 2009, as the July--October 2009 rainfall deficit had not
+>  yet fully occurred. Dropping them from both groups equalizes treated and con
+> trol measurement timing. Each row is a child, and Obs. counts children. Stati
+> stics are at the 2005 baseline, except" ///
 >             "remittances and household variables (2002). Panel B reports BMIZ
 >  for the HAZ sample, as the BMIZ sample is similar and slightly smaller, at `
 > n_bmiz' children." ///
@@ -633,8 +636,10 @@ Children, BMIZ sample: 1,433 control, 112 treated
 >  or 10 or younger (WAZ) in both rounds." _n
 
 . file write cnt "Children have a 2005 municipality and were not measured in Mx
-> FLS-3 before November 2009. In Panel A, treated children's 2005 municipality 
-> had a drought in 2009, with annual CHIRPS" _n 
+> FLS-3 before November 2009, as the July--October 2009 rainfall deficit had no
+> t yet fully occurred. Dropping them from both groups equalizes treated and co
+> ntrol measurement timing. In Panel A, treated children's 2005 municipality ha
+> d a drought in 2009, with annual CHIRPS" _n 
 
 . file write cnt "rainfall below its 1981--2004 20th percentile. Model 1 drops 
 > children alone in their interview-month cell, and the continuous DID, with no
@@ -868,9 +873,11 @@ BMIZ: DID 2005 3,511, 2009 2,383 | event studies 2002 2,569, 2005 1,719, 2009 1
 > every wave, 15 or younger (HAZ and BMIZ) or 10 or younger (WAZ), have a munic
 > ipality, and were not measured in MxFLS-3 before" _n 
 
-. file write cnt "November 2009. Later columns count the children still in the 
-> sample, so the drop across columns is attrition. This is not the same as the 
-> children the regressions drop as singletons, with" _n
+. file write cnt "November 2009, as the July--October 2009 rainfall deficit had
+>  not yet fully occurred. Dropping them from both groups equalizes treated and
+>  control measurement timing. Later columns count the children still in the sa
+> mple, so the drop across columns is attrition. This is not the same as the ch
+> ildren the regressions drop as singletons, with" _n
 
 . file write cnt "only one wave in the sample, as these also include children w
 > ho aged out or are only in a later wave. The DID 2009 count is the estimation
@@ -915,10 +922,11 @@ BMIZ: DID 2005 3,511, 2009 2,383 | event studies 2002 2,569, 2005 1,719, 2009 1
 . 
 . 
 end of do-file
-.     log close sumstats_did
+
+. log close sumstats_did
       name:  sumstats_did
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/summary_stats_did.log
   log type:  text
- closed on:  26 Oct 2026, 03:49:36
+ closed on:  29 Oct 2026, 07:36:04
 -------------------------------------------------------------------------------

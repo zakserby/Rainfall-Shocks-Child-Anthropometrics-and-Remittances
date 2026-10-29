@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.10.25)  26 OCT 2026 03:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.10.25)  29 OCT 2026 07:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -193,18 +193,16 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 31.
 [2
 
-] [3] [4
+] [3] [4] [5
 
-] [5] [6
+] [6] [7
 
 ]
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 326.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 326.
-[7
-
-] [8
+[8
 
 ] [9
 
@@ -212,44 +210,44 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 ] [11
 
+] [12
+
 ]
-<../Output/Figures/Main/event_study_haz.png, id=51, 542.025pt x 325.215pt>
+<../Output/Figures/Main/event_study_haz.png, id=54, 542.025pt x 325.215pt>
 File: ../Output/Figures/Main/event_study_haz.png Graphic file (type png)
 <use ../Output/Figures/Main/event_study_haz.png>
 Package pdftex.def Info: ../Output/Figures/Main/event_study_haz.png  used on input line 490.
 (pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
-<../Output/Figures/Main/event_study_waz.png, id=53, 542.025pt x 325.215pt>
+<../Output/Figures/Main/event_study_waz.png, id=56, 542.025pt x 325.215pt>
 File: ../Output/Figures/Main/event_study_waz.png Graphic file (type png)
 <use ../Output/Figures/Main/event_study_waz.png>
 Package pdftex.def Info: ../Output/Figures/Main/event_study_waz.png  used on input line 496.
 (pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
-<../Output/Figures/Main/event_study_bmiz.png, id=54, 542.025pt x 325.215pt>
+<../Output/Figures/Main/event_study_bmiz.png, id=57, 542.025pt x 325.215pt>
 File: ../Output/Figures/Main/event_study_bmiz.png Graphic file (type png)
 <use ../Output/Figures/Main/event_study_bmiz.png>
 Package pdftex.def Info: ../Output/Figures/Main/event_study_bmiz.png  used on input line 502.
 (pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
-[12
+[13
 
  <../Output/Figures/Main/event_study_haz.png> <../Output/Figures/Main/event_study_waz.png>]
-<../Output/Figures/Main/contdid_binscatter_haz.png, id=60, 1304.875pt x 903.375pt>
+<../Output/Figures/Main/contdid_binscatter_haz.png, id=64, 1304.875pt x 903.375pt>
 File: ../Output/Figures/Main/contdid_binscatter_haz.png Graphic file (type png)
 <use ../Output/Figures/Main/contdid_binscatter_haz.png>
 Package pdftex.def Info: ../Output/Figures/Main/contdid_binscatter_haz.png  used on input line 508.
 (pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
-<../Output/Figures/Main/contdid_binscatter_waz.png, id=61, 1304.875pt x 903.375pt>
+<../Output/Figures/Main/contdid_binscatter_waz.png, id=65, 1304.875pt x 903.375pt>
 File: ../Output/Figures/Main/contdid_binscatter_waz.png Graphic file (type png)
 <use ../Output/Figures/Main/contdid_binscatter_waz.png>
 Package pdftex.def Info: ../Output/Figures/Main/contdid_binscatter_waz.png  used on input line 514.
 (pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
-[13 <../Output/Figures/Main/event_study_bmiz.png> <../Output/Figures/Main/contdid_binscatter_haz.png>]
-<../Output/Figures/Main/contdid_att_clustered_haz.png, id=68, 1304.875pt x 903.375pt>
+[14 <../Output/Figures/Main/event_study_bmiz.png> <../Output/Figures/Main/contdid_binscatter_haz.png>]
+<../Output/Figures/Main/contdid_att_clustered_haz.png, id=71, 1304.875pt x 903.375pt>
 File: ../Output/Figures/Main/contdid_att_clustered_haz.png Graphic file (type png)
 <use ../Output/Figures/Main/contdid_att_clustered_haz.png>
 Package pdftex.def Info: ../Output/Figures/Main/contdid_att_clustered_haz.png  used on input line 520.
 (pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
-[14 <../Output/Figures/Main/contdid_binscatter_waz.png> <../Output/Figures/Main/contdid_att_clustered_haz.png>] [15
-
-] [16
+[15 <../Output/Figures/Main/contdid_binscatter_waz.png> <../Output/Figures/Main/contdid_att_clustered_haz.png>] [16
 
 ] [17
 
@@ -289,6 +287,8 @@ Package pdftex.def Info: ../Output/Figures/Main/contdid_att_clustered_haz.png  u
 
 ] [35
 
+] [36
+
 ] (./Results.aux)
  ***********
 LaTeX2e <2026-06-01>
@@ -302,12 +302,12 @@ Here is how much of TeX's memory you used:
  32457 multiletter control sequences out of 15000+600000
  633119 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 57i,9n,65p,672b,498s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,9n,65p,813b,498s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb>
-Output written on Results.pdf (35 pages, 475804 bytes).
+Output written on Results.pdf (36 pages, 479517 bytes).
 PDF statistics:
- 200 PDF objects out of 1000 (max. 8388607)
- 121 compressed objects within 2 object streams
+ 203 PDF objects out of 1000 (max. 8388607)
+ 123 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
