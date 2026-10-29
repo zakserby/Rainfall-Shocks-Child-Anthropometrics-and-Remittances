@@ -476,7 +476,7 @@ file write tab "\bottomrule" _n
 file write tab "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table compares children in dry 2005 municipalities with children in near-normal ones. Regressions are at the child level, on the 2005 to 2009 change in the WHO z-score," _n
 file write tab "for the binary DID estimation samples without children in wet municipalities (z of 1 or above). z is 2009 annual CHIRPS rainfall in the child's 2005 municipality in standard deviations from its 1981--2004 mean, grouped with the SPI classes of" _n
 file write tab "McKee et al. (1993): near normal is z between -1 and 1, moderately dry between -1.5 and -1, and severely dry or worse -1.5 or below. Cols. 1, 3 and 5 compare dry (z of -1 or below) with near normal, and Cols. 2, 4 and 6 split dry into moderately dry and" _n
-file write tab "severely dry or worse. Each class is only compared with near normal, which needs parallel trends, and not with the other class, which would need strong parallel trends (Callaway et al., 2024). Standard errors clustered by 2005 municipality are in parentheses." _n
+file write tab "severely dry or worse. Each class is only compared with near normal, which needs parallel trends, and not with the other class, which would need strong parallel trends (Callaway et al., 2024). Since the contdid package does not yet support discrete doses, the classes are estimated with the discrete-dose regression in equation 4.1 (Callaway et al., 2024). Standard errors clustered by 2005 municipality are in parentheses." _n
 file write tab "`mnw_note' `star_note' `stars'}\\" _n
 file write tab "\end{longtable}" _n "\endgroup" _n
 
@@ -544,7 +544,7 @@ file write tab "\bottomrule" _n
 file write tab "\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table reports the continuous DID of `cgbs' and tests whether 2002 remittances moderated the effect of the 2009 drought. Regressions are at the child level, on the 2005 to 2009" _n
 file write tab "change in the WHO z-score, for the binary DID estimation samples. The dose is the 2009 rainfall deficit, max(0,~-z), where z is 2009 annual CHIRPS rainfall in the child's 2005 municipality in standard deviations from its 1981--2004 mean. Panel A compares" _n
 file write tab "children with any 2009 deficit (z below 0) with children without one, Panel B gives the average ATT separately for children in 2002 remittance and non-remittance households and their difference, and Panel C interacts dry (z of -1 or below) vs near normal" _n
-file write tab "with 2002 remittances. Remittances are cash received in the last 12 months from parents, siblings, or children living outside the household in MxFLS-1 (2002), a proxy for remittances. `pt_note' The estimator does not allow controls or fixed effects." _n
+file write tab "with 2002 remittances. Remittances are cash received in the last 12 months from parents, siblings, or children living outside the household in MxFLS-1 (2002), a proxy for remittances. `pt_note' Panel A uses the contdid package (Callaway et al., 2024). Panels B and C are regressions on the 2005 to 2009 change, and Panel C uses the discrete-dose regression in equation 4.1 (Callaway et al., 2024). The estimator does not allow controls or fixed effects." _n
 file write tab "Standard errors in parentheses are clustered by 2005 municipality, where the drought is assigned. Because the package only bootstraps at the child level, we coded a multiplier bootstrap of its influence functions that clusters by 2005 municipality, and the other rows use municipality-clustered regression standard errors. `mnw_note' `star_note' `stars'}\\" _n
 file write tab "\end{longtable}" _n "\endgroup" _n "\end{document}" _n
 file close tab
@@ -605,7 +605,7 @@ foreach v in haz waz bmiz {
 	* Notes
     file write tab "\addlinespace[6pt]\multicolumn{5}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table repeats the continuous DID and SPI results for the WHO `low_`v'' by subgroup. Cols. 1--2 test for gender disparities in the impact of the drought (2005 roster sex)," _n
     file write tab "and Cols. 3--4 test whether it hits rural children harder, as rural household incomes depend more directly on rain-fed agriculture. `rural_note' Rows, samples (aged `age_`v'' in both rounds) and definitions are as in the main continuous DID and SPI" _n
-    file write tab "tables, and subgroups with few dry or untreated municipalities give noisy estimates. Standard errors clustered by 2005 municipality are in parentheses. `mnw_note' `star_note' `stars'}\\" _n
+    file write tab "tables, and subgroups with few dry or untreated municipalities give noisy estimates. The any deficit row uses the contdid package, and the SPI rows use the discrete-dose regression in equation 4.1 (Callaway et al., 2024). Standard errors clustered by 2005 municipality are in parentheses. `mnw_note' `star_note' `stars'}\\" _n
     file write tab "\end{longtable}" _n "\endgroup" _n
 }
 * Writing it and then end

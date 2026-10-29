@@ -3,7 +3,7 @@
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/regression_stats.log
   log type:  text
- opened on:  29 Oct 2026, 07:36:04
+ opened on:  29 Oct 2026, 14:32:00
 
 . do "$scripts/Statistics/Regression Stats.do"
 
@@ -3076,33 +3076,33 @@ added scalar:
   7. }
 (encoding automatically selected: ISO-8859-1)
 (7 vars, 15 obs)
-(file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 not
+(file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 not
     found)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 39 obs)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (7 vars, 30 obs)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 78 obs)
 (variable children_in_group was str3, now str4 to accommodate using data's
        values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (7 vars, 30 obs)
 (variable file was str42, now str47 to accommodate using data's values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
     as .dta format
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 78 obs)
 (variable file was str46, now str47 to accommodate using data's values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St36687.000001 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
     as .dta format
 
 . * This turns each number column from text back into numbers
@@ -3279,8 +3279,10 @@ variable group was str4 now str5
 
 . file write tab "severely dry or worse. Each class is only compared with near 
 > normal, which needs parallel trends, and not with the other class, which woul
-> d need strong parallel trends (Callaway et al., 2024). Standard errors cluste
-> red by 2005 municipality are in parentheses." _n
+> d need strong parallel trends (Callaway et al., 2024). Since the contdid pack
+> age does not yet support discrete doses, the classes are estimated with the d
+> iscrete-dose regression in equation 4.1 (Callaway et al., 2024). Standard err
+> ors clustered by 2005 municipality are in parentheses." _n
 
 . file write tab "`mnw_note' `star_note' `stars'}\\" _n
 
@@ -3394,8 +3396,11 @@ variable group was str4 now str5
 
 . file write tab "with 2002 remittances. Remittances are cash received in the l
 > ast 12 months from parents, siblings, or children living outside the househol
-> d in MxFLS-1 (2002), a proxy for remittances. `pt_note' The estimator does no
-> t allow controls or fixed effects." _n
+> d in MxFLS-1 (2002), a proxy for remittances. `pt_note' Panel A uses the cont
+> did package (Callaway et al., 2024). Panels B and C are regressions on the 20
+> 05 to 2009 change, and Panel C uses the discrete-dose regression in equation 
+> 4.1 (Callaway et al., 2024). The estimator does not allow controls or fixed e
+> ffects." _n
 
 . file write tab "Standard errors in parentheses are clustered by 2005 municipa
 > lity, where the drought is assigned. Because the package only bootstraps at t
@@ -3496,8 +3501,10 @@ variable group was str4 now str5
 >  `rural_note' Rows, samples (aged `age_`v'' in both rounds) and definitions a
 > re as in the main continuous DID and SPI" _n
  36.     file write tab "tables, and subgroups with few dry or untreated munici
-> palities give noisy estimates. Standard errors clustered by 2005 municipality
->  are in parentheses. `mnw_note' `star_note' `stars'}\\" _n
+> palities give noisy estimates. The any deficit row uses the contdid package, 
+> and the SPI rows use the discrete-dose regression in equation 4.1 (Callaway e
+> t al., 2024). Standard errors clustered by 2005 municipality are in parenthes
+> es. `mnw_note' `star_note' `stars'}\\" _n
  37.     file write tab "\end{longtable}" _n "\endgroup" _n
  38. }
 
@@ -3524,5 +3531,5 @@ end of do-file
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/regression_stats.log
   log type:  text
- closed on:  29 Oct 2026, 07:36:15
+ closed on:  29 Oct 2026, 14:32:12
 -------------------------------------------------------------------------------

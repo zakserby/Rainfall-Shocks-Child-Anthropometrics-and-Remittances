@@ -3,7 +3,7 @@
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/summary_stats_did.log
   log type:  text
- opened on:  29 Oct 2026, 07:36:02
+ opened on:  29 Oct 2026, 14:31:57
 
 . do "$scripts/Statistics/Summary Stats DID.do"
 
@@ -662,9 +662,9 @@ Children, BMIZ sample: 1,433 control, 112 treated
 > children with missing 2002 remittances are in neither row. Panel C compares e
 > ach SPI class with near normal (z between -1 and 1)" _n
 
-. file write cnt "in the continuous DID. As McKee, Doesken and Kleist (1993) no
-> te, drought intensity is arbitrarily defined for values of the SPI with these
->  categories. Children in wet municipalities (z of 1 or above)" _n
+. file write cnt "in the continuous DID. As McKee et al. (1993) note, drought i
+> ntensity is arbitrarily defined for values of the SPI with these categories. 
+> Children in wet municipalities (z of 1 or above)" _n
 
 . file write cnt "are not in the SPI analysis. Remittances are cash received in
 >  the last 12 months" _n
@@ -928,5 +928,5 @@ end of do-file
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/summary_stats_did.log
   log type:  text
- closed on:  29 Oct 2026, 07:36:04
+ closed on:  29 Oct 2026, 14:32:00
 -------------------------------------------------------------------------------

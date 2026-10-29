@@ -333,7 +333,7 @@ file write cnt "and 2005 child and mother controls, and keeps children with all 
 file write cnt "with 2002 remittances observed, so Model 5 children not in remittance households are the Model 5 count minus the remittance row. In Panel B, treated children's 2005 municipality had 2009" _n
 file write cnt "rainfall below its 1981--2004 mean (z below 0), where z is 2009 rainfall in standard deviations from that mean. These are the continuous DID samples, and the two remittance rows are the groups" _n
 file write cnt "of the remittance split. They do not add up to the total, as children with missing 2002 remittances are in neither row. Panel C compares each SPI class with near normal (z between -1 and 1)" _n
-file write cnt "in the continuous DID. As McKee, Doesken and Kleist (1993) note, drought intensity is arbitrarily defined for values of the SPI with these categories. Children in wet municipalities (z of 1 or above)" _n
+file write cnt "in the continuous DID. As McKee et al. (1993) note, drought intensity is arbitrarily defined for values of the SPI with these categories. Children in wet municipalities (z of 1 or above)" _n
 file write cnt "are not in the SPI analysis. Remittances are cash received in the last 12 months" _n
 file write cnt "from parents, siblings, or children living outside the household, from MxFLS-1 (2002).}\\" _n
 file write cnt "\end{longtable}" _n "\endgroup" _n
