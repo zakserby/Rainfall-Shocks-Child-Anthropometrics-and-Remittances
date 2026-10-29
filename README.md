@@ -44,7 +44,7 @@ Scripts/
   Statistics/
     Summary Stats DID.do            Summary statistics, sample sizes, attrition tables
     Regression Stats.do             All regression tables in LaTeX
-    Drought_map.R                   Map of the 2009 drought by municipality
+    Drought_map.R                   Maps of the 2009 drought by municipality
   Regressions/
     DID_Regs.do                     Binary DID, triple difference, event studies, robustness
     Contdid_regs.R                  Continuous DID, SPI drought classes, remittance buffer
@@ -63,7 +63,7 @@ Data/
 Output/
   Tables/                 Summary statistics and regression tables (.tex), Main and Appendix
   Regression_Estimates/   Event study coefficients (.dta) and continuous DID estimates (.csv)
-  Figures/                Trends, event studies, continuous DID figures, 2009 drought map (.png)
+  Figures/                Trends, event studies, continuous DID figures, 2009 drought maps (.png)
   Logs/                   Every Stata and R log
 
 Paper/

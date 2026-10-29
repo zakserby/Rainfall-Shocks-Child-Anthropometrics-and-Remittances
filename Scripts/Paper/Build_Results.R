@@ -104,6 +104,8 @@ figure_title <- function(name) {
   if (base == "contdid_att_clustered") family <- paste0("ATT by 2009 Rainfall Deficit, ", v, ", Continuous DID")
   if (base == "contdid_acrt_clustered") family <- paste0("ACRT by 2009 Rainfall Deficit, ", v, ", Continuous DID")
   if (base == "contdid_spi_att_clustered") family <- paste0("ATT by SPI Drought Dose, ", v, ", Continuous DID")
+  if (base == "drought_map_spi") family <- "2009 Rainfall by Municipality, SPI Classes"
+  if (base == "drought_map_binary") family <- "2009 Drought by Municipality, Binary DID Treatment"
   # This joins the type title and the subgroup with a comma
   paste(c(family, g), collapse = ", ")
 }
@@ -117,7 +119,7 @@ figure_block <- function(sub, name) {
 }
 
 # This function decides the order of the figures in Results.pdf. This function sorts them by:
-# 1) Family aka figure type: event studies first, then triple difference event studies, trends, and the continuous DID figures
+# 1) Family aka figure type: drought maps first, then event studies, triple difference event studies, trends, and the continuous DID figures
 # 2) Outcome within each family: HAZ, WAZ, BMIZ
 # 3) Subgroup: the plain version before subgroup versions
 figure_order <- function(files) {
@@ -125,6 +127,7 @@ figure_order <- function(files) {
   # Each file gets the position of its family in fam: startsWith checks which family its name begins with, which()[1] takes that family's position, and sapply repeats this for every file, e.g. event_study_waz.png is 1
   f_rank <- sapply(files, function(x) which(startsWith(x, fam))[1])
   f_rank[startsWith(files, "event_study_ddd")] <- 1.5
+  f_rank[startsWith(files, "drought_map_")] <- 0
   v_rank <- sapply(files, function(x) which(c(grepl("_haz", x), grepl("_waz", x), grepl("_bmiz", x)))[1])
   # order() sorts by family, then outcome, then name length, then alphabetically, and files[...] puts the names in that order
   files[order(f_rank, v_rank, nchar(files), files)]

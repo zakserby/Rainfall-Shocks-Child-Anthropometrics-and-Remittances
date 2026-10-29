@@ -4,8 +4,8 @@
 #===============================================================================
 
 # Maps the 2009 rainfall in each municipality against its own 1981-2004 history, the same treatment the DID and continuous DID use
-# Panel A: 2009 rainfall z-score grouped with the SPI classes of McKee, Doesken & Kleist 1993, the same classes as add_spi() in functions.R
-# Panel B: 2009 drought (indicator), rainfall below the municipality's 1981-2004 20th percentile, the binary DID treatment treat2009
+# drought_map_spi.png: 2009 rainfall z-score grouped with the SPI classes of McKee, Doesken & Kleist 1993, the same classes as add_spi() in functions.R
+# drought_map_binary.png: 2009 drought (indicator), rainfall below the municipality's 1981-2004 20th percentile, the binary DID treatment treat2009
 # Municipalities with children in the estimation sample (2005 municipality) are outlined in black
 # NOTE: Needs municipality_year_rainfall.dta from Cleaned_rainfall_municipality_drought.R and mxfls_did_analysis.dta from Build_DID_Analysis_Data.do
 
@@ -37,7 +37,7 @@ if (!dir.exists(paste(dir$root,"/Data",sep=""))) {
 dir$raw <- paste(dir$root,"/Data/Raw",sep="")
 dir$clean <- paste(dir$root,"/Data/Cleaned",sep="")
 dir$output_figure <- paste(dir$root,"/Output/Figures",sep="")
-dir.create(paste(dir$output_figure,"/Appendix",sep=""), recursive = TRUE, showWarnings = FALSE)
+dir.create(paste(dir$output_figure,"/Main",sep=""), recursive = TRUE, showWarnings = FALSE)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 # 2). Load the municipalities, rainfall and sample -----
@@ -75,28 +75,27 @@ spi_colors <- c(brewer.pal(11, "BrBG")[c(2, 4, 5)], "grey90", brewer.pal(11, "Br
 # Note: right = TRUE so z = -1 counts as moderately dry and z = -1.5 as severely dry, the same as add_spi()
 mun$spi_class <- cut(mun$rain_z, breaks = breaks, labels = FALSE, right = TRUE)
 
-# Function that draws one panel: municipalities filled by color, sample municipalities outlined, then states
-draw_panel <- function(fill, title) {
+# Function that draws one map: municipalities filled by color, sample municipalities outlined, then states. Each map is its own png in Figures/Main
+draw_map <- function(fill, title, name) {
+  png(paste(dir$output_figure,"/Main/",name,sep=""), width = 6.5, height = 4.5, units = "in", res = 300)
   par(mar = c(0.5, 0.5, 2, 0.5))
   plot(st_geometry(mun), col = fill, border = NA, main = title, cex.main = 0.9)
   plot(st_geometry(mun[mun$in_sample, ]), col = NA, border = "black", lwd = 0.8, add = TRUE)
   plot(st_geometry(states), col = NA, border = "grey40", lwd = 0.4, add = TRUE)
 }
 
-png(paste(dir$output_figure,"/Appendix/drought_map_2009.png",sep=""), width = 6.5, height = 8, units = "in", res = 300)
-layout(matrix(c(1,2), ncol = 1))
-
-# Panel A: SPI classes
+# SPI classes
 # NOTE: The wet municipalities (z >= 1) are almost all in central Mexico, so the any deficit continuous DID compares against mostly one region
-draw_panel(ifelse(is.na(mun$spi_class), "white", spi_colors[mun$spi_class]), "A. 2009 rainfall, SPI classes")
-legend("bottomleft", legend = labels, fill = spi_colors, border = NA, bty = "n", cex = 0.65)
+draw_map(ifelse(is.na(mun$spi_class), "white", spi_colors[mun$spi_class]), "2009 rainfall, SPI classes", "drought_map_spi.png")
+legend("bottomleft", legend = c(labels, "Municipality in the estimation sample"), fill = c(spi_colors, NA),
+       border = c(rep(NA, 5), "black"), bty = "n", cex = 0.65)
+dev.off()
 
-# Panel B: binary drought, the DID treatment
+# Binary drought, the DID treatment
 # NOTE: The binary treatment and the SPI classes don't line up. About a fifth of the 2009 droughts have z above -1, near normal in the SPI classes, so the binary treatment mixes mild and severe deficits
-draw_panel(ifelse(is.na(mun$drought), "white", ifelse(mun$drought == 1, "#A6611A", "grey90")), "B. 2009 drought, rainfall below the 1981-2004 20th percentile")
+draw_map(ifelse(is.na(mun$drought), "white", ifelse(mun$drought == 1, "#A6611A", "grey90")), "2009 drought, rainfall below the 1981-2004 20th percentile", "drought_map_binary.png")
 legend("bottomleft", legend = c("Drought", "No drought", "Municipality in the estimation sample"), fill = c("#A6611A", "grey90", NA),
        border = c(NA, NA, "black"), bty = "n", cex = 0.65)
-
 dev.off()
 
 # The end
