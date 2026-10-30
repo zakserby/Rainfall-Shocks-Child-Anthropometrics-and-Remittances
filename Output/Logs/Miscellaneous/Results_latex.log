@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.10.25)  29 OCT 2026 14:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.10.25)  30 OCT 2026 03:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -193,72 +193,58 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 31.
 [2
 
-] [3] [4] [5
+] [3
+
+] [4] [5
 
 ] [6] [7
 
 ]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 326.
+(Font)              <8> on input line 364.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 326.
+(Font)              <6> on input line 364.
 [8
 
 ] [9
 
 ] [10
 
-] [11
-
-] [12
-
 ]
-<../Output/Figures/Main/drought_map_spi.png, id=54, 1957.3125pt x 1355.0625pt>
+<../Output/Figures/Main/drought_map_spi.png, id=48, 1957.3125pt x 1355.0625pt>
 File: ../Output/Figures/Main/drought_map_spi.png Graphic file (type png)
 <use ../Output/Figures/Main/drought_map_spi.png>
-Package pdftex.def Info: ../Output/Figures/Main/drought_map_spi.png  used on input line 490.
+Package pdftex.def Info: ../Output/Figures/Main/drought_map_spi.png  used on input line 455.
 (pdftex.def)             Requested size: 375.80544pt x 260.17317pt.
-<../Output/Figures/Main/drought_map_binary.png, id=56, 1957.3125pt x 1355.0625pt>
+<../Output/Figures/Main/drought_map_binary.png, id=50, 1957.3125pt x 1355.0625pt>
 File: ../Output/Figures/Main/drought_map_binary.png Graphic file (type png)
 <use ../Output/Figures/Main/drought_map_binary.png>
-Package pdftex.def Info: ../Output/Figures/Main/drought_map_binary.png  used on input line 496.
+Package pdftex.def Info: ../Output/Figures/Main/drought_map_binary.png  used on input line 461.
 (pdftex.def)             Requested size: 375.80544pt x 260.17317pt.
-<../Output/Figures/Main/event_study_haz.png, id=57, 542.025pt x 325.215pt>
-File: ../Output/Figures/Main/event_study_haz.png Graphic file (type png)
-<use ../Output/Figures/Main/event_study_haz.png>
-Package pdftex.def Info: ../Output/Figures/Main/event_study_haz.png  used on input line 502.
+<../Output/Figures/Main/event_study_severity_bmiz.png, id=51, 542.025pt x 325.215pt>
+File: ../Output/Figures/Main/event_study_severity_bmiz.png Graphic file (type png)
+<use ../Output/Figures/Main/event_study_severity_bmiz.png>
+Package pdftex.def Info: ../Output/Figures/Main/event_study_severity_bmiz.png  used on input line 467.
 (pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
-[13
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 468.
+[11
 
  <../Output/Figures/Main/drought_map_spi.png> <../Output/Figures/Main/drought_map_binary.png>]
-<../Output/Figures/Main/event_study_waz.png, id=64, 542.025pt x 325.215pt>
-File: ../Output/Figures/Main/event_study_waz.png Graphic file (type png)
-<use ../Output/Figures/Main/event_study_waz.png>
-Package pdftex.def Info: ../Output/Figures/Main/event_study_waz.png  used on input line 508.
-(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
-<../Output/Figures/Main/event_study_bmiz.png, id=65, 542.025pt x 325.215pt>
-File: ../Output/Figures/Main/event_study_bmiz.png Graphic file (type png)
-<use ../Output/Figures/Main/event_study_bmiz.png>
-Package pdftex.def Info: ../Output/Figures/Main/event_study_bmiz.png  used on input line 514.
-(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
-[14 <../Output/Figures/Main/event_study_haz.png> <../Output/Figures/Main/event_study_waz.png>]
-<../Output/Figures/Main/contdid_binscatter_haz.png, id=71, 1304.875pt x 903.375pt>
-File: ../Output/Figures/Main/contdid_binscatter_haz.png Graphic file (type png)
-<use ../Output/Figures/Main/contdid_binscatter_haz.png>
-Package pdftex.def Info: ../Output/Figures/Main/contdid_binscatter_haz.png  used on input line 520.
+<../Output/Figures/Main/contdid_binscatter_bmiz.png, id=57, 1304.875pt x 903.375pt>
+File: ../Output/Figures/Main/contdid_binscatter_bmiz.png Graphic file (type png)
+<use ../Output/Figures/Main/contdid_binscatter_bmiz.png>
+Package pdftex.def Info: ../Output/Figures/Main/contdid_binscatter_bmiz.png  used on input line 474.
 (pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
-<../Output/Figures/Main/contdid_binscatter_waz.png, id=72, 1304.875pt x 903.375pt>
-File: ../Output/Figures/Main/contdid_binscatter_waz.png Graphic file (type png)
-<use ../Output/Figures/Main/contdid_binscatter_waz.png>
-Package pdftex.def Info: ../Output/Figures/Main/contdid_binscatter_waz.png  used on input line 526.
-(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
-[15 <../Output/Figures/Main/event_study_bmiz.png> <../Output/Figures/Main/contdid_binscatter_haz.png>]
-<../Output/Figures/Main/contdid_att_clustered_haz.png, id=78, 1304.875pt x 903.375pt>
-File: ../Output/Figures/Main/contdid_att_clustered_haz.png Graphic file (type png)
-<use ../Output/Figures/Main/contdid_att_clustered_haz.png>
-Package pdftex.def Info: ../Output/Figures/Main/contdid_att_clustered_haz.png  used on input line 532.
-(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
-[16 <../Output/Figures/Main/contdid_binscatter_waz.png> <../Output/Figures/Main/contdid_att_clustered_haz.png>] [17
+[12 <../Output/Figures/Main/event_study_severity_bmiz.png> <../Output/Figures/Main/contdid_binscatter_bmiz.png>] [13
+
+] [14
+
+] [15
+
+] [16
+
+] [17
 
 ] [18
 
@@ -298,27 +284,82 @@ Package pdftex.def Info: ../Output/Figures/Main/contdid_att_clustered_haz.png  u
 
 ] [36
 
-] [37
+]
+<../Output/Figures/Appendix/event_study_severity_haz.png, id=139, 542.025pt x 325.215pt>
+File: ../Output/Figures/Appendix/event_study_severity_haz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/event_study_severity_haz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/event_study_severity_haz.png  used on input line 1323.
+(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
+<../Output/Figures/Appendix/event_study_severity_waz.png, id=140, 542.025pt x 325.215pt>
+File: ../Output/Figures/Appendix/event_study_severity_waz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/event_study_severity_waz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/event_study_severity_waz.png  used on input line 1330.
+(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
+<../Output/Figures/Appendix/event_study_haz_controls.png, id=141, 542.025pt x 325.215pt>
+File: ../Output/Figures/Appendix/event_study_haz_controls.png Graphic file (type png)
+<use ../Output/Figures/Appendix/event_study_haz_controls.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/event_study_haz_controls.png  used on input line 1337.
+(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
+[37
 
-] (./Results.aux)
+ <../Output/Figures/Appendix/event_study_severity_haz.png> <../Output/Figures/Appendix/event_study_severity_waz.png>]
+<../Output/Figures/Appendix/event_study_waz_controls.png, id=148, 542.025pt x 325.215pt>
+File: ../Output/Figures/Appendix/event_study_waz_controls.png Graphic file (type png)
+<use ../Output/Figures/Appendix/event_study_waz_controls.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/event_study_waz_controls.png  used on input line 1344.
+(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
+<../Output/Figures/Appendix/event_study_bmiz_controls.png, id=149, 542.025pt x 325.215pt>
+File: ../Output/Figures/Appendix/event_study_bmiz_controls.png Graphic file (type png)
+<use ../Output/Figures/Appendix/event_study_bmiz_controls.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/event_study_bmiz_controls.png  used on input line 1351.
+(pdftex.def)             Requested size: 375.80544pt x 225.49031pt.
+[38 <../Output/Figures/Appendix/event_study_haz_controls.png> <../Output/Figures/Appendix/event_study_waz_controls.png>]
+<../Output/Figures/Appendix/contdid_binscatter_haz.png, id=155, 1304.875pt x 903.375pt>
+File: ../Output/Figures/Appendix/contdid_binscatter_haz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/contdid_binscatter_haz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/contdid_binscatter_haz.png  used on input line 1358.
+(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
+<../Output/Figures/Appendix/contdid_binscatter_waz.png, id=156, 1304.875pt x 903.375pt>
+File: ../Output/Figures/Appendix/contdid_binscatter_waz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/contdid_binscatter_waz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/contdid_binscatter_waz.png  used on input line 1364.
+(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
+[39 <../Output/Figures/Appendix/event_study_bmiz_controls.png> <../Output/Figures/Appendix/contdid_binscatter_haz.png>]
+<../Output/Figures/Appendix/contdid_att_clustered_haz.png, id=162, 1304.875pt x 903.375pt>
+File: ../Output/Figures/Appendix/contdid_att_clustered_haz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/contdid_att_clustered_haz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/contdid_att_clustered_haz.png  used on input line 1370.
+(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
+<../Output/Figures/Appendix/contdid_att_clustered_waz.png, id=163, 1304.875pt x 903.375pt>
+File: ../Output/Figures/Appendix/contdid_att_clustered_waz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/contdid_att_clustered_waz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/contdid_att_clustered_waz.png  used on input line 1376.
+(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
+[40 <../Output/Figures/Appendix/contdid_binscatter_waz.png> <../Output/Figures/Appendix/contdid_att_clustered_haz.png>]
+<../Output/Figures/Appendix/contdid_att_clustered_bmiz.png, id=169, 1304.875pt x 903.375pt>
+File: ../Output/Figures/Appendix/contdid_att_clustered_bmiz.png Graphic file (type png)
+<use ../Output/Figures/Appendix/contdid_att_clustered_bmiz.png>
+Package pdftex.def Info: ../Output/Figures/Appendix/contdid_att_clustered_bmiz.png  used on input line 1382.
+(pdftex.def)             Requested size: 375.80544pt x 260.16629pt.
+[41 <../Output/Figures/Appendix/contdid_att_clustered_waz.png> <../Output/Figures/Appendix/contdid_att_clustered_bmiz.png>] (./Results.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-09-09>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 3339 strings out of 469040
- 61215 string characters out of 5456161
- 526204 words of memory out of 5000000
- 32475 multiletter control sequences out of 15000+600000
- 633119 words of font info for 55 fonts, out of 8000000 for 9000
+ 3399 strings out of 469040
+ 64667 string characters out of 5456161
+ 522438 words of memory out of 5000000
+ 32534 multiletter control sequences out of 15000+600000
+ 633734 words of font info for 57 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 57i,9n,65p,813b,498s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,9n,65p,868b,498s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></Users/zakserby/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb>
-Output written on Results.pdf (37 pages, 1301076 bytes).
+Output written on Results.pdf (41 pages, 1570804 bytes).
 PDF statistics:
- 213 PDF objects out of 1000 (max. 8388607)
- 128 compressed objects within 2 object streams
+ 237 PDF objects out of 1000 (max. 8388607)
+ 136 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 41 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 71 words of extra memory for PDF output out of 10000 (max. 10000000)
 

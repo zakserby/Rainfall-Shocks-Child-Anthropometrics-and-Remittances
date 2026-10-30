@@ -1,16 +1,16 @@
 "outcome","sample","estimate","coef","se_contdid_bootstrap","se_clustered_municipality","n_children"
-"haz","2005-2009","Average ATT (parallel trends)",-0.2061,0.0657,0.0919,2436
-"haz","2005-2009","Average ACRT (needs strong parallel trends)",-0.0957,0.0799,0.167,2436
-"waz","2005-2009","Average ATT (parallel trends)",-0.0365,0.0981,0.0922,1084
-"waz","2005-2009","Average ACRT (needs strong parallel trends)",0.0499,0.1301,0.1386,1084
-"bmiz","2005-2009","Average ATT (parallel trends)",-0.0259,0.0651,0.0768,2383
-"bmiz","2005-2009","Average ACRT (needs strong parallel trends)",0.0148,0.0639,0.0831,2383
-"haz","2005-2009","Average ATT, 2002 remittances = 0",-0.1926,0.089,0.0949,1175
-"haz","2005-2009","Average ATT, 2002 remittances = 1",-0.4837,0.1394,0.1571,674
-"haz","2005-2009","Average ATT difference: remittance minus non-remittance",-0.2911,NA,0.1707,1849
-"waz","2005-2009","Average ATT, 2002 remittances = 0",-0.0547,0.1516,0.1465,432
-"waz","2005-2009","Average ATT, 2002 remittances = 1",-0.3795,0.211,0.1693,293
-"waz","2005-2009","Average ATT difference: remittance minus non-remittance",-0.3247,NA,0.224,725
-"bmiz","2005-2009","Average ATT, 2002 remittances = 0",-0.0771,0.083,0.0996,1150
-"bmiz","2005-2009","Average ATT, 2002 remittances = 1",0.0336,0.1466,0.1639,658
-"bmiz","2005-2009","Average ATT difference: remittance minus non-remittance",0.1107,NA,0.1858,1808
+"haz","2005-2009","Average ATT (parallel trends)",-0.0775,0.0569,0.1017,2436
+"haz","2005-2009","Average ACRT (needs strong parallel trends)",-0.0071,0.0597,0.1373,2436
+"waz","2005-2009","Average ATT (parallel trends)",0.0279,0.0886,0.0907,1084
+"waz","2005-2009","Average ACRT (needs strong parallel trends)",-0.0332,0.1032,0.1732,1084
+"bmiz","2005-2009","Average ATT (parallel trends)",-0.0454,0.0527,0.0654,2383
+"bmiz","2005-2009","Average ACRT (needs strong parallel trends)",0.0291,0.0628,0.1302,2383
+"haz","2005-2009","Average ATT, 2002 remittances = 0",-0.0801,0.0807,0.1073,1175
+"haz","2005-2009","Average ATT, 2002 remittances = 1",-0.2794,0.1096,0.1824,674
+"haz","2005-2009","Average ATT difference: remittance minus non-remittance",-0.1993,NA,0.179,1849
+"waz","2005-2009","Average ATT, 2002 remittances = 0",0.0504,0.1358,0.1524,432
+"waz","2005-2009","Average ATT, 2002 remittances = 1",-0.0304,0.1701,0.19,293
+"waz","2005-2009","Average ATT difference: remittance minus non-remittance",-0.0808,NA,0.2179,725
+"bmiz","2005-2009","Average ATT, 2002 remittances = 0",-0.0424,0.0765,0.0909,1150
+"bmiz","2005-2009","Average ATT, 2002 remittances = 1",0.0312,0.1056,0.1157,658
+"bmiz","2005-2009","Average ATT difference: remittance minus non-remittance",0.0736,NA,0.1449,1808

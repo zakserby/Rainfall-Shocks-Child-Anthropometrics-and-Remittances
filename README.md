@@ -11,7 +11,7 @@
 
 ## Overview
 
-This thesis studies how the 2009 drought in Mexico affected child health, measured by WHO height-for-age (HAZ), weight-for-age (WAZ), and BMI-for-age (BMIZ) z-scores, and whether household remittances buffered the shock. It combines the Mexican Family Life Survey (2002, 2005, 2009) with municipality-level CHIRPS rainfall and estimates binary difference-in-differences, triple differences with 2002 remittances, event studies, and the continuous difference-in-differences of Callaway, Goodman-Bacon and Sant'Anna (2024), with subanalyses by child sex and by rural vs urban locality.
+This thesis studies how the 2009 drought in Mexico affected child health, measured by WHO height-for-age (HAZ), weight-for-age (WAZ), and BMI-for-age (BMIZ) z-scores, and whether household remittances buffered the shock. It combines the Mexican Family Life Survey (2002, 2005, 2009) with municipality-level CHIRPS rainfall over the May-October growing season and estimates binary difference-in-differences, triple differences with 2002 remittances, event studies, and the continuous difference-in-differences of Callaway, Goodman-Bacon and Sant'Anna (2024), with subanalyses by child sex and by rural vs urban locality.
 
 ## How to run
 
@@ -36,7 +36,7 @@ Scripts/
   00_Master.do                      Runs everything in order
   MS Thesis.Rproj                   R project (R scripts take the project root as one folder up from Scripts)
   Cleaning/
-    Cleaned_rainfall_municipality_drought.R   CHIRPS to a municipality-year rainfall panel and drought indicator
+    Cleaned_rainfall_municipality_drought.R   CHIRPS to a municipality-year May-October rainfall panel and drought indicator
     Cleaning Script for MxFLS_2002_03.do      Cleans each MxFLS wave: WHO z-scores, remittances, controls
     Cleaning Script for MxFLS_2005_06.do
     Cleaning Script for MxFLS_2009_12.do      Also appends the three waves into the panel
@@ -47,7 +47,7 @@ Scripts/
     Drought_map.R                   Maps of the 2009 drought by municipality
   Regressions/
     DID_Regs.do                     Binary DID, triple difference, event studies, robustness
-    Contdid_regs.R                  Continuous DID, SPI drought classes, remittance buffer
+    Contdid_regs.R                  Continuous DID, rainfall classes (SPI cutoffs), remittance buffer
     functions.R                     Functions used by the R scripts
     Subanalysis_Gender_*            Same analyses for boys and girls
     Subanalysis_Rural_*             Same analyses for rural and urban children
@@ -63,11 +63,12 @@ Data/
 Output/
   Tables/                 Summary statistics and regression tables (.tex), Main and Appendix
   Regression_Estimates/   Event study coefficients (.dta) and continuous DID estimates (.csv)
-  Figures/                Trends, event studies, continuous DID figures, 2009 drought maps (.png)
+  Figures/                Trends, event studies, continuous DID figures, 2009 drought maps (.png).
+                          Main and Appendix are in the paper, Miscellaneous is not
   Logs/                   Every Stata and R log
 
 Paper/
-  Results.tex, Results.pdf          All main and appendix tables and the main figures
+  Results.tex, Results.pdf          All main and appendix tables and figures
   Proposal.pdf                      Thesis proposal
 
 README.rtf                          Detailed project readme
@@ -83,8 +84,8 @@ Writing Sample.pdf                  Copy of Paper/Results.pdf
 
 ## Software requirements
 
-- **Stata** (tested with Stata 19 MP). reghdfe, ftools, require, estout and distinct install automatically.
+- **Stata** (tested with Stata 19 MP). reghdfe, ftools, require, estout, distinct and boottest install automatically.
 - **R** 4.x (tested with R 4.4.2). terra, sf, data.table, readxl, haven, did (>= 2.5.0), BMisc, sandwich, RColorBrewer and tinytex install automatically. contdid 0.1.1 installs from GitHub (bcallaway11/contdid) and needs ptetools >= 1.0.1. fwildclusterboot 0.13.0 and summclust 0.7.2 install from the CRAN archive and need the Xcode command line tools and gfortran on a Mac.
 - **TinyTeX** compiles Results.pdf; `Build_Results.R` installs it if no LaTeX is found.
 
-Bootstrap results are reproducible: `set.seed(1234)` is set before every bootstrap in R.
+Bootstrap results are reproducible: `set.seed(1234)` is set before every bootstrap in R, and `seed(1234)` for every `boottest` in Stata.

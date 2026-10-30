@@ -124,13 +124,13 @@ rainfall_long[, `:=`(year = year(date), month = month(date))]
 mun_month <- as.data.frame(rainfall_long[, .(rainfall = weighted.mean(rainfall, fraction, na.rm = TRUE)), by = .(cvegeo, year, month)]) 
 cat("Municipality-month done, elapsed:", round(difftime(Sys.time(), start_time, units = "mins"), 1), "min\n") 
 
-# Sum the 12 monthly values to get total annual rainfall per municipality-year   
-# Full year is used because Mexico's natural disasters could fall across the whole year,
-mun_year <- aggregate(rainfall ~ cvegeo + year, data = mun_month, FUN = sum, na.rm = TRUE)   
+# Sum May to October only, the spring-summer growing season for maize, the same as Jessoe et al. (2018)
+# The variable keeps the name annual_rainfall, but it is the May to October total of each year. We do this just for ease
+mun_year <- aggregate(rainfall ~ cvegeo + year, data = mun_month[mun_month$month %in% 5:10, ], FUN = sum, na.rm = TRUE)   
 names(mun_year)[names(mun_year) == "rainfall"] <- "annual_rainfall"   
 
 
-# Baseline 1981-2004 mean and SD of annual rainfall, per municipality, meaning each municipality compared to its own history
+# Baseline 1981-2004 mean and SD of May to October rainfall, per municipality, meaning each municipality compared to its own history
 # Ends in 2004 because the DID shock window starts at the MxFLS-2 interviews 2005, so the baseline never overlaps the years being tested. 
 # The 20th percentile is added for drought according to Manisha Shah and Bryce Millett Steinberg
 # CAN CHECK THIS RAINFALL DROUGHT SHOCK DEFINITION
@@ -152,9 +152,9 @@ mun_year$negative_shock <- as.integer(mun_year$annual_rainfall <= mun_year$long_
 # Standardized deviation from the municipality's own baseline, "normalized deviation", allows +/-2 SD extreme categories in Stata 
 mun_year$rain_z <- (mun_year$annual_rainfall - mun_year$long_run_mean) / mun_year$long_run_sd   
 
-# Add binary drought shock for the DID. Drought = annual rainfall below the 20th percentile of the municipality's own 1981-2004 rainfall by Shah & Steinberg
+# Add binary drought shock for the DID. Drought = May to October rainfall below the 20th percentile of the municipality's own 1981-2004 rainfall by Shah & Steinberg
 # 20th percentile of each district's own history. 
-# We code treat2009 = drought in calendar year 2009 in the child's 2005 municipality (cvegeo05). Note that the 2005-2008 droughts in that same municipality 
+# We code treat2009 = drought in May to October 2009 in the child's 2005 municipality (cvegeo05). Note that the 2005-2008 droughts in that same municipality 
 # enter as controls (drought2005-drought2008 x post).
 mun_year$drought <- as.integer(mun_year$annual_rainfall < mun_year$long_run_p20)   
 attr(mun_year$drought, "label") <- "drought (indicator)"

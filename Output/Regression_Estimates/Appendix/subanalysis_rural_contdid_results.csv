@@ -1,31 +1,31 @@
 "outcome","sample","estimate","coef","se_contdid_bootstrap","se_clustered_municipality","n_children"
-"haz","2005-2009, rural","Average ATT (parallel trends)",0.0857,0.142,0.1985,1020
-"haz","2005-2009, rural","Average ACRT (needs strong parallel trends)",-0.5043,0.149,0.2722,1020
-"waz","2005-2009, rural","Average ATT (parallel trends)",0.0152,0.2334,0.2321,424
-"waz","2005-2009, rural","Average ACRT (needs strong parallel trends)",0.0537,0.2807,0.1994,424
-"bmiz","2005-2009, rural","Average ATT (parallel trends)",0.0227,0.1348,0.1249,1002
-"bmiz","2005-2009, rural","Average ACRT (needs strong parallel trends)",0.1313,0.1258,0.1231,1002
-"haz","2005-2009, urban","Average ATT (parallel trends)",-0.288,0.074,0.0879,1416
-"haz","2005-2009, urban","Average ACRT (needs strong parallel trends)",0.0659,0.0849,0.1363,1416
-"waz","2005-2009, urban","Average ATT (parallel trends)",0.0162,0.1162,0.095,660
-"waz","2005-2009, urban","Average ACRT (needs strong parallel trends)",-0.0364,0.1206,0.1608,660
-"bmiz","2005-2009, urban","Average ATT (parallel trends)",-0.0487,0.083,0.1094,1381
-"bmiz","2005-2009, urban","Average ACRT (needs strong parallel trends)",-0.0503,0.0706,0.1104,1381
-"haz","2005-2009, rural","Average ATT, 2002 remittances = 0",0.1026,0.1543,0.1673,489
-"haz","2005-2009, rural","Average ATT, 2002 remittances = 1",-0.3444,0.3724,0.4162,330
-"haz","2005-2009, rural","Average ATT difference: remittance minus non-remittance",-0.447,NA,0.4053,819
-"waz","2005-2009, rural","Average ATT, 2002 remittances = 0",0.1544,0.227,0.2503,165
-"waz","2005-2009, rural","Average ATT, 2002 remittances = 1",-1.2808,0.3765,0.3518,138
-"waz","2005-2009, rural","Average ATT difference: remittance minus non-remittance",-1.4352,NA,0.4155,303
-"bmiz","2005-2009, rural","Average ATT, 2002 remittances = 0",0.093,0.1609,0.166,482
-"bmiz","2005-2009, rural","Average ATT, 2002 remittances = 1",6e-04,0.3489,0.2082,320
-"bmiz","2005-2009, rural","Average ATT difference: remittance minus non-remittance",-0.0924,NA,0.2084,802
-"haz","2005-2009, urban","Average ATT, 2002 remittances = 0",-0.2322,0.1042,0.0973,686
-"haz","2005-2009, urban","Average ATT, 2002 remittances = 1",-0.5813,0.1614,0.1556,344
-"haz","2005-2009, urban","Average ATT difference: remittance minus non-remittance",-0.3491,NA,0.1947,1030
-"waz","2005-2009, urban","Average ATT, 2002 remittances = 0",0.0202,0.1688,0.1514,267
-"waz","2005-2009, urban","Average ATT, 2002 remittances = 1",-0.2579,0.2223,0.1992,155
-"waz","2005-2009, urban","Average ATT difference: remittance minus non-remittance",-0.2781,NA,0.251,422
-"bmiz","2005-2009, urban","Average ATT, 2002 remittances = 0",-0.142,0.1049,0.1291,668
-"bmiz","2005-2009, urban","Average ATT, 2002 remittances = 1",0.0211,0.1544,0.2144,338
-"bmiz","2005-2009, urban","Average ATT difference: remittance minus non-remittance",0.1631,NA,0.2531,1006
+"haz","2005-2009, rural","Average ATT (parallel trends)",0.1008,0.0917,0.1876,1020
+"haz","2005-2009, rural","Average ACRT (needs strong parallel trends)",0.0542,0.1167,0.2961,1020
+"waz","2005-2009, rural","Average ATT (parallel trends)",0.0656,0.1455,0.194,424
+"waz","2005-2009, rural","Average ACRT (needs strong parallel trends)",-0.0947,0.22,0.2489,424
+"bmiz","2005-2009, rural","Average ATT (parallel trends)",-0.0349,0.0852,0.0929,1002
+"bmiz","2005-2009, rural","Average ACRT (needs strong parallel trends)",0.0736,0.1156,0.2036,1002
+"haz","2005-2009, urban","Average ATT (parallel trends)",-0.1803,0.074,0.1024,1416
+"haz","2005-2009, urban","Average ACRT (needs strong parallel trends)",-0.1864,0.0757,0.1542,1416
+"waz","2005-2009, urban","Average ATT (parallel trends)",0.0474,0.1056,0.0941,660
+"waz","2005-2009, urban","Average ACRT (needs strong parallel trends)",-0.2302,0.1238,0.2807,660
+"bmiz","2005-2009, urban","Average ATT (parallel trends)",-0.054,0.0764,0.0989,1381
+"bmiz","2005-2009, urban","Average ACRT (needs strong parallel trends)",-0.1415,0.0716,0.1688,1381
+"haz","2005-2009, rural","Average ATT, 2002 remittances = 0",0.131,0.1213,0.1926,489
+"haz","2005-2009, rural","Average ATT, 2002 remittances = 1",-0.0528,0.1583,0.2946,330
+"haz","2005-2009, rural","Average ATT difference: remittance minus non-remittance",-0.1838,NA,0.2918,819
+"waz","2005-2009, rural","Average ATT, 2002 remittances = 0",0.034,0.1992,0.2641,165
+"waz","2005-2009, rural","Average ATT, 2002 remittances = 1",0.0644,0.3218,0.3582,138
+"waz","2005-2009, rural","Average ATT difference: remittance minus non-remittance",0.0303,NA,0.3875,303
+"bmiz","2005-2009, rural","Average ATT, 2002 remittances = 0",-0.0266,0.1279,0.1389,482
+"bmiz","2005-2009, rural","Average ATT, 2002 remittances = 1",0.1069,0.1685,0.1225,320
+"bmiz","2005-2009, rural","Average ATT difference: remittance minus non-remittance",0.1334,NA,0.1673,802
+"haz","2005-2009, urban","Average ATT, 2002 remittances = 0",-0.1737,0.1007,0.1013,686
+"haz","2005-2009, urban","Average ATT, 2002 remittances = 1",-0.4974,0.1472,0.1763,344
+"haz","2005-2009, urban","Average ATT difference: remittance minus non-remittance",-0.3237,NA,0.2018,1030
+"waz","2005-2009, urban","Average ATT, 2002 remittances = 0",0.1364,0.173,0.1534,267
+"waz","2005-2009, urban","Average ATT, 2002 remittances = 1",-0.1153,0.2002,0.2112,155
+"waz","2005-2009, urban","Average ATT difference: remittance minus non-remittance",-0.2517,NA,0.2427,422
+"bmiz","2005-2009, urban","Average ATT, 2002 remittances = 0",-0.0511,0.097,0.122,668
+"bmiz","2005-2009, urban","Average ATT, 2002 remittances = 1",-0.0405,0.1347,0.1845,338
+"bmiz","2005-2009, urban","Average ATT difference: remittance minus non-remittance",0.0106,NA,0.2306,1006

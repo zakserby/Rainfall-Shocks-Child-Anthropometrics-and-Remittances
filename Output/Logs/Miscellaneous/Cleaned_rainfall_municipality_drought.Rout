@@ -4,9 +4,9 @@ Loading required package: sf
 Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE
 Loading required package: data.table
 
-Attaching package: ‘data.table’
+Attaching package: 'data.table'
 
-The following object is masked from ‘package:terra’:
+The following object is masked from 'package:terra':
 
     shift
 
@@ -15,12 +15,12 @@ Loading required package: haven
      terra         sf data.table     readxl      haven 
       TRUE       TRUE       TRUE       TRUE       TRUE 
 Warning messages:
-1: package ‘terra’ was built under R version 4.4.3 
-2: package ‘sf’ was built under R version 4.4.3 
-3: package ‘data.table’ was built under R version 4.4.3 
-|---------|---------|---------|---------|=========================================                                          |---------|---------|---------|---------|=========================================                                          |---------|---------|---------|---------|=========================================                                          Mask done, elapsed: 0.7 min
+1: package 'terra' was built under R version 4.4.3 
+2: package 'sf' was built under R version 4.4.3 
+3: package 'data.table' was built under R version 4.4.3 
+|---------|---------|---------|---------|=========================================                                          |---------|---------|---------|---------|=========================================                                          |---------|---------|---------|---------|=========================================                                          Mask done, elapsed: 0.8 min
 [1] 396
-|---------|---------|---------|---------|=========================================                                          Extract done, elapsed: 0.9 min
+|---------|---------|---------|---------|=========================================                                          Extract done, elapsed: 1.6 min
   ID  1981-01  1981-02   1981-03  1981-04  1981-05  1981-06  1981-07  1981-08
 1  1 22.04458 25.76187 12.946746 34.26867 58.67908 317.4500 232.3954 198.5493
 2  1 23.77676 15.36124 10.095896 38.29455 55.40924 232.6575 166.5575 141.8644
@@ -729,7 +729,7 @@ Warning messages:
 4  09012 -99.225 19.275
 5  09012 -99.175 19.275
 6  09012 -99.125 19.275
-Reshape done, elapsed: 2.8 min
+Reshape done, elapsed: 3.3 min
       ID   cell cvegeo   fraction     lon    lat       date rainfall
    <num>  <num> <char>      <num>   <num>  <num>     <Date>    <num>
 1:     1 169662  09012 0.09779493 -99.225 19.325 1981-01-01 22.04458
@@ -741,5 +741,5 @@ Reshape done, elapsed: 2.8 min
 [1] 41949864        8
 [1] 2456
 [1] "1981-01-01" "2013-12-01"
-Municipality-month done, elapsed: 2.8 min
-Total runtime: 2.8 min
+Municipality-month done, elapsed: 3.4 min
+Total runtime: 3.4 min

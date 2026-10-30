@@ -4,7 +4,7 @@
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Miscellaneous/build_did_analysis_
 > data.log
   log type:  text
- opened on:  26 Oct 2026, 03:49:30
+ opened on:  30 Oct 2026, 03:43:52
 .     do "$scripts/Cleaning/Build_DID_Analysis_Data.do"
 
 . *******************************************************************
@@ -175,7 +175,7 @@ xij variables:
 .     tempfile rain_wide
 
 .     save `rain_wide'
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St01124.000002 saved
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
     as .dta format
 
 . restore
@@ -625,5 +625,5 @@ end of do-file
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Miscellaneous/build_did_analysis_
 > data.log
   log type:  text
- closed on:  26 Oct 2026, 03:49:33
+ closed on:  30 Oct 2026, 03:43:55
 -------------------------------------------------------------------------------

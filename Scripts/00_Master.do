@@ -1,6 +1,6 @@
 *******************************************************************
 * MASTER FILE: runs the project's scripts in order
-* Project: MS Thesis (Mexico: natural disasters, remittances, child health)
+* Project: MS Thesis
 *******************************************************************
 clear all
 set more off
@@ -48,7 +48,7 @@ capture mkdir "$root/Output/Figures/Miscellaneous"
 * 2). Select what to run, where 1 runs it and 0 doesn't
 *******************************************************************
 
-global run_R           0   // Rebuild the municipality rainfall data in R. Note: it is slow because it reads the 7.7 GB CHIRPS file). Also its output is already in Data/Cleaned 
+global run_R           0   // Rebuild the municipality May to October rainfall data in R. Note: it is slow because it reads the 7.7 GB CHIRPS file). Also its output is already in Data/Cleaned 
 global run_cleaning    1   // MxFLS cleans all waves and appends them 
 global run_build_did   1   // Builds the DID analysis data once. Note: The summary stats, DID, continuous DID and subanalyses all load it
 global run_sumstats_did 1  // DID summary statistics 
@@ -60,7 +60,7 @@ global run_sub_gender_contdid 1   // Subanalyses: continuous DID for boys and gi
 global run_sub_rural_did     1   // Subanalyses: DID regressions for rural and urban children separately
 global run_sub_rural_contdid 1   // Subanalyses: continuous DID for rural and urban children separately. Slow for the same reason as run_contdid
 global run_regstats    1   // Exports the regression tables to LaTeX. Note: runs last because it needs the continuous DID results from R
-global run_paper       1   // Puts all main and appendix tables and the main figures into Paper/Results.tex and compiles Paper/Results.pdf
+global run_paper       1   // Puts all main and appendix tables and the main and appendix figures into Paper/Results.tex and compiles Paper/Results.pdf
 
 * If the municipality rainfall data is not in Data/Cleaned yet, e.g. a fresh copy with only the raw data, the R rainfall step runs even if run_R is 0
 capture confirm file "$clean_rain/municipality_year_rainfall.dta"
@@ -143,6 +143,7 @@ if $run_map {
 *******************************************************************
 
 * DID regressions
+* Event studies by SPI class without controls, on the SPI table children
 if $run_did {
     log using "$out_logs/Main/did_regs.log", replace text name(regs_did)
     do "$scripts/Regressions/DID_Regs.do" 
@@ -186,7 +187,7 @@ if $run_sub_rural_did {
     log close sub_rural_did
 }
 
-* In general, as with this code below, Stata runs that R script in the background through the Mac terminal. Everything R prints, including any errors, is saved to a log file. This is if rural contdid is switched on
+* Again, Stata runs that R script in the background through the Mac terminal
 if $run_sub_rural_contdid {
     cd "$scripts"
     shell "$Rscript" "$scripts/Regressions/Subanalysis_Rural_Contdid_regs.R" > "$out_logs/Miscellaneous/Subanalysis_Rural_Contdid_regs.Rout" 2>&1 

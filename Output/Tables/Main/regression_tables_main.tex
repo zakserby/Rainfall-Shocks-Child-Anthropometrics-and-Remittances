@@ -12,72 +12,34 @@
 \renewcommand{\arraystretch}{0.86}
 \setlength{\tabcolsep}{4pt}
 \setlength{\LTcapwidth}{\textwidth}
-\begin{longtable}{l*{5}{c}}
-\caption{2009 Drought and Height-for-Age, Binary DID}\\
+\begin{longtable}{l*{6}{c}}
+\caption{2009 Drought and Child Anthropometrics, Rainfall Classes}\\
 \toprule
- & \multicolumn{5}{c}{Height-for-age z-score (HAZ)}\\
-\cmidrule(lr){2-6}
-            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         \\
+ & \multicolumn{2}{c}{HAZ} & \multicolumn{2}{c}{WAZ} & \multicolumn{2}{c}{BMIZ}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+ & (1) & (2) & (3) & (4) & (5) & (6)\\
 \midrule
-Drought \ensuremath{\times} post&       0.003         &       0.049         &       0.013         &       0.126         &      -0.043         \\
-            &     (0.094)         &     (0.100)         &     (0.110)         &     (0.164)         &     (0.117)         \\
-Drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances&                     &                     &                     &                     &      -0.093         \\
-            &                     &                     &                     &                     &     (0.143)         \\
-2002 remittances \ensuremath{\times} post&                     &                     &                     &                     &      -0.188\sym{*}  \\
-            &                     &                     &                     &                     &     (0.097)         \\
+Dry, \ensuremath{z\le -1} & -0.041 &  & -0.197 &  & -0.163\sym{**} & \\
+ & (0.100) &  & (0.117) &  & (0.076) & \\
+ & [0.704] &  & [0.104] &  & [0.036] & \\
+Moderately dry, \ensuremath{-1.5<z\le -1} &  & 0.018 &  & -0.230 &  & -0.221\sym{*}\\
+ &  & (0.139) &  & (0.164) &  & (0.106)\\
+ &  & [0.915] &  & [0.220] &  & [0.062]\\
+Severely dry or worse, \ensuremath{z\le -1.5} &  & -0.117 &  & -0.148 &  & -0.086\\
+ &  & (0.112) &  & (0.119) &  & (0.068)\\
+ &  & [0.308] &  & [0.238] &  & [0.218]\\
 \midrule
-2005--2008 droughts \ensuremath{\times} post&           N         &           Y         &           Y         &           Y         &           Y         \\
-2002 household controls \ensuremath{\times} post&           N         &           N         &           Y         &           Y         &           Y         \\
-2005 child and mother controls \ensuremath{\times} post&           N         &           N         &           Y         &           Y         &           Y         \\
-2005 father and birth controls \ensuremath{\times} post&           N         &           N         &           N         &           Y         &           N         \\
-Child FE    &           Y         &           Y         &           Y         &           Y         &           Y         \\
-Interview year-month FE&           Y         &           Y         &           Y         &           Y         &           Y         \\
-Children    &       2,432         &       2,432         &       1,755         &         734         &       1,622         \\
+P-val: pre-trend 2002--2005, moderately dry & & 0.933 & & 0.393 & & 0.230\\
+P-val: pre-trend 2002--2005, severely dry or worse & & 0.791 & & 0.237 & & 0.040\\
+Children & 2,351 & 2,351 & 1,045 & 1,045 & 2,300 & 2,300\\
+Dry 2005 municipalities & 40 &  & 39 &  & 40 & \\
+Near-normal 2005 municipalities & 89 & 89 & 80 & 80 & 89 & 89\\
 \bottomrule
-\addlinespace[6pt]\multicolumn{6}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table reports the effect of the 2009 drought on the WHO height-for-age z-score (HAZ) with the binary DID. Regressions are at the child-wave level. The sample is children with the outcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009),
-aged 15 or younger in both rounds. Children have a 2005 municipality and were not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Drought equals 1 if annual CHIRPS rainfall in 2009 in the child's 2005 municipality was below its 1981--2004 20th percentile,
-and post equals 1 in MxFLS-3. Remittances equal 1 if the household received cash in the last 12 months from parents, siblings, or children living outside the household in MxFLS-1 (2002), a proxy for remittances. Cols. 1--4 report the average drought
-effect. Col. 1 is the basic DID, Col. 2 adds the 2005--2008 droughts, and Col. 3 adds 2002 household controls (electricity, floor, roof, ventilation, sleeping rooms per person, log expenditure per capita, rural) and 2005 child and mother controls (child sex and full vaccination, mother's height, schooling, age at birth and employment). Col. 4 adds the 2005 father and birth controls (father's height, schooling, age at birth and employment, birth order, oldest child,
-birth weight, delivered at home, weeks predominantly breastfed, iron in pregnancy, premature), which are missing for many children, often because the father migrated. All controls are interacted with post. Col. 5 is the triple difference: it keeps the controls of Col. 3
-and adds 2002 remittances \ensuremath{\times} post and drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances, the difference in the drought effect for children in 2002 remittance households. Rural is a locality with fewer than 2,500 inhabitants (INEGI, 2024). All regressions include child and interview year-month
-fixed effects, children in singleton cells are dropped, and standard errors are clustered by 2005 municipality, where the drought is assigned. \sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}\\
-\end{longtable}
-\endgroup
-\clearpage
-\begingroup
-\footnotesize
-\renewcommand{\arraystretch}{0.86}
-\setlength{\tabcolsep}{4pt}
-\setlength{\LTcapwidth}{\textwidth}
-\begin{longtable}{l*{5}{c}}
-\caption{2009 Drought and Weight-for-Age, Binary DID}\\
-\toprule
- & \multicolumn{5}{c}{Weight-for-age z-score (WAZ)}\\
-\cmidrule(lr){2-6}
-            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         \\
-\midrule
-Drought \ensuremath{\times} post&      -0.162\sym{*}  &      -0.150         &      -0.321\sym{***}&      -0.247         &      -0.266\sym{**} \\
-            &     (0.096)         &     (0.107)         &     (0.115)         &     (0.194)         &     (0.130)         \\
-Drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances&                     &                     &                     &                     &      -0.194         \\
-            &                     &                     &                     &                     &     (0.213)         \\
-2002 remittances \ensuremath{\times} post&                     &                     &                     &                     &       0.025         \\
-            &                     &                     &                     &                     &     (0.118)         \\
-\midrule
-2005--2008 droughts \ensuremath{\times} post&           N         &           Y         &           Y         &           Y         &           Y         \\
-2002 household controls \ensuremath{\times} post&           N         &           N         &           Y         &           Y         &           Y         \\
-2005 child and mother controls \ensuremath{\times} post&           N         &           N         &           Y         &           Y         &           Y         \\
-2005 father and birth controls \ensuremath{\times} post&           N         &           N         &           N         &           Y         &           N         \\
-Child FE    &           Y         &           Y         &           Y         &           Y         &           Y         \\
-Interview year-month FE&           Y         &           Y         &           Y         &           Y         &           Y         \\
-Children    &       1,078         &       1,078         &         700         &         224         &         634         \\
-\bottomrule
-\addlinespace[6pt]\multicolumn{6}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table reports the effect of the 2009 drought on the WHO weight-for-age z-score (WAZ) with the binary DID. Regressions are at the child-wave level. The sample is children with the outcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009),
-aged 10 or younger in both rounds. Children have a 2005 municipality and were not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Drought equals 1 if annual CHIRPS rainfall in 2009 in the child's 2005 municipality was below its 1981--2004 20th percentile,
-and post equals 1 in MxFLS-3. Remittances equal 1 if the household received cash in the last 12 months from parents, siblings, or children living outside the household in MxFLS-1 (2002), a proxy for remittances. Cols. 1--4 report the average drought
-effect. Col. 1 is the basic DID, Col. 2 adds the 2005--2008 droughts, and Col. 3 adds 2002 household controls (electricity, floor, roof, ventilation, sleeping rooms per person, log expenditure per capita, rural) and 2005 child and mother controls (child sex and full vaccination, mother's height, schooling, age at birth and employment). Col. 4 adds the 2005 father and birth controls (father's height, schooling, age at birth and employment, birth order, oldest child,
-birth weight, delivered at home, weeks predominantly breastfed, iron in pregnancy, premature), which are missing for many children, often because the father migrated. All controls are interacted with post. Col. 5 is the triple difference: it keeps the controls of Col. 3
-and adds 2002 remittances \ensuremath{\times} post and drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances, the difference in the drought effect for children in 2002 remittance households. Rural is a locality with fewer than 2,500 inhabitants (INEGI, 2024). All regressions include child and interview year-month
-fixed effects, children in singleton cells are dropped, and standard errors are clustered by 2005 municipality, where the drought is assigned. \sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}\\
+\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table compares children in dry 2005 municipalities with children in near-normal ones. Regressions are at the child level, on the 2005 to 2009 change in the WHO z-score,
+for the binary DID estimation samples without children in wet municipalities (z of 1 or above). z is 2009 May--October CHIRPS rainfall, the maize growing season (Jessoe et al., 2018), in the child's 2005 municipality in standard deviations from its 1981--2004 mean, grouped into standardized rainfall classes with the SPI cutoffs:
+near normal is z between -1 and 1, moderately dry between -1.5 and -1, and severely dry or worse -1.5 or below (McKee et al., 1993). Cols. 1, 3 and 5 compare dry (z of -1 or below) with near normal, and Cols. 2, 4 and 6 split dry into moderately dry and
+severely dry or worse. Each class is only compared with near normal, which needs parallel trends, and not with the other class, which would need strong parallel trends (Callaway et al., 2024). Since the contdid package does not yet support discrete doses, the classes are estimated with the discrete-dose regression in equation 4.1 (Callaway et al., 2024). The regressions have no controls, as the contdid package does not yet support covariates (Callaway et al., 2024). The pre-trend p-values test the 2002 leads of the rainfall class event study, on the same children with child and wave fixed effects. Standard errors clustered by 2005 municipality are in parentheses.
+Wild cluster bootstrap p-values are in brackets, which tend to be conservative with few treated municipalities (MacKinnon et al., 2023). Stars use the clustered p-values, and where a wild bootstrap p-value is shown both must pass. \mbox{\sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}}\\
 \end{longtable}
 \endgroup
 \clearpage
@@ -93,11 +55,11 @@ fixed effects, children in singleton cells are dropped, and standard errors are 
 \cmidrule(lr){2-6}
             &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         \\
 \midrule
-Drought \ensuremath{\times} post&      -0.112         &      -0.094         &      -0.167\sym{*}  &      -0.068         &      -0.149         \\
-            &     (0.073)         &     (0.077)         &     (0.086)         &     (0.105)         &     (0.104)         \\
-Drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances&                     &                     &                     &                     &      -0.006         \\
-            &                     &                     &                     &                     &     (0.211)         \\
-2002 remittances \ensuremath{\times} post&                     &                     &                     &                     &       0.032         \\
+Drought \ensuremath{\times} post&      -0.145\sym{**} &      -0.180\sym{**} &      -0.304\sym{***}&      -0.212\sym{*}  &      -0.266\sym{**} \\
+            &     (0.071)         &     (0.087)         &     (0.095)         &     (0.112)         &     (0.110)         \\
+Drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances&                     &                     &                     &                     &       0.027         \\
+            &                     &                     &                     &                     &     (0.217)         \\
+2002 remittances \ensuremath{\times} post&                     &                     &                     &                     &       0.010         \\
             &                     &                     &                     &                     &     (0.074)         \\
 \midrule
 2005--2008 droughts \ensuremath{\times} post&           N         &           Y         &           Y         &           Y         &           Y         \\
@@ -109,48 +71,12 @@ Interview year-month FE&           Y         &           Y         &           Y
 Children    &       2,379         &       2,379         &       1,714         &         712         &       1,587         \\
 \bottomrule
 \addlinespace[6pt]\multicolumn{6}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table reports the effect of the 2009 drought on the WHO BMI-for-age z-score (BMIZ) with the binary DID. Regressions are at the child-wave level. The sample is children with the outcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009),
-aged 15 or younger in both rounds. Children have a 2005 municipality and were not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Drought equals 1 if annual CHIRPS rainfall in 2009 in the child's 2005 municipality was below its 1981--2004 20th percentile,
+aged 15 or younger in both rounds. Cols. 3--5 also keep only children with all of their regressors observed. Children have a 2005 municipality. They were not measured in MxFLS-3 before November 2009. We use November 2009 as the cutoff because the 2009 rainfall deficit, the drought, had not fully occurred before then. Dropping them from both groups equalizes treated and control measurement timing. Drought equals 1 if May--October CHIRPS rainfall in 2009, the maize growing season (Jessoe et al., 2018), in the child's 2005 municipality was below its 1981--2004 20th percentile,
 and post equals 1 in MxFLS-3. Remittances equal 1 if the household received cash in the last 12 months from parents, siblings, or children living outside the household in MxFLS-1 (2002), a proxy for remittances. Cols. 1--4 report the average drought
 effect. Col. 1 is the basic DID, Col. 2 adds the 2005--2008 droughts, and Col. 3 adds 2002 household controls (electricity, floor, roof, ventilation, sleeping rooms per person, log expenditure per capita, rural) and 2005 child and mother controls (child sex and full vaccination, mother's height, schooling, age at birth and employment). Col. 4 adds the 2005 father and birth controls (father's height, schooling, age at birth and employment, birth order, oldest child,
 birth weight, delivered at home, weeks predominantly breastfed, iron in pregnancy, premature), which are missing for many children, often because the father migrated. All controls are interacted with post. Col. 5 is the triple difference: it keeps the controls of Col. 3
 and adds 2002 remittances \ensuremath{\times} post and drought \ensuremath{\times} post \ensuremath{\times} 2002 remittances, the difference in the drought effect for children in 2002 remittance households. Rural is a locality with fewer than 2,500 inhabitants (INEGI, 2024). All regressions include child and interview year-month
-fixed effects, children in singleton cells are dropped, and standard errors are clustered by 2005 municipality, where the drought is assigned. \sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}\\
-\end{longtable}
-\endgroup
-\clearpage
-\begingroup
-\footnotesize
-\renewcommand{\arraystretch}{0.86}
-\setlength{\tabcolsep}{4pt}
-\setlength{\LTcapwidth}{\textwidth}
-\begin{longtable}{l*{6}{c}}
-\caption{2009 Drought and Child Anthropometrics, SPI Drought Classes}\\
-\toprule
- & \multicolumn{2}{c}{HAZ} & \multicolumn{2}{c}{WAZ} & \multicolumn{2}{c}{BMIZ}\\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
- & (1) & (2) & (3) & (4) & (5) & (6)\\
-\midrule
-Dry, \ensuremath{z\le -1} & -0.003 &  & -0.206\sym{*} &  & -0.127 & \\
- & (0.098) &  & (0.111) &  & (0.076) & \\
- & [0.974] &  & [0.067] &  & [0.106] & \\
-Moderately dry, \ensuremath{-1.5<z\le -1} &  & 0.162 &  & -0.080 &  & -0.125\\
- &  & (0.105) &  & (0.118) &  & (0.132)\\
- &  & [0.156] &  & [0.521] &  & [0.456]\\
-Severely dry or worse, \ensuremath{z\le -1.5} &  & -0.149 &  & -0.322\sym{*} &  & -0.129\sym{*}\\
- &  & (0.126) &  & (0.168) &  & (0.067)\\
- &  & [0.296] &  & [0.050] &  & [0.070]\\
-\midrule
-P-val: pre-trend 2002--2005, moderately dry & & 0.161 & & 0.528 & & 0.556\\
-P-val: pre-trend 2002--2005, severely dry or worse & & 0.868 & & 0.613 & & 0.020\\
-Children & 2,400 & 2,400 & 1,075 & 1,075 & 2,348 & 2,348\\
-Dry 2005 municipalities & 50 &  & 46 &  & 50 & \\
-Near-normal 2005 municipalities & 81 & 81 & 75 & 75 & 81 & 81\\
-\bottomrule
-\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table compares children in dry 2005 municipalities with children in near-normal ones. Regressions are at the child level, on the 2005 to 2009 change in the WHO z-score,
-for the binary DID estimation samples without children in wet municipalities (z of 1 or above). z is 2009 annual CHIRPS rainfall in the child's 2005 municipality in standard deviations from its 1981--2004 mean, grouped with the SPI classes of
-McKee et al. (1993): near normal is z between -1 and 1, moderately dry between -1.5 and -1, and severely dry or worse -1.5 or below. Cols. 1, 3 and 5 compare dry (z of -1 or below) with near normal, and Cols. 2, 4 and 6 split dry into moderately dry and
-severely dry or worse. Each class is only compared with near normal, which needs parallel trends, and not with the other class, which would need strong parallel trends (Callaway et al., 2024). Since the contdid package does not yet support discrete doses, the classes are estimated with the discrete-dose regression in equation 4.1 (Callaway et al., 2024). Standard errors clustered by 2005 municipality are in parentheses.
-Wild cluster bootstrap p-values are in brackets, which tend to be conservative with few treated municipalities (MacKinnon et al., 2023). Stars use the clustered p-values, and where a wild bootstrap p-value is shown both must pass: \sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}\\
+fixed effects, children in singleton cells are dropped, and standard errors are clustered by 2005 municipality, where the drought is assigned. \mbox{\sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}}\\
 \end{longtable}
 \endgroup
 \clearpage
@@ -166,37 +92,37 @@ Wild cluster bootstrap p-values are in brackets, which tend to be conservative w
  & (1) & (2) & (3)\\
 \midrule
 \textit{Panel A: Continuous DID, any 2009 rainfall deficit} & & & \\
-Average ATT & -0.206\sym{**} & -0.036 & -0.026\\
- & (0.089) & (0.092) & (0.080)\\
- & [0.040] & [0.696] & [0.760]\\
-Average ACRT & -0.096 & 0.050 & 0.015\\
- & (0.167) & (0.139) & (0.083)\\
+Average ATT & -0.077 & 0.028 & -0.045\\
+ & (0.101) & (0.097) & (0.069)\\
+ & [0.462] & [0.777] & [0.518]\\
+Average ACRT & -0.007 & -0.033 & 0.029\\
+ & (0.137) & (0.173) & (0.130)\\
 Children & 2,436 & 1,084 & 2,383\\
 \addlinespace[6pt]\textit{Panel B: Average ATT by 2002 remittances} & & & \\
-No 2002 remittances & -0.193\sym{**} & -0.055 & -0.077\\
- & (0.095) & (0.146) & (0.100)\\
-2002 remittances & -0.484\sym{***} & -0.380\sym{**} & 0.034\\
- & (0.157) & (0.169) & (0.164)\\
-Difference, remittances minus none & -0.291\sym{*} & -0.325 & 0.111\\
- & (0.171) & (0.224) & (0.186)\\
+No 2002 remittances & -0.080 & 0.050 & -0.042\\
+ & (0.107) & (0.152) & (0.091)\\
+2002 remittances & -0.279 & -0.030 & 0.031\\
+ & (0.182) & (0.190) & (0.116)\\
+Difference, remittances minus none & -0.199 & -0.081 & 0.074\\
+ & (0.179) & (0.218) & (0.145)\\
 Children & 1,849 & 725 & 1,808\\
 \addlinespace[6pt]\textit{Panel C: Dry vs near normal by 2002 remittances} & & & \\
-Dry, \ensuremath{z\le -1} & -0.069 & -0.233 & -0.163\\
- & (0.113) & (0.182) & (0.107)\\
- & [0.573] & [0.260] & [0.156]\\
-Dry \ensuremath{\times} 2002 remittances & -0.081 & -0.115 & 0.073\\
- & (0.136) & (0.216) & (0.199)\\
- & [0.559] & [0.602] & [0.724]\\
-2002 remittances & -0.066 & 0.057 & 0.062\\
- & (0.108) & (0.128) & (0.071)\\
- & [0.553] & [0.664] & [0.392]\\
-Children & 1,814 & 716 & 1,774\\
+Dry, \ensuremath{z\le -1} & -0.054 & -0.160 & -0.251\sym{**}\\
+ & (0.114) & (0.200) & (0.109)\\
+ & [0.657] & [0.543] & [0.027]\\
+Dry \ensuremath{\times} 2002 remittances & -0.135 & -0.220 & 0.100\\
+ & (0.133) & (0.216) & (0.207)\\
+ & [0.317] & [0.329] & [0.653]\\
+2002 remittances & -0.040 & 0.088 & 0.039\\
+ & (0.109) & (0.134) & (0.070)\\
+ & [0.722] & [0.524] & [0.577]\\
+Children & 1,773 & 693 & 1,734\\
 \bottomrule
-\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table reports the continuous DID of Callaway et al. (2024) and tests whether 2002 remittances moderated the effect of the 2009 drought. Regressions are at the child level, on the 2005 to 2009
-change in the WHO z-score, for the binary DID estimation samples. The dose is the 2009 rainfall deficit, max(0,~-z), where z is 2009 annual CHIRPS rainfall in the child's 2005 municipality in standard deviations from its 1981--2004 mean. Panel A compares
+\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table reports the continuous DID (Callaway et al., 2024) and tests whether 2002 remittances moderated the effect of the 2009 drought. Regressions are at the child level, on the 2005 to 2009
+change in the WHO z-score, for the binary DID estimation samples. The dose is the 2009 rainfall deficit, max(0,~-z), where z is 2009 May--October CHIRPS rainfall, the maize growing season (Jessoe et al., 2018), in the child's 2005 municipality in standard deviations from its 1981--2004 mean. Panel A compares
 children with any 2009 deficit (z below 0) with children without one, Panel B gives the average ATT separately for children in 2002 remittance and non-remittance households and their difference, and Panel C interacts dry (z of -1 or below) vs near normal
 with 2002 remittances. Remittances are cash received in the last 12 months from parents, siblings, or children living outside the household in MxFLS-1 (2002), a proxy for remittances. The average ATT needs parallel trends, while the average ACRT, the average slope of the dose response, and comparisons between doses need strong parallel trends (Callaway et al., 2024). Panel A uses the contdid package (Callaway et al., 2024). Panels B and C are regressions on the 2005 to 2009 change, and Panel C uses the discrete-dose regression in equation 4.1 (Callaway et al., 2024). The estimator does not allow controls or fixed effects.
-Standard errors in parentheses are clustered by 2005 municipality, where the drought is assigned. Because the package only bootstraps at the child level, we coded a multiplier bootstrap of its influence functions that clusters by 2005 municipality, and the other rows use municipality-clustered regression standard errors. Wild cluster bootstrap p-values are in brackets, which tend to be conservative with few treated municipalities (MacKinnon et al., 2023). Stars use the clustered p-values, and where a wild bootstrap p-value is shown both must pass: \sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}\\
+Standard errors in parentheses are clustered by 2005 municipality, where the drought is assigned. Because the package only bootstraps at the child level, we coded a multiplier bootstrap of its influence functions that clusters by 2005 municipality, and the other rows use municipality-clustered regression standard errors. Wild cluster bootstrap p-values are in brackets, which tend to be conservative with few treated municipalities (MacKinnon et al., 2023). Stars use the clustered p-values, and where a wild bootstrap p-value is shown both must pass. \mbox{\sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}}\\
 \end{longtable}
 \endgroup
 \end{document}

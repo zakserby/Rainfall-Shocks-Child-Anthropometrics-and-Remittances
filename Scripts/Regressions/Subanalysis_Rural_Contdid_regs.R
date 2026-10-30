@@ -242,7 +242,7 @@ for (s in names(misc$rural)) {
     trt$bin <- cut(trt$D, breaks = unique(quantile(trt$D, seq(0, 1, .1))), include.lowest = TRUE)
     bins <- aggregate(cbind(D, dY) ~ bin, data = trt, FUN = mean)
     bins$n <- as.numeric(table(trt$bin)[as.character(bins$bin)])
-    png(paste(dir$output_figure,"/Appendix/contdid_binscatter_",k,".png",sep=""), width = 6.5, height = 4.5, units = "in", res = 200)
+    png(paste(dir$output_figure,"/Miscellaneous/contdid_binscatter_",k,".png",sep=""), width = 6.5, height = 4.5, units = "in", res = 200)
     plot(bins$D, bins$dY, pch = 21, bg = "grey70", cex = 1 + 2 * bins$n / max(bins$n),
          xlab = "2009 rainfall deficit (SDs below the 1981-2004 mean)", ylab = paste0("Change in ", v, ", 2005 to 2009"),
          main = paste0("Change in ", v, " by 2009 rainfall deficit, ", s), ylim = range(c(bins$dY, mean(unt$dY))))
@@ -270,9 +270,9 @@ for (s in names(misc$rural)) {
 
     # ---- d. Plots ----
     xlab <- "2009 rainfall deficit (SDs below the 1981-2004 mean)"
-    plot_bands(res$dose, res$att.d, b_att.d$se, b_att.d$crit.val, paste0("Appendix/contdid_att_clustered_", k, ".png"),
+    plot_bands(res$dose, res$att.d, b_att.d$se, b_att.d$crit.val, paste0("Miscellaneous/contdid_att_clustered_", k, ".png"),
                xlab, "ATT", paste0("ATT(d), ", v, ", ", s, ": 95% bands clustered by municipality"))
-    plot_bands(res$dose, res$acrt.d, b_acrt.d$se, b_acrt.d$crit.val, paste0("Appendix/contdid_acrt_clustered_", k, ".png"),
+    plot_bands(res$dose, res$acrt.d, b_acrt.d$se, b_acrt.d$crit.val, paste0("Miscellaneous/contdid_acrt_clustered_", k, ".png"),
                xlab, "ACRT", paste0("ACRT(d), ", v, ", ", s, ": 95% bands clustered by municipality"))
   }
 }
@@ -416,7 +416,7 @@ for (s in names(misc$rural)) {
                       untreated_municipalities = length(unique(fd_spi$cvegeo05[fd_spi$D_spi == 0])), row.names = NULL)
     spi_results <- rbind(spi_results, row)
 
-    plot_bands(res_spi$dose, res_spi$att.d, b_att_spi.d$se, b_att_spi.d$crit.val, paste0(ifelse(v == "waz", "Miscellaneous", "Appendix"), "/contdid_spi_att_clustered_", k, ".png"),
+    plot_bands(res_spi$dose, res_spi$att.d, b_att_spi.d$se, b_att_spi.d$crit.val, paste0("Miscellaneous/contdid_spi_att_clustered_", k, ".png"),
                "2009 rainfall deficit (SDs below the 1981-2004 mean), z <= -1", "ATT",
                paste0("ATT(d), SPI dose, ", v, ", ", s, ": 95% bands clustered by municipality"))
 
@@ -429,12 +429,6 @@ for (s in names(misc$rural)) {
     spi_reg(fd_spi, c("mod_dry","sev_dry"), v, paste0("Groups: moderately dry, severely dry or worse, ", s), near_normal)
     cat("Extremely dry shown alone (few municipalities, SE not reliable):\n")
     spi_reg(fd_spi, c("mod_dry","sev_only","ext_dry"), v, paste0("Groups: all three SPI dry classes, ", s), near_normal)
-
-    # ---- d. Pre-trends ----
-    cat("d. Pre-trends, 2002 to 2005, each group vs near normal:\n")
-    df3_spi <- add_spi(df3_list[[k]])
-    pre_spi <- first_diff(df3_spi[df3_spi$time_period %in% c(1, 2), ])
-    spi_reg(pre_spi, c("mod_dry","sev_dry"), v, paste0("Pre-trend 2002-2005: moderately dry, severely dry or worse, ", s), near_normal)
 
     # ---- f. Remittance buffer ----
     cat("f. Remittance buffer, dry x 2002 remittances:\n")

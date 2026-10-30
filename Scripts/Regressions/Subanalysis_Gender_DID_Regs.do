@@ -33,6 +33,7 @@ foreach d in "$out_regs" "$out_logs" "$out_figs" {
         capture mkdir "`d'/`s'"
     }
 }
+capture mkdir "$out_figs/Miscellaneous"
 
 * If the master already opened the log, the capture fails quietly and the master keeps logging. If this file is run on its own, it opens the same log here and closes it at the end, so the DID and the event study are always in the log.
 capture log using "$out_logs/Appendix/subanalysis_gender_did_regs.log", replace text name(sub_gender_did)
@@ -130,7 +131,7 @@ foreach v in haz waz bmiz {
         legend(order(1 "Control" 2 "Treated (2009 drought)") pos(6) row(1)) ///
         xtitle("Wave") ytitle("Mean `v'") ///
         title("Mean `v' by wave, treated vs control, `s'")
-    graph export "$out_figs/Appendix/trends_`v'_`s'.png", replace
+    graph export "$out_figs/Miscellaneous/trends_`v'_`s'.png", replace
     restore
 }
 
@@ -156,7 +157,7 @@ foreach v in haz waz bmiz {
         yline(0, lpattern(dash) lcolor(black)) ///
         xtitle("Event time (wave)") ytitle("Coefficient") ///
         title("Event study: `v', `s'") legend(off)
-    graph export "$out_figs/Appendix/event_study_`v'_`s'.png", replace
+    graph export "$out_figs/Miscellaneous/event_study_`v'_`s'.png", replace
     restore
 }
 
@@ -183,7 +184,7 @@ foreach v in haz waz bmiz {
         yline(0, lpattern(dash) lcolor(black)) ///
         xtitle("Event time (wave)") ytitle("Coefficient") ///
         title("DDD event study (drought x 2002 remittances): `v', `s'") legend(off)
-    graph export "$out_figs/Appendix/event_study_ddd_`v'_`s'.png", replace
+    graph export "$out_figs/Miscellaneous/event_study_ddd_`v'_`s'.png", replace
     restore
 }
 
@@ -216,7 +217,7 @@ foreach v in haz waz bmiz {
         legend(order(1 "Control" 2 "Treated (2009 drought)") pos(6) row(1)) ///
         xtitle("Wave") ytitle("Mean `v'") ///
         title("Mean `v' by wave, children in all 3 waves, `s'")
-    graph export "$out_figs/Appendix/trends_`v'_all3_`s'.png", replace
+    graph export "$out_figs/Miscellaneous/trends_`v'_all3_`s'.png", replace
     restore
 
     reghdfe `v' lead_2_treat lag_0_treat if e_`v'_all3 == 1 & `sex', absorb($FE_month) vce(cluster cvegeo05)
@@ -239,7 +240,7 @@ foreach v in haz waz bmiz {
         yline(0, lpattern(dash) lcolor(black)) ///
         xtitle("Event time (wave)") ytitle("Coefficient") ///
         title("Event study, children in all 3 waves: `v', `s'") legend(off)
-    graph export "$out_figs/Appendix/event_study_`v'_all3_`s'.png", replace
+    graph export "$out_figs/Miscellaneous/event_study_`v'_all3_`s'.png", replace
     restore
 }
 }

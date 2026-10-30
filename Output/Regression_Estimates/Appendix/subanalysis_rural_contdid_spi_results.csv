@@ -1,79 +1,67 @@
 "outcome","specification","term","coef","se_clustered","p_clustered","p_wild_bootstrap","n_children","children_in_group","municipalities_in_group","untreated_municipalities"
-"haz","contdid with the SPI dose (a.), rural","Average ACRT (needs strong parallel trends)",-1.0951,0.5992,0.068,NA,987,430,19,43
-"haz","Average ATT: dry (z <= -1) vs near normal, rural","dry",0.1696,0.1771,0.342,0.39,987,430,19,43
-"haz","Groups: moderately dry, severely dry or worse, rural","mod_dry",0.319,0.1785,0.079,0.098,987,227,11,43
-"haz","Groups: moderately dry, severely dry or worse, rural","sev_dry",0.0025,0.2566,0.992,0.992,987,203,8,43
-"haz","Groups: all three SPI dry classes, rural","mod_dry",0.319,0.1786,0.079,0.098,987,227,11,43
-"haz","Groups: all three SPI dry classes, rural","sev_only",-0.1945,0.274,0.48,0.734,987,140,6,43
-"haz","Groups: all three SPI dry classes, rural","ext_dry",0.4402,0.1581,0.007,0.172,987,63,2,43
-"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, rural","mod_dry",-0.5186,0.2256,0.025,0.028,484,91,10,40
-"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, rural","sev_dry",-0.2453,0.2614,0.352,0.515,484,86,7,40
-"haz","Remittance buffer: dry x 2002 remittances, rural","dry",0.1628,0.2159,0.454,0.498,786,338,17,38
-"haz","Remittance buffer: dry x 2002 remittances, rural","remittance_hh_02",0.1057,0.1794,0.558,0.579,786,318,44,38
-"haz","Remittance buffer: dry x 2002 remittances, rural","dry:remittance_hh_02",-0.1554,0.2274,0.497,0.506,786,109,14,38
-"haz","Main average ATT from 6): any deficit vs none, rural","D_any",0.0857,0.1915,0.656,0.659,1020,902,48,16
-"waz","contdid with the SPI dose (a.), rural","Average ACRT (needs strong parallel trends)",-0.5375,0.8644,0.534,NA,415,185,18,39
-"waz","Average ATT: dry (z <= -1) vs near normal, rural","dry",-0.1328,0.2087,0.527,0.612,415,185,18,39
-"waz","Groups: moderately dry, severely dry or worse, rural","mod_dry",0.0694,0.1984,0.728,0.746,415,102,10,39
-"waz","Groups: moderately dry, severely dry or worse, rural","sev_dry",-0.3812,0.3115,0.226,0.456,415,83,8,39
-"waz","Groups: all three SPI dry classes, rural","mod_dry",0.0694,0.1986,0.728,0.746,415,102,10,39
-"waz","Groups: all three SPI dry classes, rural","sev_only",-0.5477,0.3623,0.136,0.329,415,61,6,39
-"waz","Groups: all three SPI dry classes, rural","ext_dry",0.0805,0.1296,0.537,0.573,415,22,2,39
-"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, rural","mod_dry",0.1576,0.3895,0.688,0.722,91,28,9,19
-"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, rural","sev_dry",0.3805,0.5783,0.515,0.654,91,17,6,19
-"waz","Remittance buffer: dry x 2002 remittances, rural","dry",-0.2842,0.3063,0.358,0.481,294,135,16,32
-"waz","Remittance buffer: dry x 2002 remittances, rural","remittance_hh_02",0.1863,0.2418,0.445,0.457,294,136,35,32
-"waz","Remittance buffer: dry x 2002 remittances, rural","dry:remittance_hh_02",0.0839,0.3462,0.81,0.825,294,55,12,32
-"waz","Main average ATT from 6): any deficit vs none, rural","D_any",0.0152,0.2426,0.95,0.952,424,380,47,12
-"bmiz","contdid with the SPI dose (a.), rural","Average ACRT (needs strong parallel trends)",-0.9217,0.692,0.183,NA,970,418,19,43
-"bmiz","Average ATT: dry (z <= -1) vs near normal, rural","dry",-0.085,0.102,0.408,0.439,970,418,19,43
-"bmiz","Groups: moderately dry, severely dry or worse, rural","mod_dry",0.0104,0.1334,0.938,0.941,970,219,11,43
-"bmiz","Groups: moderately dry, severely dry or worse, rural","sev_dry",-0.1899,0.0991,0.06,0.125,970,199,8,43
-"bmiz","Groups: all three SPI dry classes, rural","mod_dry",0.0104,0.1335,0.938,0.941,970,219,11,43
-"bmiz","Groups: all three SPI dry classes, rural","sev_only",-0.2411,0.1136,0.038,0.202,970,137,6,43
-"bmiz","Groups: all three SPI dry classes, rural","ext_dry",-0.0769,0.059,0.197,0.285,970,62,2,43
-"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, rural","mod_dry",0.0384,0.2742,0.889,0.915,448,85,10,40
-"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, rural","sev_dry",0.4319,0.1746,0.016,0.111,448,78,7,40
-"bmiz","Remittance buffer: dry x 2002 remittances, rural","dry",-0.0734,0.1533,0.634,0.686,770,327,17,38
-"bmiz","Remittance buffer: dry x 2002 remittances, rural","remittance_hh_02",0.1139,0.0729,0.124,0.127,770,309,44,38
-"bmiz","Remittance buffer: dry x 2002 remittances, rural","dry:remittance_hh_02",0.0576,0.2406,0.812,0.824,770,105,14,38
-"bmiz","Main average ATT from 6): any deficit vs none, rural","D_any",0.0227,0.1204,0.851,0.858,1002,885,48,16
-"haz","contdid with the SPI dose (a.), urban","Average ACRT (needs strong parallel trends)",0.2077,0.6238,0.739,NA,1413,513,33,44
-"haz","Average ATT: dry (z <= -1) vs near normal, urban","dry",-0.1178,0.1028,0.255,0.289,1413,513,33,44
-"haz","Groups: moderately dry, severely dry or worse, urban","mod_dry",0.057,0.1093,0.604,0.674,1413,214,16,44
-"haz","Groups: moderately dry, severely dry or worse, urban","sev_dry",-0.2429,0.1115,0.032,0.057,1413,299,17,44
-"haz","Groups: all three SPI dry classes, urban","mod_dry",0.057,0.1094,0.604,0.674,1413,214,16,44
-"haz","Groups: all three SPI dry classes, urban","sev_only",-0.2843,0.1254,0.026,0.056,1413,249,13,44
-"haz","Groups: all three SPI dry classes, urban","ext_dry",-0.037,0.1577,0.815,0.853,1413,50,4,44
-"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, urban","mod_dry",0.063,0.1102,0.57,0.57,789,125,14,42
-"haz","Pre-trend 2002-2005: moderately dry, severely dry or worse, urban","sev_dry",0.0953,0.0863,0.273,0.286,789,174,15,42
-"haz","Remittance buffer: dry x 2002 remittances, urban","dry",-0.2004,0.0983,0.045,0.057,1028,369,29,43
-"haz","Remittance buffer: dry x 2002 remittances, urban","remittance_hh_02",-0.144,0.1381,0.3,0.313,1028,344,61,43
-"haz","Remittance buffer: dry x 2002 remittances, urban","dry:remittance_hh_02",-0.0988,0.1683,0.559,0.564,1028,111,25,43
-"haz","Main average ATT from 6): any deficit vs none, urban","D_any",-0.288,0.085,0.001,0.007,1416,1016,58,20
-"waz","contdid with the SPI dose (a.), urban","Average ACRT (needs strong parallel trends)",-0.168,0.7761,0.829,NA,660,213,29,42
-"waz","Average ATT: dry (z <= -1) vs near normal, urban","dry",-0.2238,0.1045,0.036,0.043,660,213,29,42
-"waz","Groups: moderately dry, severely dry or worse, urban","mod_dry",-0.17,0.1326,0.204,0.263,660,89,13,42
-"waz","Groups: moderately dry, severely dry or worse, urban","sev_dry",-0.2623,0.1394,0.064,0.099,660,124,16,42
-"waz","Groups: all three SPI dry classes, urban","mod_dry",-0.17,0.1327,0.204,0.263,660,89,13,42
-"waz","Groups: all three SPI dry classes, urban","sev_only",-0.1962,0.1426,0.173,0.207,660,100,13,42
-"waz","Groups: all three SPI dry classes, urban","ext_dry",-0.5378,0.1693,0.002,0.101,660,24,3,42
-"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, urban","mod_dry",0.1981,0.2535,0.438,0.46,179,29,10,29
-"waz","Pre-trend 2002-2005: moderately dry, severely dry or worse, urban","sev_dry",0.033,0.2474,0.894,0.892,179,36,12,29
-"waz","Remittance buffer: dry x 2002 remittances, urban","dry",-0.0959,0.175,0.586,0.579,422,129,24,39
-"waz","Remittance buffer: dry x 2002 remittances, urban","remittance_hh_02",0.0088,0.144,0.951,0.95,422,155,50,39
-"waz","Remittance buffer: dry x 2002 remittances, urban","dry:remittance_hh_02",-0.4108,0.2453,0.099,0.1,422,49,19,39
-"waz","Main average ATT from 6): any deficit vs none, urban","D_any",0.0162,0.0902,0.858,0.861,660,459,52,19
-"bmiz","contdid with the SPI dose (a.), urban","Average ACRT (needs strong parallel trends)",-0.0149,0.4399,0.973,NA,1378,497,33,44
-"bmiz","Average ATT: dry (z <= -1) vs near normal, urban","dry",-0.1599,0.1073,0.14,0.17,1378,497,33,44
-"bmiz","Groups: moderately dry, severely dry or worse, urban","mod_dry",-0.2658,0.1921,0.17,0.373,1378,203,16,44
-"bmiz","Groups: moderately dry, severely dry or worse, urban","sev_dry",-0.0867,0.079,0.276,0.292,1378,294,17,44
-"bmiz","Groups: all three SPI dry classes, urban","mod_dry",-0.2658,0.1921,0.171,0.373,1378,203,16,44
-"bmiz","Groups: all three SPI dry classes, urban","sev_only",-0.0314,0.0775,0.687,0.707,1378,244,13,44
-"bmiz","Groups: all three SPI dry classes, urban","ext_dry",-0.3569,0.0646,0,0.048,1378,50,4,44
-"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, urban","mod_dry",0.2543,0.303,0.404,0.553,731,112,14,40
-"bmiz","Pre-trend 2002-2005: moderately dry, severely dry or worse, urban","sev_dry",0.1761,0.1311,0.184,0.195,731,164,15,40
-"bmiz","Remittance buffer: dry x 2002 remittances, urban","dry",-0.2284,0.1515,0.136,0.143,1004,359,29,43
-"bmiz","Remittance buffer: dry x 2002 remittances, urban","remittance_hh_02",0.0299,0.1154,0.796,0.796,1004,338,60,43
-"bmiz","Remittance buffer: dry x 2002 remittances, urban","dry:remittance_hh_02",0.0652,0.2951,0.826,0.842,1004,108,24,43
-"bmiz","Main average ATT from 6): any deficit vs none, urban","D_any",-0.0487,0.1032,0.638,0.651,1381,991,58,20
+"haz","contdid with the SPI dose (a.), rural","Average ACRT (needs strong parallel trends)",-0.3728,1.1726,0.751,NA,1003,368,13,49
+"haz","Average ATT: dry (z <= -1) vs near normal, rural","dry",0.0328,0.1803,0.856,0.876,1003,368,13,49
+"haz","Groups: moderately dry, severely dry or worse, rural","mod_dry",-0.011,0.206,0.958,0.966,1003,284,9,49
+"haz","Groups: moderately dry, severely dry or worse, rural","sev_dry",0.1808,0.1913,0.348,0.519,1003,84,4,49
+"haz","Groups: all three SPI dry classes, rural","mod_dry",-0.011,0.2061,0.958,0.966,1003,284,9,49
+"haz","Groups: all three SPI dry classes, rural","sev_only",-0.0387,0.1696,0.82,0.834,1003,53,3,49
+"haz","Groups: all three SPI dry classes, rural","ext_dry",0.556,0.0948,0,0.46,1003,31,1,49
+"haz","Remittance buffer: dry x 2002 remittances, rural","dry",0.0879,0.2229,0.695,0.727,803,288,11,45
+"haz","Remittance buffer: dry x 2002 remittances, rural","remittance_hh_02",0.0975,0.1761,0.582,0.606,803,318,44,45
+"haz","Remittance buffer: dry x 2002 remittances, rural","dry:remittance_hh_02",-0.1974,0.211,0.354,0.375,803,99,11,45
+"haz","Main average ATT from 6): any deficit vs none, rural","D_any",0.1008,0.1809,0.579,0.614,1020,715,37,27
+"waz","contdid with the SPI dose (a.), rural","Average ACRT (needs strong parallel trends)",-0.8134,1.4646,0.579,NA,419,158,13,44
+"waz","Average ATT: dry (z <= -1) vs near normal, rural","dry",-0.1432,0.2268,0.53,0.639,419,158,13,44
+"waz","Groups: moderately dry, severely dry or worse, rural","mod_dry",-0.1828,0.2708,0.502,0.636,419,126,9,44
+"waz","Groups: moderately dry, severely dry or worse, rural","sev_dry",0.0125,0.1237,0.92,0.924,419,32,4,44
+"waz","Groups: all three SPI dry classes, rural","mod_dry",-0.1828,0.2711,0.503,0.636,419,126,9,44
+"waz","Groups: all three SPI dry classes, rural","sev_only",-0.0643,0.0953,0.502,0.577,419,24,3,44
+"waz","Groups: all three SPI dry classes, rural","ext_dry",0.2432,0.094,0.012,0.463,419,8,1,44
+"waz","Remittance buffer: dry x 2002 remittances, rural","dry",-0.224,0.3439,0.518,0.731,299,114,11,38
+"waz","Remittance buffer: dry x 2002 remittances, rural","remittance_hh_02",0.3034,0.2443,0.22,0.237,299,136,35,38
+"waz","Remittance buffer: dry x 2002 remittances, rural","dry:remittance_hh_02",-0.1444,0.3477,0.68,0.705,299,49,10,38
+"waz","Main average ATT from 6): any deficit vs none, rural","D_any",0.0656,0.2016,0.746,0.756,424,308,36,23
+"bmiz","contdid with the SPI dose (a.), rural","Average ACRT (needs strong parallel trends)",-0.9609,0.4317,0.026,NA,986,358,13,49
+"bmiz","Average ATT: dry (z <= -1) vs near normal, rural","dry",-0.1469,0.0936,0.122,0.155,986,358,13,49
+"bmiz","Groups: moderately dry, severely dry or worse, rural","mod_dry",-0.1522,0.109,0.168,0.238,986,275,9,49
+"bmiz","Groups: moderately dry, severely dry or worse, rural","sev_dry",-0.1294,0.0902,0.157,0.309,986,83,4,49
+"bmiz","Groups: all three SPI dry classes, rural","mod_dry",-0.1522,0.109,0.168,0.238,986,275,9,49
+"bmiz","Groups: all three SPI dry classes, rural","sev_only",-0.1618,0.107,0.136,0.527,986,52,3,49
+"bmiz","Groups: all three SPI dry classes, rural","ext_dry",-0.0749,0.0611,0.225,0.488,986,31,1,49
+"bmiz","Remittance buffer: dry x 2002 remittances, rural","dry",-0.209,0.1474,0.162,0.246,787,278,11,45
+"bmiz","Remittance buffer: dry x 2002 remittances, rural","remittance_hh_02",0.132,0.0742,0.081,0.065,787,309,44,45
+"bmiz","Remittance buffer: dry x 2002 remittances, rural","dry:remittance_hh_02",-0.0301,0.2626,0.909,0.915,787,96,11,45
+"bmiz","Main average ATT from 6): any deficit vs none, rural","D_any",-0.0349,0.0905,0.701,0.699,1002,701,37,27
+"haz","contdid with the SPI dose (a.), urban","Average ACRT (needs strong parallel trends)",0.7108,0.7328,0.332,NA,1348,490,28,47
+"haz","Average ATT: dry (z <= -1) vs near normal, urban","dry",-0.0948,0.1062,0.375,0.406,1348,490,28,47
+"haz","Groups: moderately dry, severely dry or worse, urban","mod_dry",0.1105,0.1045,0.294,0.41,1348,204,14,47
+"haz","Groups: moderately dry, severely dry or worse, urban","sev_dry",-0.2413,0.1147,0.039,0.065,1348,286,14,47
+"haz","Groups: all three SPI dry classes, urban","mod_dry",0.1105,0.1046,0.294,0.41,1348,204,14,47
+"haz","Groups: all three SPI dry classes, urban","sev_only",-0.2516,0.1267,0.051,0.095,1348,249,13,47
+"haz","Groups: all three SPI dry classes, urban","ext_dry",-0.1718,0.0619,0.007,0.46,1348,37,1,47
+"haz","Remittance buffer: dry x 2002 remittances, urban","dry",-0.1668,0.1042,0.114,0.126,970,361,25,45
+"haz","Remittance buffer: dry x 2002 remittances, urban","remittance_hh_02",-0.1431,0.1421,0.318,0.336,970,335,60,45
+"haz","Remittance buffer: dry x 2002 remittances, urban","dry:remittance_hh_02",-0.098,0.1746,0.576,0.586,970,104,23,45
+"haz","Main average ATT from 6): any deficit vs none, urban","D_any",-0.1803,0.1014,0.079,0.104,1416,892,54,24
+"waz","contdid with the SPI dose (a.), urban","Average ACRT (needs strong parallel trends)",-0.752,0.7124,0.291,NA,626,204,27,42
+"waz","Average ATT: dry (z <= -1) vs near normal, urban","dry",-0.2182,0.103,0.038,0.044,626,204,27,42
+"waz","Groups: moderately dry, severely dry or worse, urban","mod_dry",-0.1948,0.0914,0.037,0.097,626,91,14,42
+"waz","Groups: moderately dry, severely dry or worse, urban","sev_dry",-0.2371,0.1539,0.128,0.168,626,113,13,42
+"waz","Groups: all three SPI dry classes, urban","mod_dry",-0.1948,0.0915,0.037,0.097,626,91,14,42
+"waz","Groups: all three SPI dry classes, urban","sev_only",-0.1555,0.1479,0.297,0.322,626,97,12,42
+"waz","Groups: all three SPI dry classes, urban","ext_dry",-0.7315,0.0605,0,0.452,626,16,1,42
+"waz","Remittance buffer: dry x 2002 remittances, urban","dry",-0.0696,0.181,0.702,0.711,394,129,23,38
+"waz","Remittance buffer: dry x 2002 remittances, urban","remittance_hh_02",-0.0511,0.1495,0.734,0.744,394,150,49,38
+"waz","Remittance buffer: dry x 2002 remittances, urban","dry:remittance_hh_02",-0.3266,0.2499,0.196,0.209,394,49,19,38
+"waz","Main average ATT from 6): any deficit vs none, urban","D_any",0.0474,0.0938,0.615,0.622,660,396,48,23
+"bmiz","contdid with the SPI dose (a.), urban","Average ACRT (needs strong parallel trends)",-0.8729,1.2126,0.472,NA,1314,478,28,47
+"bmiz","Average ATT: dry (z <= -1) vs near normal, urban","dry",-0.1742,0.1106,0.12,0.141,1314,478,28,47
+"bmiz","Groups: moderately dry, severely dry or worse, urban","mod_dry",-0.3121,0.186,0.097,0.194,1314,197,14,47
+"bmiz","Groups: moderately dry, severely dry or worse, urban","sev_dry",-0.0774,0.085,0.365,0.379,1314,281,14,47
+"bmiz","Groups: all three SPI dry classes, urban","mod_dry",-0.3121,0.186,0.098,0.194,1314,197,14,47
+"bmiz","Groups: all three SPI dry classes, urban","sev_only",-0.0367,0.0834,0.661,0.673,1314,244,13,47
+"bmiz","Groups: all three SPI dry classes, urban","ext_dry",-0.3462,0.0502,0,0.442,1314,37,1,47
+"bmiz","Remittance buffer: dry x 2002 remittances, urban","dry",-0.2843,0.1521,0.066,0.061,947,354,25,45
+"bmiz","Remittance buffer: dry x 2002 remittances, urban","remittance_hh_02",-0.0444,0.1189,0.71,0.71,947,330,59,45
+"bmiz","Remittance buffer: dry x 2002 remittances, urban","dry:remittance_hh_02",0.2156,0.3041,0.481,0.534,947,102,22,45
+"bmiz","Main average ATT from 6): any deficit vs none, urban","D_any",-0.054,0.0945,0.57,0.593,1381,867,54,24

@@ -3,7 +3,7 @@
 # Results document
 #===============================================================================
 
-# This script puts every table and figure in the output folder into one LaTeX file and also a PDF file. We use TinyTex. Note that appendix and miscellaneous figures are not included
+# This script puts every table and figure in the output folder into one LaTeX file and also a PDF file. We use TinyTex. Note that miscellaneous figures are not included
 # Must be run after the summary stats, the regressions and regression stats do files and r scripts, since it only reads their output. 00_Master.do runs it last
 
 #===============================================================================
@@ -85,7 +85,7 @@ table_body <- function(file) {
 # NOTE: The main purpose of this is to write the title above each figure in Results.pdf, built from the image’s file name
 # First defining so lookups that will be used in the function
 outcome <- c(haz = "Height-for-Age", waz = "Weight-for-Age", bmiz = "BMI-for-Age")
-group <- c(boys = "Boys", girls = "Girls", rural = "Rural Children", urban = "Urban Children", all3 = "Children in All Three Waves")
+group <- c(boys = "Boys", girls = "Girls", rural = "Rural Children", urban = "Urban Children", all3 = "Children in All Three Waves", controls = "With Controls")
 # Defining the function
 figure_title <- function(name) {
   # Breaking apart the file name
@@ -100,53 +100,71 @@ figure_title <- function(name) {
   if (base == "trends") family <- paste0("Mean ", v, " by Wave, Treated and Control, Binary DID")
   if (base == "event_study") family <- paste0("Event Study, ", v, ", Binary DID")
   if (base == "event_study_ddd") family <- paste0("Triple Difference Event Study, ", v, ", Binary DID")
+  if (base == "event_study_severity") family <- paste0("Event Study by Drought Severity, ", v, ", Rainfall Classes")
   if (base == "contdid_binscatter") family <- paste0("Change in ", v, " by 2009 Rainfall Deficit, Continuous DID")
   if (base == "contdid_att_clustered") family <- paste0("ATT by 2009 Rainfall Deficit, ", v, ", Continuous DID")
   if (base == "contdid_acrt_clustered") family <- paste0("ACRT by 2009 Rainfall Deficit, ", v, ", Continuous DID")
   if (base == "contdid_spi_att_clustered") family <- paste0("ATT by SPI Drought Dose, ", v, ", Continuous DID")
-  if (base == "drought_map_spi") family <- "2009 Rainfall by Municipality, SPI Classes"
+  if (base == "drought_map_spi") family <- "2009 Rainfall by Municipality, Rainfall Classes"
   if (base == "drought_map_binary") family <- "2009 Drought by Municipality, Binary DID Treatment"
   # This joins the type title and the subgroup with a comma
   paste(c(family, g), collapse = ", ")
 }
 
+# Notes under the event study figures, so the sample and specification of each are clear
+figure_note <- function(name) {
+  fe <- "Child and interview year-month fixed effects, 2005 is the reference wave, and 95\\% confidence intervals use standard errors clustered by 2005 municipality."
+  if (grepl("^event_study_severity_", name)) return("Moderately dry and severely dry or worse vs near normal, from one regression on the children of the rainfall class table, in each wave they are measured. No controls, same as the rainfall class table. Child and wave fixed effects, 2005 is the reference wave, and 95\\% confidence intervals use standard errors clustered by 2005 municipality.")
+  if (grepl("^event_study_(haz|waz|bmiz)_controls", name)) return(paste("Sample is the children in Model 3 of the binary DID, in each wave they are measured. The Model 3 controls are each interacted with the 2002 and 2009 waves.", fe))
+  ""
+}
+
 # Creating one figure, the title on top and the figure below it, in that order
 # The function takes two inputs: the figures subfolder, e.g. "Main" and the image file, e.g. "event_study_waz.png"
 figure_block <- function(sub, name) {
+  note <- figure_note(name)
   c("\\begin{figure}[H]", "\\centering",
     paste0("\\caption{", figure_title(name), "}"),
-    paste0("\\includegraphics[width=0.8\\textwidth]{", name, "}"), "\\end{figure}", "")
+    paste0("\\includegraphics[width=0.8\\textwidth]{", name, "}"),
+    if (note != "") paste0("\\par\\parbox{0.8\\textwidth}{\\scriptsize \\textit{Notes:} ", note, "}"),
+    "\\end{figure}", "")
 }
 
 # This function decides the order of the figures in Results.pdf. This function sorts them by:
-# 1) Family aka figure type: drought maps first, then event studies, triple difference event studies, trends, and the continuous DID figures
+# 1) Family aka figure type: drought maps first, then event studies by SPI class, binary event studies, and the continuous DID figures
 # 2) Outcome within each family: HAZ, WAZ, BMIZ
 # 3) Subgroup: the plain version before subgroup versions
 figure_order <- function(files) {
   fam <- c("event_study_", "trends_", "contdid_binscatter", "contdid_att_clustered", "contdid_acrt_clustered", "contdid_spi_att_clustered")
   # Each file gets the position of its family in fam: startsWith checks which family its name begins with, which()[1] takes that family's position, and sapply repeats this for every file, e.g. event_study_waz.png is 1
   f_rank <- sapply(files, function(x) which(startsWith(x, fam))[1])
+  f_rank[startsWith(files, "event_study_severity")] <- 0.5
   f_rank[startsWith(files, "event_study_ddd")] <- 1.5
   f_rank[startsWith(files, "drought_map_")] <- 0
   v_rank <- sapply(files, function(x) which(c(grepl("_haz", x), grepl("_waz", x), grepl("_bmiz", x)))[1])
   # order() sorts by family, then outcome, then name length, then alphabetically, and files[...] puts the names in that order
   files[order(f_rank, v_rank, nchar(files), files)]
 }
-# list.files lists the .png files in Output/Figures/Main, and figure_order sorts them into the order they appear in Results.pdf
-main_figs <- figure_order(list.files(paste(dir$figures,"/Main",sep=""), pattern = "\\.png$"))
+# The figures in Output/Figures/Main are listed by name, and figure_order sorts them into the order they appear in Results.pdf
+main_figs <- figure_order(c("drought_map_spi.png", "drought_map_binary.png", "event_study_severity_bmiz.png", "contdid_binscatter_bmiz.png"))
+# Same for Output/Figures/Appendix, which go at the end of the appendix
+app_figs <- figure_order(c("event_study_severity_haz.png", "event_study_severity_waz.png",
+                           "event_study_haz_controls.png", "event_study_waz_controls.png", "event_study_bmiz_controls.png",
+                           "contdid_binscatter_haz.png", "contdid_binscatter_waz.png",
+                           "contdid_att_clustered_haz.png", "contdid_att_clustered_waz.png", "contdid_att_clustered_bmiz.png"))
 
 #===============================================================================
 # 4). Write Results.tex
 #===============================================================================
 
 # This builds the whole Results.tex file as one list of text lines and saves it
-# It’s the step that puts everything together by implementing the document setup, adds a title page, inserts the middles of the three table files and the Main figures, and closes the document
+# It’s the step that puts everything together by implementing the document setup, adds a title page, inserts the middles of the three table files, the Main figures and the Appendix figures, and closes the document
 # The summary stats, the regression results, and the appendix coded with table_body are simply section headings
 tex <- c("\\documentclass[12pt]{article}", "\\usepackage[margin=1in]{geometry}", "\\usepackage{booktabs}", "\\usepackage{longtable}",
          "\\usepackage{caption}", "\\usepackage{graphicx}", "\\usepackage{float}",
          "\\DeclareCaptionLabelSeparator{emdash}{---}", "\\captionsetup{font=normalsize,labelfont=sc,textfont=sc,labelsep=emdash}", "\\captionsetup[figure]{position=top,justification=centering}",
          "\\def\\sym#1{\\ifmmode^{#1}\\else\\(^{#1}\\)\\fi}",
-         "\\graphicspath{{../Output/Figures/Main/}{Output/Figures/Main/}{./}}",
+         "\\graphicspath{{../Output/Figures/Main/}{Output/Figures/Main/}{../Output/Figures/Appendix/}{Output/Figures/Appendix/}{./}}",
          "\\title{Results First Draft}", "\\author{Zachary Serby}", "\\date{\\today}",
          "\\begin{document}", "\\maketitle", "\\thispagestyle{empty}", "\\clearpage", "",
          "\\subsection*{Summary Statistics}", "",
@@ -156,6 +174,7 @@ tex <- c("\\documentclass[12pt]{article}", "\\usepackage[margin=1in]{geometry}",
          "\\clearpage", unlist(lapply(main_figs, function(f) figure_block("Main", f))),
          "\\clearpage", "\\section*{Appendix}", "",
          table_body(paste(dir$tables,"/Appendix/regression_tables_appendix.tex",sep="")), "",
+         "\\clearpage", unlist(lapply(app_figs, function(f) figure_block("Appendix", f))),
          "\\end{document}")
 # Writes every line in tex and saves it 
 writeLines(tex, paste(dir$paper,"/Results.tex",sep=""))

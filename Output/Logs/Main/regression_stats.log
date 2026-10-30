@@ -3,9 +3,8 @@
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/regression_stats.log
   log type:  text
- opened on:  29 Oct 2026, 14:32:00
-
-. do "$scripts/Statistics/Regression Stats.do"
+ opened on:  30 Oct 2026, 03:47:22
+.     do "$scripts/Statistics/Regression Stats.do"
 
 . *******************************************************************
 . * Regression tables in LaTeX for the 2009 drought DID
@@ -19,11 +18,11 @@
 >  and the subanalysis R scripts save
 . 
 . * Broadly how we organize the results
-.         * 1) Tables/Main/regression_tables_main.tex: binary DID, SPI drought 
-> classes, continuous DID and the remittance buffer
-.         * 2) Tables/Appendix/regression_tables_appendix.tex: children in all 
-> three waves, subanalyses by sex and rural vs urban, event studies, continuous
->  DID subanalyses
+.         * 1) Tables/Main/regression_tables_main.tex: SPI drought classes, bin
+> ary DID for BMIZ, continuous DID and the remittance buffer
+.         * 2) Tables/Appendix/regression_tables_appendix.tex: binary DID for H
+> AZ and WAZ, Model 3 with all covariates, children in all three waves, subanal
+> yses by sex and rural vs urban, event studies, continuous DID subanalyses
 . 
 . clear all
 
@@ -93,6 +92,10 @@
 
 . if _rc ssc install require
 
+. capture which boottest
+
+. if _rc ssc install boottest
+
 . 
 . *******************************************************************
 . * Load DID analysis data
@@ -122,6 +125,112 @@
 
 . gen lag_0_ddd    = treat2009 * remittance_hh_02 * (year == 2009)
 (44,016 missing values generated)
+
+. * Event study controls, same as b2. in DID_Regs.do
+. global es_controls ""
+
+. foreach c in drought2005 drought2006 drought2007 drought2008 dwell_electricit
+> y_02 dwell_floor_good_02 dwell_roof_good_02 dwell_ventilation_good_02 rooms_p
+> er_person_02 ln_pc_expend_month_02 rural_02 child_male_05 mother_height_cm_05
+>  mother_edu_years_05 mother_age_at_birth_05 mother_employed_05 fully_vaccinat
+> ed_05 {
+  2.     gen `c'_w02 = `c' * (year == 2002)
+  3.     gen `c'_w09 = `c' * (year == 2009)
+  4.     global es_controls "$es_controls `c'_w02 `c'_w09"
+  5. }
+(25,453 missing values generated)
+(25,453 missing values generated)
+(25,453 missing values generated)
+(25,453 missing values generated)
+(25,453 missing values generated)
+(25,453 missing values generated)
+(25,453 missing values generated)
+(25,453 missing values generated)
+(34,314 missing values generated)
+(34,314 missing values generated)
+(34,314 missing values generated)
+(34,314 missing values generated)
+(34,314 missing values generated)
+(34,314 missing values generated)
+(34,619 missing values generated)
+(34,619 missing values generated)
+(34,485 missing values generated)
+(34,485 missing values generated)
+(36,008 missing values generated)
+(36,008 missing values generated)
+(34,296 missing values generated)
+(34,296 missing values generated)
+(25,441 missing values generated)
+(25,441 missing values generated)
+(70,112 missing values generated)
+(70,112 missing values generated)
+(68,406 missing values generated)
+(68,406 missing values generated)
+(67,823 missing values generated)
+(67,823 missing values generated)
+(68,381 missing values generated)
+(68,381 missing values generated)
+(92,223 missing values generated)
+(92,223 missing values generated)
+
+. * Model 3 and Model 5 children, same as DID_Regs.do, so the event study table
+>  uses the same children as the DID tables
+. foreach v in haz waz bmiz {
+  2.     quietly reghdfe `v' treat_post drought2005_post drought2006_post droug
+> ht2007_post drought2008_post dwell_electricity_02_post dwell_floor_good_02_po
+> st dwell_roof_good_02_post dwell_ventilation_good_02_post rooms_per_person_02
+> _post ln_pc_expend_month_02_post rural_02_post child_male_05_post mother_heig
+> ht_cm_05_post mother_edu_years_05_post mother_age_at_birth_05_post mother_emp
+> loyed_05_post fully_vaccinated_05_post if s_`v' == 1, absorb(pid_link_canonic
+> al int_ym) vce(cluster cvegeo05)
+  3.     gen tmp = e(sample)
+  4.     bysort pid_link_canonical: egen m3_`v' = max(tmp)
+  5.     drop tmp
+  6.     quietly reghdfe `v' treat_post remittance_hh_02_post treat_post_remit0
+> 2 drought2005_post drought2006_post drought2007_post drought2008_post dwell_e
+> lectricity_02_post dwell_floor_good_02_post dwell_roof_good_02_post dwell_ven
+> tilation_good_02_post rooms_per_person_02_post ln_pc_expend_month_02_post rur
+> al_02_post child_male_05_post mother_height_cm_05_post mother_edu_years_05_po
+> st mother_age_at_birth_05_post mother_employed_05_post fully_vaccinated_05_po
+> st if s_`v' == 1, absorb(pid_link_canonical int_ym) vce(cluster cvegeo05)
+  7.     gen tmp = e(sample)
+  8.     bysort pid_link_canonical: egen m5_`v' = max(tmp)
+  9.     drop tmp
+ 10. }
+
+. 
+. * SPI event study, same as DID_Regs.do, for the pre-trend p-values of the SPI
+>  table. Wild bootstrap like the other SPI p-values, with areg as boottest doe
+> s not run after reghdfe with two FE
+. gen mod_dry = (rain_z2009 <= -1 & rain_z2009 > -1.5) if rain_z2009 < 1
+(28,604 missing values generated)
+
+. gen sev_dry = (rain_z2009 <= -1.5) if rain_z2009 < 1
+(28,604 missing values generated)
+
+. gen lead_2_mod = mod_dry * (year == 2002)
+(28,604 missing values generated)
+
+. gen lag_0_mod  = mod_dry * (year == 2009)
+(28,604 missing values generated)
+
+. gen lead_2_sev = sev_dry * (year == 2002)
+(28,604 missing values generated)
+
+. gen lag_0_sev  = sev_dry * (year == 2009)
+(28,604 missing values generated)
+
+. foreach v in haz waz bmiz {
+  2.     bysort pid_link_canonical: egen spi_`v' = max(reg_`v' == 1 & rain_z200
+> 9 < 1)
+  3.     quietly areg `v' lead_2_mod lag_0_mod lead_2_sev lag_0_sev i.year if e
+> _`v' == 1 & spi_`v' == 1, absorb(pid_link_canonical) vce(cluster cvegeo05)
+  4.     foreach c in mod sev {
+  5.         quietly boottest lead_2_`c', reps(9999) weighttype(webb) seed(1234
+> ) nograph
+  6.         local pre_`c'_`v' = strtrim(string(r(p), "%9.3f"))
+  7.     }
+  8. }
 
 . 
 . * Children measured in all three waves, same as DID_Regs.do
@@ -325,13 +434,14 @@
 . capture program drop tab_head
 
 . program define tab_head
-  1.     args ncol caption
-  2.     file write tab "\clearpage" _n "\begingroup" _n "\footnotesize" _n "\r
-> enewcommand{\arraystretch}{0.86}" _n "\setlength{\tabcolsep}{4pt}" _n "\setle
-> ngth{\LTcapwidth}{\textwidth}" _n
-  3.     file write tab "\begin{longtable}{l*{`ncol'}{c}}" _n "\caption{`captio
+  1.     args ncol caption first
+  2.     if "`first'" == "" file write tab "\clearpage" _n
+  3.     file write tab "\begingroup" _n "\footnotesize" _n "\renewcommand{\arr
+> aystretch}{0.86}" _n "\setlength{\tabcolsep}{4pt}" _n "\setlength{\LTcapwidth
+> }{\textwidth}" _n
+  4.     file write tab "\begin{longtable}{l*{`ncol'}{c}}" _n "\caption{`captio
 > n'}\\" _n "\toprule" _n
-  4. end
+  5. end
 
 . 
 . *******************************************************************
@@ -349,7 +459,8 @@
 > {0.86}" "\setlength{\tabcolsep}{4pt}" "\setlength{\LTcapwidth}{\textwidth}" "
 > '
 
-. local stars "\sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\)."
+. * mbox keeps the star legend on one line
+. local stars "\mbox{\sym{*}\(p<.10\), \sym{**}\(p<.05\), \sym{***}\(p<.01\).}"
 
 . 
 . * Outcome names and age cutoffs
@@ -381,7 +492,7 @@
 . 
 . * Sources cited in the notes. Used multiple times across tables so we make th
 > em locals
-. local cgbs "Callaway et al. (2024)"
+. local cgbs "(Callaway et al., 2024)"
 
 . local rural_note "Rural is a locality with fewer than 2,500 inhabitants (INEG
 > I, 2024)."
@@ -390,7 +501,263 @@
 > o be conservative with few treated municipalities (MacKinnon et al., 2023)."
 
 . local star_note "Stars use the clustered p-values, and where a wild bootstrap
->  p-value is shown both must pass:"
+>  p-value is shown both must pass."
+
+. 
+. *******************************************************************
+. * Load the continuous DID results from R
+. *******************************************************************
+. 
+. preserve
+
+. * Each csv is imported as text and appended, then the numbers are turned back
+>  into numbers. Note: NA in the csv files becomes missing
+. tempfile csvs
+
+. local first 1
+
+. foreach f in "Main/contdid_results" "Main/contdid_spi_results" "Appendix/suba
+> nalysis_gender_contdid_results" "Appendix/subanalysis_gender_contdid_spi_resu
+> lts" "Appendix/subanalysis_rural_contdid_results" "Appendix/subanalysis_rural
+> _contdid_spi_results" {
+  2.     import delimited using "$out_regs/`f'.csv", clear varnames(1) stringco
+> ls(_all) bindquote(strict)
+  3.     gen file = "`f'"
+  4.     if `first' == 0 append using `csvs'
+  5.     save `csvs', replace
+  6.     local first 0
+  7. }
+(encoding automatically selected: ISO-8859-1)
+(7 vars, 15 obs)
+(file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 not
+    found)
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+(encoding automatically selected: ISO-8859-1)
+(11 vars, 33 obs)
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+(encoding automatically selected: ISO-8859-1)
+(7 vars, 30 obs)
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+(encoding automatically selected: ISO-8859-1)
+(11 vars, 66 obs)
+(variable children_in_group was str3, now str4 to accommodate using data's
+       values)
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+(encoding automatically selected: ISO-8859-1)
+(7 vars, 30 obs)
+(variable file was str42, now str47 to accommodate using data's values)
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+(encoding automatically selected: ISO-8859-1)
+(11 vars, 66 obs)
+(variable file was str46, now str47 to accommodate using data's values)
+(variable children_in_group was str3, now str4 to accommodate using data's
+       values)
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+
+. * This turns each number column from text back into numbers
+. foreach v in coef se_contdid_bootstrap se_clustered_municipality n_children s
+> e_clustered p_clustered p_wild_bootstrap children_in_group municipalities_in_
+> group untreated_municipalities {
+  2.     capture destring `v', replace force
+  3. }
+
+. 
+. * The stacked csv files label their rows in different columns, so we make two
+>  columns that work for every row. That is spec (the label) and group (all or 
+> the subgroup)
+. * Then each table cell is found with one condition, e.g. outcome == "haz" & g
+> roup == "boys" & spec == "..."
+. 
+. * The SPI files put the label in specification and the continuous DID files p
+> ut it in estimate, so spec takes whichever one the row has
+. gen spec = specification
+(75 missing values generated)
+
+. replace spec = estimate if spec == ""
+variable spec was str52 now str55
+(75 real changes made)
+
+. replace term = "" if missing(term)
+(0 real changes made)
+
+. * group is "all" for the main results. Subgroup labels end in ", boys", ", gi
+> rls", ", rural" or ", urban", in spec or in sample
+. gen group = "all"
+
+. foreach g in boys girls rural urban {
+  2.     * If the label contains ", boys" (or girls, rural, urban), that row be
+> longs to that subgroup
+.     replace group = "`g'" if strpos(spec, ", `g'") | strpos(sample, ", `g'")
+  3. }
+variable group was str3 now str4
+(48 real changes made)
+variable group was str4 now str5
+(48 real changes made)
+(48 real changes made)
+(48 real changes made)
+
+. save `csvs', replace
+file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St79248.000002 saved
+    as .dta format
+
+. 
+. * For assumptions the continuous DID and SPI notes use the same sentence 
+. local pt_note "The average ATT needs parallel trends, while the average ACRT,
+>  the average slope of the dose response, and comparisons between doses need s
+> trong parallel trends (Callaway et al., 2024)."
+
+. 
+. *******************************************************************
+. * SPI drought classes table, main
+. *******************************************************************
+. 
+. * NOTE: This writes the SPI drought-class table, the first table of the Main 
+> tables file. The SPI regressions were run in R, so esttab can't be used. Inst
+> ead the table is written by hand, one LaTeX line at a time with file write an
+> d using numbers pulled from the csv rows with csv_cell and csv_num
+. * NOTE: Columns 1, 3 and 5 are dry (z <= -1) vs near normal, columns 2, 4 and
+>  6 split dry into moderately dry and severely dry or worse, from section 8 of
+>  Contdid_regs.R
+. 
+. * Creating the header.
+. capture file close tab
+
+. file open tab using "$out_sumstats/Main/regression_tables_main.tex", write re
+> place
+
+. foreach p of local preamble {
+  2.     file write tab `"`p'"' _n
+  3. }
+
+. tab_head 6 "2009 Drought and Child Anthropometrics, Rainfall Classes" first
+
+. file write tab " & \multicolumn{2}{c}{HAZ} & \multicolumn{2}{c}{WAZ} & \multi
+> column{2}{c}{BMIZ}\\" _n "\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6
+> -7}" _n " & (1) & (2) & (3) & (4) & (5) & (6)\\" _n "\midrule" _n
+
+. 
+. * Coefficient rows: each outcome has the dry column and the groups column
+. foreach r in dry mod sev {
+  2.         * This loops over the three row types: dry, moderately dry, and se
+> verely dry or worse. And ensure math prints the math 
+.     if "`r'" == "dry" local lab "Dry, \ensuremath{z\le -1}"
+  3.     if "`r'" == "mod" local lab "Moderately dry, \ensuremath{-1.5<z\le -1}
+> "
+  4.     if "`r'" == "sev" local lab "Severely dry or worse, \ensuremath{z\le -
+> 1.5}"
+  5.         * Three rows the coefficient with the label, the SEs and the p-val
+> ue from the wild bootstrap
+.     local row1 "`lab'"
+  6.     local row2 ""
+  7.     local row3 ""
+  8.     foreach v in haz waz bmiz {
+  9.         foreach c in dry groups {
+ 10.                         * Picking the row 
+.             local cnd `"group == "all" & outcome == "`v'""'
+ 11.                         * adds the dry-vs-near-normal regression
+.             if "`c'" == "dry" local cnd `"`cnd' & strpos(spec, "Average ATT: 
+> dry") & term == "dry" & "`r'" == "dry""'
+ 12.                         * For a groups column, this adds the split regress
+> ion, the term mod_dry or sev_dry
+.             if "`c'" == "groups" local cnd `"`cnd' & strpos(spec, "Groups: mo
+> derately") & term == "`r'_dry""'
+ 13.                         * Calls the row and gives the se, p-value, and wil
+> d boostrap p value
+.             csv_cell if `cnd', se(se_clustered) pc(p_clustered) wild(p_wild_b
+> ootstrap)
+ 14.             local row1 "`row1' & `r(b)'"
+ 15.             local row2 "`row2' & `r(se)'"
+ 16.             local row3 "`row3' & `r(p)'"
+ 17.         }
+ 18.     }
+ 19.     file write tab "`row1'\\" _n "`row2'\\" _n "`row3'\\" _n
+ 20. }
+
+. 
+. * Pre-trend p-values (wild bootstrap), number of children and municipalities
+. * The midrule just creates that medium thick line
+. file write tab "\midrule" _n 
+
+. foreach r in mod sev {
+  2.         * This just labels the rows 
+.     local row = "P-val: pre-trend 2002--2005, " + cond("`r'" == "mod", "moder
+> ately dry", "severely dry or worse")
+  3.     foreach v in haz waz bmiz {
+  4.                 * Wild bootstrap p-value of the 2002 lead, from the SPI ev
+> ent study above
+.                 * The first & skips the first column as the event study is on
+> ly for the split cases not the dry column
+.         local row "`row' & & `pre_`r'_`v''"
+  5.     }
+  6.         * This writes the row
+.     file write tab "`row'\\" _n
+  7. }
+
+. * CSV holds the count for each of these three rows, each with a label, we jus
+> t call upon each 
+. foreach n in n_children municipalities_in_group untreated_municipalities {
+  2.     if "`n'" == "n_children" local row "Children"
+  3.     if "`n'" == "municipalities_in_group" local row "Dry 2005 municipaliti
+> es"
+  4.     if "`n'" == "untreated_municipalities" local row "Near-normal 2005 mun
+> icipalities"
+  5.     foreach v in haz waz bmiz {
+  6.         csv_num `n' if group == "all" & outcome == "`v'" & strpos(spec, "A
+> verage ATT: dry") & term == "dry"
+  7.         local a "`r(n)'"
+  8.         csv_num `n' if group == "all" & outcome == "`v'" & strpos(spec, "G
+> roups: moderately") & term == "mod_dry"
+  9.         local b "`r(n)'"
+ 10.         if "`n'" == "municipalities_in_group" local b ""
+ 11.                 * Adds the two cells for each outcome
+.         local row "`row' & `a' & `b'"
+ 12.     }
+ 13.         * Writes the row
+.     file write tab "`row'\\" _n
+ 14. }
+
+. * Notes
+. file write tab "\bottomrule" _n
+
+. file write tab "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scripts
+> ize \textit{Notes:} This table compares children in dry 2005 municipalities w
+> ith children in near-normal ones. Regressions are at the child level, on the 
+> 2005 to 2009 change in the WHO z-score," _n
+
+. file write tab "for the binary DID estimation samples without children in wet
+>  municipalities (z of 1 or above). z is 2009 May--October CHIRPS rainfall, th
+> e maize growing season (Jessoe et al., 2018), in the child's 2005 municipalit
+> y in standard deviations from its 1981--2004 mean, grouped into standardized 
+> rainfall classes with the SPI cutoffs:" _n
+
+. file write tab "near normal is z between -1 and 1, moderately dry between -1.
+> 5 and -1, and severely dry or worse -1.5 or below (McKee et al., 1993). Cols.
+>  1, 3 and 5 compare dry (z of -1 or below) with near normal, and Cols. 2, 4 a
+> nd 6 split dry into moderately dry and" _n
+
+. file write tab "severely dry or worse. Each class is only compared with near 
+> normal, which needs parallel trends, and not with the other class, which woul
+> d need strong parallel trends (Callaway et al., 2024). Since the contdid pack
+> age does not yet support discrete doses, the classes are estimated with the d
+> iscrete-dose regression in equation 4.1 (Callaway et al., 2024). The regressi
+> ons have no controls, as the contdid package does not yet support covariates 
+> (Callaway et al., 2024). The pre-trend p-values test the 2002 leads of the ra
+> infall class event study, on the same children with child and wave fixed effe
+> cts. Standard errors clustered by 2005 municipality are in parentheses." _n
+
+. file write tab "`mnw_note' `star_note' `stars'}\\" _n
+
+. file write tab "\end{longtable}" _n "\endgroup" _n
+
+. file close tab
+
+. restore
 
 . 
 . *******************************************************************
@@ -455,14 +822,14 @@
  25.         local tcap = "Binary DID, " + cond("`t'" == "boys", "Boys", "Girls
 > ")
  26.         local sample_note = "The sample is " + cond("`t'" == "boys", "boys
-> ", "girls") + " (2005 roster sex) with the outcome measured in both MxFLS-2 (
-> 2005) and MxFLS-3 (2009)"
+> ", "girls") + ", using sex reported in the 2005 household roster, with the ou
+> tcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009)"
  27.         local reason "Estimating the effect separately for boys and girls 
 > tests for gender disparities in the impact of the drought, as households faci
 > ng an income shock may protect the nutrition and health of sons and daughters
 >  differently."
- 28.         local sample_short = cond("`t'" == "boys", "boys", "girls") + " (2
-> 005 roster sex)"
+ 28.         local sample_short = cond("`t'" == "boys", "boys", "girls") + ", u
+> sing sex reported in the 2005 household roster"
  29.         local ctrl_diff ", without child sex in the controls"
  30.         local child_note "2005 mother controls and child full vaccination 
 > (mother's height, schooling, age at birth and employment), without child sex 
@@ -497,54 +864,61 @@
 .         local ph `" `tabstart' "\begin{longtable}{l*{5}{c}}" "\caption{2009 D
 > rought and `cap_`v'', `tcap'}\\" "\toprule" " & \multicolumn{5}{c}{`head_`v''
 > }\\" "\cmidrule(lr){2-6}" "'
- 46.         local first = ("`v'" == "haz" & ("`t'" == "main" | "`t'" == "all3"
-> ))
- 47.         if `first' local ph `" `preamble' `ph' "'
- 48.         else local ph `" "\clearpage" `ph' "'
- 49.         local mode = cond(`first', "replace", "append")
- 50. 
+ 46.         * Only keep BMIZ in Main, put HAZ and WAZ tables in the appendix
+.         local file_v "`file'"
+ 47.         if "`t'" == "main" & "`v'" != "bmiz" local file_v "$out_sumstats/A
+> ppendix/regression_tables_appendix.tex"
+ 48.         local first = ("`v'" == "haz" & "`t'" == "main")
+ 49.         if `first' local ph `" `preamble' `ph' "'
+ 50.         else local ph `" "\clearpage" `ph' "'
+ 51.         local mode = cond(`first', "replace", "append")
+ 52. 
 .         * Notes
 .         local pf `" "\bottomrule" "\addlinespace[6pt]\multicolumn{6}{p{0.97\t
 > extwidth}}{\scriptsize \textit{Notes:} This table reports the effect of the 2
 > 009 drought on the WHO `low_`v'' with the binary DID. Regressions are at the 
-> child-wave level. `sample_note'," "aged `age_`v'' in both rounds. Children ha
-> ve a 2005 municipality and were not measured in MxFLS-3 before November 2009,
->  as the July--October 2009 rainfall deficit had not yet fully occurred. Dropp
-> ing them from both groups equalizes treated and control measurement timing. D
-> rought equals 1 if annual CHIRPS rainfall in 2009 in the child's 2005 municip
-> ality was below its 1981--2004 20th percentile," "and post equals 1 in MxFLS-
-> 3. Remittances equal 1 if the household received cash in the last 12 months f
-> rom parents, siblings, or children living outside the household in MxFLS-1 (2
-> 002), a proxy for remittances. Cols. 1--4 report the average drought" "effect
-> . Col. 1 is the basic DID, Col. 2 adds the 2005--2008 droughts, and Col. 3 ad
-> ds `hh_note' and `child_note'. Col. 4 adds the 2005 father and birth controls
->  (father's height, schooling, age at birth and employment, birth order, oldes
-> t child," "birth weight, delivered at home, weeks predominantly breastfed, ir
-> on in pregnancy, premature), which are missing for many children, often becau
-> se the father migrated. All controls are interacted with post. Col. 5 is the 
-> triple difference: it keeps the controls of Col. 3" "and adds 2002 remittance
-> s \ensuremath{\times} post and drought \ensuremath{\times} post \ensuremath{\
-> times} 2002 remittances, the difference in the drought effect for children in
->  2002 remittance households. `extra_note' All regressions include child and i
-> nterview year-month" "fixed effects, children in singleton cells are dropped,
->  and standard errors are clustered by 2005 municipality, where the drought is
->  assigned. `stars'}\\" "\end{longtable}" "\endgroup" "'
- 51.         if "`t'" != "main" local pf `" "\bottomrule" "\addlinespace[6pt]\m
+> child-wave level. `sample_note'," "aged `age_`v'' in both rounds. Cols. 3--5 
+> also keep only children with all of their regressors observed. Children have 
+> a 2005 municipality. They were not measured in MxFLS-3 before November 2009. 
+> We use November 2009 as the cutoff because the 2009 rainfall deficit, the dro
+> ught, had not fully occurred before then. Dropping them from both groups equa
+> lizes treated and control measurement timing. Drought equals 1 if May--Octobe
+> r CHIRPS rainfall in 2009, the maize growing season (Jessoe et al., 2018), in
+>  the child's 2005 municipality was below its 1981--2004 20th percentile," "an
+> d post equals 1 in MxFLS-3. Remittances equal 1 if the household received cas
+> h in the last 12 months from parents, siblings, or children living outside th
+> e household in MxFLS-1 (2002), a proxy for remittances. Cols. 1--4 report the
+>  average drought" "effect. Col. 1 is the basic DID, Col. 2 adds the 2005--200
+> 8 droughts, and Col. 3 adds `hh_note' and `child_note'. Col. 4 adds the 2005 
+> father and birth controls (father's height, schooling, age at birth and emplo
+> yment, birth order, oldest child," "birth weight, delivered at home, weeks pr
+> edominantly breastfed, iron in pregnancy, premature), which are missing for m
+> any children, often because the father migrated. All controls are interacted 
+> with post. Col. 5 is the triple difference: it keeps the controls of Col. 3" 
+> "and adds 2002 remittances \ensuremath{\times} post and drought \ensuremath{\
+> times} post \ensuremath{\times} 2002 remittances, the difference in the droug
+> ht effect for children in 2002 remittance households. `extra_note' All regres
+> sions include child and interview year-month" "fixed effects, children in sin
+> gleton cells are dropped, and standard errors are clustered by 2005 municipal
+> ity, where the drought is assigned. `stars'}\\" "\end{longtable}" "\endgroup"
+>  "'
+ 53.         if "`t'" != "main" local pf `" "\bottomrule" "\addlinespace[6pt]\m
 > ulticolumn{6}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} `reason' The tab
 > le reports the effect of the 2009 drought on the WHO `low_`v'' with the binar
 > y DID for `sample_short', aged `age_`v'' in both rounds, with a 2005 municipa
-> lity and not measured in MxFLS-3 before November 2009, as the July--October 2
-> 009 rainfall deficit had not yet fully occurred. Dropping them from both grou
-> ps equalizes treated and control measurement timing." "Columns, variables and
->  controls are as in the main binary DID tables`ctrl_diff'. All regressions in
-> clude child and interview year-month fixed effects, and standard errors are c
-> lustered by 2005 municipality. `stars'}\\" "\end{longtable}" "\endgroup" "'
- 52. 
+> lity. They were not measured in MxFLS-3 before November 2009. We use November
+>  2009 as the cutoff because the 2009 rainfall deficit, the drought, had not f
+> ully occurred before then. Dropping them from both groups equalizes treated a
+> nd control measurement timing." "Columns, variables and controls are as in th
+> e main binary DID tables`ctrl_diff'. All regressions include child and interv
+> iew year-month fixed effects, and standard errors are clustered by 2005 munic
+> ipality. `stars'}\\" "\end{longtable}" "\endgroup" "'
+ 54. 
 .                 * This is the line that actually writes the table. It takes t
 > he five saved regressions (m1–m5) and writes them into the .tex file as five 
 > side-by-side columns. It uses the header (ph) and notes (pf) built just befor
 > e, and the Y/N rows and children count that add_rows attached to each model
-.         esttab m1 m2 m3 m4 m5 using "`file'", `mode' booktabs ///
+.         esttab m1 m2 m3 m4 m5 using "`file_v'", `mode' booktabs ///
 >             cells(b(star fmt(3)) se(par fmt(3))) star(* 0.10 ** 0.05 *** 0.01
 > ) ///
 >             keep(treat_post treat_post_remit02 remittance_hh_02_post) order(t
@@ -560,8 +934,61 @@
 >             collabels(none) nomtitles numbers nonotes noobs nodepvars ///
 >             prehead(`ph') posthead("\midrule") prefoot("\midrule") postfoot(`
 > pf')
- 53.     }
- 54. }
+ 55.     }
+ 56.     * Model 3 with every covariate shown, one column per outcome
+.     if "`t'" == "main" {
+ 57.         eststo clear
+ 58.         foreach v in haz waz bmiz {
+ 59.             quietly reghdfe `v' treat_post $did_controls $controls02 $cont
+> rols05 if s_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
+ 60.             add_rows Y Y Y N
+ 61.             eststo c_`v'
+ 62.         }
+ 63.         local ph `" "\clearpage" `tabstart' "\begin{longtable}{p{0.62\text
+> width}ccc}" "\caption{2009 Drought and Child Anthropometrics, Binary DID Mode
+> l 3 with All Covariates}\\" "\toprule" " & HAZ & WAZ & BMIZ\\" "'
+ 64.         local pf `" "\bottomrule" "\addlinespace[6pt]\multicolumn{4}{p{0.9
+> 7\textwidth}}{\scriptsize \textit{Notes:} This table reports every coefficien
+> t of Model 3, Col. 3 of the main binary DID tables, for each outcome. Samples
+> , variables and controls are as in those tables, and all controls are interac
+> ted with post. All regressions include child and interview year-month fixed e
+> ffects, children in singleton cells are dropped, and standard errors are clus
+> tered by 2005 municipality. `stars'}\\" "\end{longtable}" "\endgroup" "'
+ 65.         esttab c_haz c_waz c_bmiz using "$out_sumstats/Appendix/regression
+> _tables_appendix.tex", append booktabs ///
+>             cells(b(star fmt(3)) se(par fmt(3))) star(* 0.10 ** 0.05 *** 0.01
+> ) ///
+>             keep(treat_post $did_controls $controls02 $controls05) order(trea
+> t_post $did_controls $controls02 $controls05) ///
+>             varlabels(treat_post "2009 drought \ensuremath{\times} post" drou
+> ght2005_post "2005 drought \ensuremath{\times} post" drought2006_post "2006 d
+> rought \ensuremath{\times} post" drought2007_post "2007 drought \ensuremath{\
+> times} post" drought2008_post "2008 drought \ensuremath{\times} post" ///
+>                 dwell_electricity_02_post "2002 dwelling has electricity \ens
+> uremath{\times} post" dwell_floor_good_02_post "2002 good floor quality \ensu
+> remath{\times} post" dwell_roof_good_02_post "2002 good roof quality \ensurem
+> ath{\times} post" dwell_ventilation_good_02_post "2002 enough ventilation \en
+> suremath{\times} post" ///
+>                 rooms_per_person_02_post "2002 sleeping rooms per member \ens
+> uremath{\times} post" ln_pc_expend_month_02_post "2002 ln expenditure per cap
+> ita \ensuremath{\times} post" rural_02_post "2002 rural locality \ensuremath{
+> \times} post" ///
+>                 child_male_05_post "Male \ensuremath{\times} post" mother_hei
+> ght_cm_05_post "2005 mother's height (cm) \ensuremath{\times} post" mother_ed
+> u_years_05_post "2005 mother's years of schooling \ensuremath{\times} post" m
+> other_age_at_birth_05_post "Mother's age at birth \ensuremath{\times} post" /
+> //
+>                 mother_employed_05_post "2005 mother employed \ensuremath{\ti
+> mes} post" fully_vaccinated_05_post "2005 fully vaccinated \ensuremath{\times
+> } post") ///
+>             stats(fe_child fe_month nchild nclust, labels("Child FE" "Intervi
+> ew year-month FE" "Children" "2005 municipalities (clusters)") fmt(0 0 %9.0fc
+>  %9.0fc)) ///
+>             collabels(none) nomtitles numbers nonotes noobs nodepvars ///
+>             prehead(`ph') posthead("\midrule") prefoot("\midrule") postfoot(`
+> pf')
+ 66.     }
+ 67. }
 
 added scalar:
              e(nchild) =  2432
@@ -683,8 +1110,8 @@ added macro:
 added macro:
            e(fe_month) : "Y"
 (output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
-> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Main/regression_tables_ma
-> in.tex)
+> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Appendix/regression_table
+> s_appendix.tex)
 
 added scalar:
              e(nchild) =  1078
@@ -806,8 +1233,8 @@ added macro:
 added macro:
            e(fe_month) : "Y"
 (output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
-> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Main/regression_tables_ma
-> in.tex)
+> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Appendix/regression_table
+> s_appendix.tex)
 
 added scalar:
              e(nchild) =  2379
@@ -931,6 +1358,81 @@ added macro:
 (output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
 > /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Main/regression_tables_ma
 > in.tex)
+
+added scalar:
+             e(nchild) =  1755
+
+added scalar:
+             e(nclust) =  116
+
+added macro:
+           e(droughts) : "Y"
+
+added macro:
+                 e(hh) : "Y"
+
+added macro:
+              e(child) : "Y"
+
+added macro:
+              e(birth) : "N"
+
+added macro:
+           e(fe_child) : "Y"
+
+added macro:
+           e(fe_month) : "Y"
+
+added scalar:
+             e(nchild) =  700
+
+added scalar:
+             e(nclust) =  101
+
+added macro:
+           e(droughts) : "Y"
+
+added macro:
+                 e(hh) : "Y"
+
+added macro:
+              e(child) : "Y"
+
+added macro:
+              e(birth) : "N"
+
+added macro:
+           e(fe_child) : "Y"
+
+added macro:
+           e(fe_month) : "Y"
+
+added scalar:
+             e(nchild) =  1714
+
+added scalar:
+             e(nclust) =  116
+
+added macro:
+           e(droughts) : "Y"
+
+added macro:
+                 e(hh) : "Y"
+
+added macro:
+              e(child) : "Y"
+
+added macro:
+              e(birth) : "N"
+
+added macro:
+           e(fe_child) : "Y"
+
+added macro:
+           e(fe_month) : "Y"
+(output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
+> /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Appendix/regression_table
+> s_appendix.tex)
 
 added scalar:
              e(nchild) =  1293
@@ -2782,29 +3284,31 @@ added macro:
 . * Event study tables, appendix
 . *******************************************************************
 . 
-. * Here we write the event study tables in the appendix, one per outcome. Each
->  table has two columns: Col. 1, event study and Col. 2, triple difference eve
-> nt study
+. * Here we write the event study tables in the appendix, one per outcome. Col.
+>  1 is the event study and Col. 2 the triple difference event study, both with
+>  controls. Col. 1 uses the Model 3 children and Col. 2 the Model 5 children
 . * 1st chunk is running the event study and DDD event study and storing it
 . foreach v in haz waz bmiz {
   2.     eststo clear
-  3.     quietly reghdfe `v' lead_2_treat lag_0_treat if e_`v' == 1, absorb($FE
-> _month) vce(cluster cvegeo05)
+  3.     * This is Col. 1 the event study with controls on the Model 3 children
+.     quietly reghdfe `v' lead_2_treat lag_0_treat $es_controls if e_`v' == 1 &
+>  m3_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
   4.     quietly test lead_2_treat
   5.     local pl = r(p)
-  6.     add_rows N N N N
+  6.     add_rows Y Y Y N
   7.     estadd scalar p_lead = `pl'
-  8.     eststo es
-  9.     quietly reghdfe `v' lead_2_ddd lag_0_ddd lead_2_treat lag_0_treat lead
-> _2_remit lag_0_remit if e_`v' == 1 & !missing(remittance_hh_02), absorb($FE_m
-> onth) vce(cluster cvegeo05)
+  8.     eststo esc
+  9.     * Triple difference with controls on the Model 5 children
+.     quietly reghdfe `v' lead_2_ddd lag_0_ddd lead_2_treat lag_0_treat lead_2_
+> remit lag_0_remit $es_controls if e_`v' == 1 & m5_`v' == 1, absorb($FE_month)
+>  vce(cluster cvegeo05)
  10.     quietly test lead_2_ddd
  11.     local pl = r(p)
  12.     quietly lincom lag_0_treat + lag_0_ddd
  13.     local lb = r(estimate)
  14.     local ls = r(se)
  15.     local lp = r(p)
- 16.     add_rows N N N N
+ 16.     add_rows Y Y Y N
  17.     estadd scalar p_lead = `pl'
  18.     estadd scalar lin_b = `lb'
  19.     estadd scalar lin_se = `ls'
@@ -2817,24 +3321,30 @@ added macro:
 > {c}{`head_`v''}\\" "\cmidrule(lr){2-3}" "'
  23.     local pf `" "\bottomrule" "\addlinespace[6pt]\multicolumn{3}{p{0.97\te
 > xtwidth}}{\scriptsize \textit{Notes:} This table tests for pre-trends before 
-> the 2009 drought. Regressions are at the child-wave level and use MxFLS-1 (20
-> 02), MxFLS-2 (2005) and MxFLS-3 (2009), with 2005 as the" "reference wave. Th
-> e sample is children aged `age_`v'' in each wave they are in, with a 2005 mun
-> icipality, and not measured in MxFLS-3 before November 2009, as the July--Oct
-> ober 2009 rainfall deficit had not yet fully occurred. Dropping them from bot
-> h groups equalizes treated and control measurement timing. Col. 1 regresses t
-> he outcome on the drought times the 2002 wave (the lead) and times the 2009" 
-> "wave. Col. 2 adds the same terms times 2002 remittances, and the 2002 remitt
-> ance terms on their own (not shown), for children with 2002 remittances obser
-> ved. The P-value of the lead tests the drought lead in Col. 1 and the triple 
-> difference lead in Col. 2." "The effect for remittance households is the sum 
-> of the two 2009 drought terms. All regressions include child and interview ye
-> ar-month fixed effects, and standard errors are clustered by 2005 municipalit
-> y. `stars'}\\" "\end{longtable}" "\endgroup" "'
+> the 2009 drought. Regressions are at the child-wave level on MxFLS-1 (2002), 
+> MxFLS-2 (2005) and MxFLS-3 (2009), with 2005 as the" "reference wave. The sam
+> ple is children aged `age_`v'' in each wave they are in, with a 2005 municipa
+> lity. They were not measured in MxFLS-3 before November 2009. We use November
+>  2009 as the cutoff because the 2009 rainfall deficit, the drought, had not f
+> ully occurred before then. Dropping them from both groups equalizes treated a
+> nd control measurement timing. Col. 1 keeps the children in Model 3 of the bi
+> nary DID and Col. 2 those in Model 5, so each matches its DID sample. Col. 1 
+> regresses the outcome on the drought times the 2002 wave, known as the lead, 
+> and times the 2009" "wave, with the 2005--2008 droughts, 2002 household and 2
+> 005 child and mother controls, each times the 2002 and 2009 waves. Following 
+> the literature, baseline controls are interacted with time to allow different
+>  trends by pre-treatment characteristics (Bailey and Goodman-Bacon, 2015; Bai
+> ley et al., 2021). Col. 2 adds the drought terms times 2002 remittances, and 
+> the 2002 remittance terms on their own (not shown). The P-value of the lead t
+> ests the drought lead in Col. 1 and the triple difference lead in Col. 2." "T
+> he effect for remittance households is the sum of the two 2009 drought terms.
+>  All regressions include child and interview year-month fixed effects, and st
+> andard errors are clustered by 2005 municipality. `stars'}\\" "\end{longtable
+> }" "\endgroup" "'
  24. 
 .         * Here we actually writing the table
-.     esttab es ddd using "$out_sumstats/Appendix/regression_tables_appendix.te
-> x", append booktabs ///
+.     esttab esc ddd using "$out_sumstats/Appendix/regression_tables_appendix.t
+> ex", append booktabs ///
 >         cells(b(star fmt(3)) se(par fmt(3))) star(* 0.10 ** 0.05 *** 0.01) //
 > /
 >         keep(lead_2_treat lag_0_treat lead_2_ddd lag_0_ddd) order(lead_2_trea
@@ -2844,30 +3354,32 @@ added macro:
 > uremath{\times} 2002 remittances \ensuremath{\times} 2002 wave (lead)" lag_0_
 > ddd "Drought \ensuremath{\times} 2002 remittances \ensuremath{\times} 2009 wa
 > ve") ///
->         stats(fe_child fe_month p_lead lin_b lin_se lin_p N nchild nclust, la
-> bels("Child FE" "Interview year-month FE" "P-value, lead = 0" "\midrule 2009 
-> drought effect, remittance households" "\quad SE" "\quad P-value" "\midrule O
-> bservations (child-waves)" "Children" "2005 municipalities (clusters)") fmt(0
->  0 3 3 3 3 %9.0fc %9.0fc %9.0fc)) ///
+>         stats(droughts hh child fe_child fe_month p_lead lin_b lin_se lin_p N
+>  nchild nclust, labels("2005--2008 droughts \ensuremath{\times} wave" "2002 h
+> ousehold controls \ensuremath{\times} wave" "2005 child and mother controls \
+> ensuremath{\times} wave" "Child FE" "Interview year-month FE" "P-value, lead 
+> = 0" "\midrule 2009 drought effect, remittance households" "\quad SE" "\quad 
+> P-value" "\midrule Observations (child-waves)" "Children" "2005 municipalitie
+> s (clusters)") fmt(0 0 0 0 0 3 3 3 3 %9.0fc %9.0fc %9.0fc)) ///
 >         collabels(none) mtitles("Event study" "Triple difference") numbers no
 > notes noobs nodepvars ///
 >         prehead(`ph') posthead("\midrule") prefoot("\midrule") postfoot(`pf')
  25. }
 
 added scalar:
-             e(nchild) =  4550
+             e(nchild) =  1755
 
 added scalar:
-             e(nclust) =  143
+             e(nclust) =  116
 
 added macro:
-           e(droughts) : "N"
+           e(droughts) : "Y"
 
 added macro:
-                 e(hh) : "N"
+                 e(hh) : "Y"
 
 added macro:
-              e(child) : "N"
+              e(child) : "Y"
 
 added macro:
               e(birth) : "N"
@@ -2879,22 +3391,22 @@ added macro:
            e(fe_month) : "Y"
 
 added scalar:
-             e(p_lead) =  .42175843
+             e(p_lead) =  .3222021
 
 added scalar:
-             e(nchild) =  3690
+             e(nchild) =  1622
 
 added scalar:
-             e(nclust) =  136
+             e(nclust) =  114
 
 added macro:
-           e(droughts) : "N"
+           e(droughts) : "Y"
 
 added macro:
-                 e(hh) : "N"
+                 e(hh) : "Y"
 
 added macro:
-              e(child) : "N"
+              e(child) : "Y"
 
 added macro:
               e(birth) : "N"
@@ -2906,34 +3418,34 @@ added macro:
            e(fe_month) : "Y"
 
 added scalar:
-             e(p_lead) =  .46443375
+             e(p_lead) =  .10109302
 
 added scalar:
-              e(lin_b) =  -.11033287
+              e(lin_b) =  -.16675037
 
 added scalar:
-             e(lin_se) =  .13622548
+             e(lin_se) =  .14279472
 
 added scalar:
-              e(lin_p) =  .41940673
+              e(lin_p) =  .2453605
 (output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
 > /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Appendix/regression_table
 > s_appendix.tex)
 
 added scalar:
-             e(nchild) =  2342
+             e(nchild) =  700
 
 added scalar:
-             e(nclust) =  137
+             e(nclust) =  101
 
 added macro:
-           e(droughts) : "N"
+           e(droughts) : "Y"
 
 added macro:
-                 e(hh) : "N"
+                 e(hh) : "Y"
 
 added macro:
-              e(child) : "N"
+              e(child) : "Y"
 
 added macro:
               e(birth) : "N"
@@ -2945,22 +3457,22 @@ added macro:
            e(fe_month) : "Y"
 
 added scalar:
-             e(p_lead) =  .10266786
+             e(p_lead) =  .02794477
 
 added scalar:
-             e(nchild) =  1817
+             e(nchild) =  634
 
 added scalar:
-             e(nclust) =  127
+             e(nclust) =  99
 
 added macro:
-           e(droughts) : "N"
+           e(droughts) : "Y"
 
 added macro:
-                 e(hh) : "N"
+                 e(hh) : "Y"
 
 added macro:
-              e(child) : "N"
+              e(child) : "Y"
 
 added macro:
               e(birth) : "N"
@@ -2972,34 +3484,34 @@ added macro:
            e(fe_month) : "Y"
 
 added scalar:
-             e(p_lead) =  .05573159
+             e(p_lead) =  .82204101
 
 added scalar:
-              e(lin_b) =  -.27298208
+              e(lin_b) =  -.47711399
 
 added scalar:
-             e(lin_se) =  .15995991
+             e(lin_se) =  .20040379
 
 added scalar:
-              e(lin_p) =  .09036626
+              e(lin_p) =  .01921028
 (output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
 > /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Appendix/regression_table
 > s_appendix.tex)
 
 added scalar:
-             e(nchild) =  4388
+             e(nchild) =  1714
 
 added scalar:
-             e(nclust) =  143
+             e(nclust) =  116
 
 added macro:
-           e(droughts) : "N"
+           e(droughts) : "Y"
 
 added macro:
-                 e(hh) : "N"
+                 e(hh) : "Y"
 
 added macro:
-              e(child) : "N"
+              e(child) : "Y"
 
 added macro:
               e(birth) : "N"
@@ -3011,22 +3523,22 @@ added macro:
            e(fe_month) : "Y"
 
 added scalar:
-             e(p_lead) =  .38514984
+             e(p_lead) =  .00031058
 
 added scalar:
-             e(nchild) =  3554
+             e(nchild) =  1587
 
 added scalar:
-             e(nclust) =  136
+             e(nclust) =  114
 
 added macro:
-           e(droughts) : "N"
+           e(droughts) : "Y"
 
 added macro:
-                 e(hh) : "N"
+                 e(hh) : "Y"
 
 added macro:
-              e(child) : "N"
+              e(child) : "Y"
 
 added macro:
               e(birth) : "N"
@@ -3038,255 +3550,19 @@ added macro:
            e(fe_month) : "Y"
 
 added scalar:
-             e(p_lead) =  .97346101
+             e(p_lead) =  .35821307
 
 added scalar:
-              e(lin_b) =  -.01395166
+              e(lin_b) =  -.22208214
 
 added scalar:
-             e(lin_se) =  .14180519
+             e(lin_se) =  .16730818
 
 added scalar:
-              e(lin_p) =  .92177165
+              e(lin_p) =  .18705737
 (output written to /Users/zakserby/Documents/Documents (MAC)/Cornell University
 > /Master's Thesis/Proposal 3 Mexico OG/Output/Tables/Appendix/regression_table
 > s_appendix.tex)
-
-. 
-. *******************************************************************
-. * Load the continuous DID results from R
-. *******************************************************************
-. 
-. * Each csv is imported as text and appended, then the numbers are turned back
->  into numbers. Note: NA in the csv files becomes missing
-. tempfile csvs
-
-. local first 1
-
-. foreach f in "Main/contdid_results" "Main/contdid_spi_results" "Appendix/suba
-> nalysis_gender_contdid_results" "Appendix/subanalysis_gender_contdid_spi_resu
-> lts" "Appendix/subanalysis_rural_contdid_results" "Appendix/subanalysis_rural
-> _contdid_spi_results" {
-  2.     import delimited using "$out_regs/`f'.csv", clear varnames(1) stringco
-> ls(_all) bindquote(strict)
-  3.     gen file = "`f'"
-  4.     if `first' == 0 append using `csvs'
-  5.     save `csvs', replace
-  6.     local first 0
-  7. }
-(encoding automatically selected: ISO-8859-1)
-(7 vars, 15 obs)
-(file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 not
-    found)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
-    as .dta format
-(encoding automatically selected: ISO-8859-1)
-(11 vars, 39 obs)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
-    as .dta format
-(encoding automatically selected: ISO-8859-1)
-(7 vars, 30 obs)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
-    as .dta format
-(encoding automatically selected: ISO-8859-1)
-(11 vars, 78 obs)
-(variable children_in_group was str3, now str4 to accommodate using data's
-       values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
-    as .dta format
-(encoding automatically selected: ISO-8859-1)
-(7 vars, 30 obs)
-(variable file was str42, now str47 to accommodate using data's values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
-    as .dta format
-(encoding automatically selected: ISO-8859-1)
-(11 vars, 78 obs)
-(variable file was str46, now str47 to accommodate using data's values)
-file /var/folders/8b/5tzzlj113bd9tswyt9lzxf580000gn/T//St46843.000001 saved
-    as .dta format
-
-. * This turns each number column from text back into numbers
-. foreach v in coef se_contdid_bootstrap se_clustered_municipality n_children s
-> e_clustered p_clustered p_wild_bootstrap children_in_group municipalities_in_
-> group untreated_municipalities {
-  2.     capture destring `v', replace force
-  3. }
-
-. 
-. * The stacked csv files label their rows in different columns, so we make two
->  columns that work for every row. That is spec (the label) and group (all or 
-> the subgroup)
-. * Then each table cell is found with one condition, e.g. outcome == "haz" & g
-> roup == "boys" & spec == "..."
-. 
-. * The SPI files put the label in specification and the continuous DID files p
-> ut it in estimate, so spec takes whichever one the row has
-. gen spec = specification
-(75 missing values generated)
-
-. replace spec = estimate if spec == ""
-(75 real changes made)
-
-. replace term = "" if missing(term)
-(0 real changes made)
-
-. * group is "all" for the main results. Subgroup labels end in ", boys", ", gi
-> rls", ", rural" or ", urban", in spec or in sample
-. gen group = "all"
-
-. foreach g in boys girls rural urban {
-  2.     * If the label contains ", boys" (or girls, rural, urban), that row be
-> longs to that subgroup
-.     replace group = "`g'" if strpos(spec, ", `g'") | strpos(sample, ", `g'")
-  3. }
-variable group was str3 now str4
-(54 real changes made)
-variable group was str4 now str5
-(54 real changes made)
-(54 real changes made)
-(54 real changes made)
-
-. 
-. * For assumptions the continuous DID and SPI notes use the same sentence 
-. local pt_note "The average ATT needs parallel trends, while the average ACRT,
->  the average slope of the dose response, and comparisons between doses need s
-> trong parallel trends (Callaway et al., 2024)."
-
-. 
-. *******************************************************************
-. * SPI drought classes table, main
-. *******************************************************************
-. 
-. * NOTE: This writes Table 7, the SPI drought-class table, into the Main table
-> s file. The SPI regressions were run in R, so esttab can't be used. Instead t
-> he table is written by hand, one LaTeX line at a time with file write and usi
-> ng numbers pulled from the csv rows with csv_cell and csv_num
-. * NOTE: Columns 1, 3 and 5 are dry (z <= -1) vs near normal, columns 2, 4 and
->  6 split dry into moderately dry and severely dry or worse, from section 8 of
->  Contdid_regs.R
-. 
-. * Creating the header
-. capture file close tab
-
-. file open tab using "$out_sumstats/Main/regression_tables_main.tex", write ap
-> pend
-
-. tab_head 6 "2009 Drought and Child Anthropometrics, SPI Drought Classes"
-
-. file write tab " & \multicolumn{2}{c}{HAZ} & \multicolumn{2}{c}{WAZ} & \multi
-> column{2}{c}{BMIZ}\\" _n "\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6
-> -7}" _n " & (1) & (2) & (3) & (4) & (5) & (6)\\" _n "\midrule" _n
-
-. 
-. * Coefficient rows: each outcome has the dry column and the groups column
-. foreach r in dry mod sev {
-  2.         * This loops over the three row types: dry, moderately dry, and se
-> verely dry or worse. And ensure math prints the math 
-.     if "`r'" == "dry" local lab "Dry, \ensuremath{z\le -1}"
-  3.     if "`r'" == "mod" local lab "Moderately dry, \ensuremath{-1.5<z\le -1}
-> "
-  4.     if "`r'" == "sev" local lab "Severely dry or worse, \ensuremath{z\le -
-> 1.5}"
-  5.         * Three rows the coefficient with the label, the SEs and the p-val
-> ue from the wild bootstrap
-.     local row1 "`lab'"
-  6.     local row2 ""
-  7.     local row3 ""
-  8.     foreach v in haz waz bmiz {
-  9.         foreach c in dry groups {
- 10.                         * Picking the row 
-.             local cnd `"group == "all" & outcome == "`v'""'
- 11.                         * adds the dry-vs-near-normal regression
-.             if "`c'" == "dry" local cnd `"`cnd' & strpos(spec, "Average ATT: 
-> dry") & term == "dry" & "`r'" == "dry""'
- 12.                         * For a groups column, this adds the split regress
-> ion, the term mod_dry or sev_dry
-.             if "`c'" == "groups" local cnd `"`cnd' & strpos(spec, "Groups: mo
-> derately") & term == "`r'_dry""'
- 13.                         * Calls the row and gives the se, p-value, and wil
-> d boostrap p value
-.             csv_cell if `cnd', se(se_clustered) pc(p_clustered) wild(p_wild_b
-> ootstrap)
- 14.             local row1 "`row1' & `r(b)'"
- 15.             local row2 "`row2' & `r(se)'"
- 16.             local row3 "`row3' & `r(p)'"
- 17.         }
- 18.     }
- 19.     file write tab "`row1'\\" _n "`row2'\\" _n "`row3'\\" _n
- 20. }
-
-. 
-. * Pre-trend p-values (wild bootstrap), number of children and municipalities
-. * The midrule just creates that medium thick line
-. file write tab "\midrule" _n 
-
-. foreach r in mod sev {
-  2.         * This just labels the rows 
-.     local row = "P-val: pre-trend 2002--2005, " + cond("`r'" == "mod", "moder
-> ately dry", "severely dry or worse")
-  3.     foreach v in haz waz bmiz {
-  4.                 * Grabs wild bootstrap p-values and formats it 
-.         csv_num p_wild_bootstrap if group == "all" & outcome == "`v'" & strpo
-> s(spec, "Pre-trend") & term == "`r'_dry", fmt(%9.3f)
-  5.                 * The first & skips the first column as the event study is
->  only for the split cases not the dry column
-.         local row "`row' & & `r(n)'"
-  6.     }
-  7.         * This writes the row
-.     file write tab "`row'\\" _n
-  8. }
-
-. * CSV holds the count for each of these three rows, each with a label, we jus
-> t call upon each 
-. foreach n in n_children municipalities_in_group untreated_municipalities {
-  2.     if "`n'" == "n_children" local row "Children"
-  3.     if "`n'" == "municipalities_in_group" local row "Dry 2005 municipaliti
-> es"
-  4.     if "`n'" == "untreated_municipalities" local row "Near-normal 2005 mun
-> icipalities"
-  5.     foreach v in haz waz bmiz {
-  6.         csv_num `n' if group == "all" & outcome == "`v'" & strpos(spec, "A
-> verage ATT: dry") & term == "dry"
-  7.         local a "`r(n)'"
-  8.         csv_num `n' if group == "all" & outcome == "`v'" & strpos(spec, "G
-> roups: moderately") & term == "mod_dry"
-  9.         local b "`r(n)'"
- 10.         if "`n'" == "municipalities_in_group" local b ""
- 11.                 * Adds the two cells for each outcome
-.         local row "`row' & `a' & `b'"
- 12.     }
- 13.         * Writes the row
-.     file write tab "`row'\\" _n
- 14. }
-
-. * Notes
-. file write tab "\bottomrule" _n
-
-. file write tab "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scripts
-> ize \textit{Notes:} This table compares children in dry 2005 municipalities w
-> ith children in near-normal ones. Regressions are at the child level, on the 
-> 2005 to 2009 change in the WHO z-score," _n
-
-. file write tab "for the binary DID estimation samples without children in wet
->  municipalities (z of 1 or above). z is 2009 annual CHIRPS rainfall in the ch
-> ild's 2005 municipality in standard deviations from its 1981--2004 mean, grou
-> ped with the SPI classes of" _n
-
-. file write tab "McKee et al. (1993): near normal is z between -1 and 1, moder
-> ately dry between -1.5 and -1, and severely dry or worse -1.5 or below. Cols.
->  1, 3 and 5 compare dry (z of -1 or below) with near normal, and Cols. 2, 4 a
-> nd 6 split dry into moderately dry and" _n
-
-. file write tab "severely dry or worse. Each class is only compared with near 
-> normal, which needs parallel trends, and not with the other class, which woul
-> d need strong parallel trends (Callaway et al., 2024). Since the contdid pack
-> age does not yet support discrete doses, the classes are estimated with the d
-> iscrete-dose regression in equation 4.1 (Callaway et al., 2024). Standard err
-> ors clustered by 2005 municipality are in parentheses." _n
-
-. file write tab "`mnw_note' `star_note' `stars'}\\" _n
-
-. file write tab "\end{longtable}" _n "\endgroup" _n
 
 . 
 . *******************************************************************
@@ -3294,8 +3570,13 @@ variable group was str4 now str5
 . *******************************************************************
 . 
 . * This writes the table, "Continuous DID and Remittances as a Moderator". Lik
-> e Table 7, it's written by hand with file write, because the results come fro
-> m R csv files.
+> e the SPI table, it's written by hand with file write, because the results co
+> me from R csv files.
+. use `csvs', clear
+
+. file open tab using "$out_sumstats/Main/regression_tables_main.tex", write ap
+> pend
+
 . tab_head 3 "Continuous DID and Remittances as a Moderator"
 
 . file write tab " & HAZ & WAZ & BMIZ\\" _n " & (1) & (2) & (3)\\" _n "\midrule
@@ -3380,14 +3661,15 @@ variable group was str4 now str5
 
 . * Notes
 . file write tab "\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scripts
-> ize \textit{Notes:} This table reports the continuous DID of `cgbs' and tests
->  whether 2002 remittances moderated the effect of the 2009 drought. Regressio
-> ns are at the child level, on the 2005 to 2009" _n
+> ize \textit{Notes:} This table reports the continuous DID `cgbs' and tests wh
+> ether 2002 remittances moderated the effect of the 2009 drought. Regressions 
+> are at the child level, on the 2005 to 2009" _n
 
 . file write tab "change in the WHO z-score, for the binary DID estimation samp
-> les. The dose is the 2009 rainfall deficit, max(0,~-z), where z is 2009 annua
-> l CHIRPS rainfall in the child's 2005 municipality in standard deviations fro
-> m its 1981--2004 mean. Panel A compares" _n
+> les. The dose is the 2009 rainfall deficit, max(0,~-z), where z is 2009 May--
+> October CHIRPS rainfall, the maize growing season (Jessoe et al., 2018), in t
+> he child's 2005 municipality in standard deviations from its 1981--2004 mean.
+>  Panel A compares" _n
 
 . file write tab "children with any 2009 deficit (z below 0) with children with
 > out one, Panel B gives the average ATT separately for children in 2002 remitt
@@ -3418,9 +3700,9 @@ variable group was str4 now str5
 . *******************************************************************
 . 
 . * This writes the continuous DID subgroup tables in the appendix, one per out
-> come. It's the same approach as Tables 7 and 8, meaning it's hand-written wit
-> h file write, with the numbers pulled from the csv data with csv_cell and csv
-> _num
+> come. It's the same approach as the SPI and continuous DID tables, meaning it
+> 's hand-written with file write, with the numbers pulled from the csv data wi
+> th csv_cell and csv_num
 . * It's slightly different as the columns are the subgroups (boys, girls, rura
 > l, urban) and the rows are the estimates, this is to safe space and make less
 >  tables
@@ -3493,18 +3775,19 @@ variable group was str4 now str5
 .     file write tab "\bottomrule" _n
  34.         * Notes
 .     file write tab "\addlinespace[6pt]\multicolumn{5}{p{0.97\textwidth}}{\scr
-> iptsize \textit{Notes:} This table repeats the continuous DID and SPI results
->  for the WHO `low_`v'' by subgroup. Cols. 1--2 test for gender disparities in
->  the impact of the drought (2005 roster sex)," _n
+> iptsize \textit{Notes:} This table repeats the continuous DID and rainfall cl
+> ass results for the WHO `low_`v'' by subgroup. Cols. 1--2 test for gender dis
+> parities in the impact of the drought, using sex reported in the 2005 househo
+> ld roster," _n
  35.     file write tab "and Cols. 3--4 test whether it hits rural children har
 > der, as rural household incomes depend more directly on rain-fed agriculture.
->  `rural_note' Rows, samples (aged `age_`v'' in both rounds) and definitions a
-> re as in the main continuous DID and SPI" _n
- 36.     file write tab "tables, and subgroups with few dry or untreated munici
-> palities give noisy estimates. The any deficit row uses the contdid package, 
-> and the SPI rows use the discrete-dose regression in equation 4.1 (Callaway e
-> t al., 2024). Standard errors clustered by 2005 municipality are in parenthes
-> es. `mnw_note' `star_note' `stars'}\\" _n
+>  `rural_note' Rows, samples and definitions are as in the main continuous DID
+>  and rainfall class" _n
+ 36.     file write tab "tables. Children are aged `age_`v'' in both rounds. Th
+> e any deficit row uses the contdid package, and the rainfall class rows use t
+> he discrete-dose regression in equation 4.1 (Callaway et al., 2024). Standard
+>  errors clustered by 2005 municipality are in parentheses. `mnw_note' `star_n
+> ote' `stars'}\\" _n
  37.     file write tab "\end{longtable}" _n "\endgroup" _n
  38. }
 
@@ -3525,11 +3808,10 @@ variable group was str4 now str5
 . 
 . 
 end of do-file
-
-. log close regstats
+.     log close regstats
       name:  regstats
        log:  /Users/zakserby/Documents/Documents (MAC)/Cornell University/Maste
 > r's Thesis/Proposal 3 Mexico OG/Output/Logs/Main/regression_stats.log
   log type:  text
- closed on:  29 Oct 2026, 14:32:12
+ closed on:  30 Oct 2026, 03:47:41
 -------------------------------------------------------------------------------

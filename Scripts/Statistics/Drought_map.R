@@ -70,7 +70,7 @@ states <- aggregate(mun["CVE_ENT"], by = list(mun$CVE_ENT), FUN = function(x) x[
 # SPI classes, from extremely dry to wet. Near normal is -1 < z < 1
 breaks <- c(-Inf, -2, -1.5, -1, 1, Inf)
 labels <- c("Extremely dry, z <= -2", "Severely dry, -2 < z <= -1.5", "Moderately dry, -1.5 < z <= -1", "Near normal, -1 < z < 1", "Wet, z >= 1")
-# Browns for the dry classes and teal for wet, from the BrBG palette. Near normal is grey so the droughts stand out
+# Colors
 spi_colors <- c(brewer.pal(11, "BrBG")[c(2, 4, 5)], "grey90", brewer.pal(11, "BrBG")[9])
 # Note: right = TRUE so z = -1 counts as moderately dry and z = -1.5 as severely dry, the same as add_spi()
 mun$spi_class <- cut(mun$rain_z, breaks = breaks, labels = FALSE, right = TRUE)
@@ -86,13 +86,13 @@ draw_map <- function(fill, title, name) {
 
 # SPI classes
 # NOTE: The wet municipalities (z >= 1) are almost all in central Mexico, so the any deficit continuous DID compares against mostly one region
-draw_map(ifelse(is.na(mun$spi_class), "white", spi_colors[mun$spi_class]), "2009 rainfall, SPI classes", "drought_map_spi.png")
+draw_map(ifelse(is.na(mun$spi_class), "white", spi_colors[mun$spi_class]), "2009 rainfall classes", "drought_map_spi.png")
 legend("bottomleft", legend = c(labels, "Municipality in the estimation sample"), fill = c(spi_colors, NA),
        border = c(rep(NA, 5), "black"), bty = "n", cex = 0.65)
 dev.off()
 
 # Binary drought, the DID treatment
-# NOTE: The binary treatment and the SPI classes don't line up. About a fifth of the 2009 droughts have z above -1, near normal in the SPI classes, so the binary treatment mixes mild and severe deficits
+# NOTE: The binary treatment and the SPI classes don't line up. About a sixth of the 2009 droughts have z above -1, near normal in the SPI classes, so the binary treatment mixes mild and severe deficits
 draw_map(ifelse(is.na(mun$drought), "white", ifelse(mun$drought == 1, "#A6611A", "grey90")), "2009 drought, rainfall below the 1981-2004 20th percentile", "drought_map_binary.png")
 legend("bottomleft", legend = c("Drought", "No drought", "Municipality in the estimation sample"), fill = c("#A6611A", "grey90", NA),
        border = c(NA, NA, "black"), bty = "n", cex = 0.65)

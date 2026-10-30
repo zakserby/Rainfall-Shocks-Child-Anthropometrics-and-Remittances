@@ -318,7 +318,7 @@ for (v in misc$outcomes) {
   # Counts the number of children in that bin and then determines the size of the circle based on that
   bins$n <- as.numeric(table(trt$bin)[as.character(bins$bin)])
   # Simply construct the figure below
-  png(paste(dir$output_figure,"/", ifelse(v %in% c("haz","waz"), "Main", "Appendix"), "/contdid_binscatter_",v,".png",sep=""), width = 6.5, height = 4.5, units = "in", res = 200)
+  png(paste(dir$output_figure,"/", ifelse(v == "bmiz", "Main", "Appendix"), "/contdid_binscatter_",v,".png",sep=""), width = 6.5, height = 4.5, units = "in", res = 200)
   plot(bins$D, bins$dY, pch = 21, bg = "grey70", cex = 1 + 2 * bins$n / max(bins$n),
        xlab = "2009 rainfall deficit (SDs below the 1981-2004 mean)", ylab = paste0("Change in ", v, ", 2005 to 2009"),
        main = paste0("Change in ", v, " by 2009 rainfall deficit"), ylim = range(c(bins$dY, mean(unt$dY))))
@@ -354,11 +354,11 @@ for (v in misc$outcomes) {
   xlab <- "2009 rainfall deficit (SDs below the 1981-2004 mean)"
   
   # ATT(d): Use contdid's estimates from Case 1, with the clustered SEs and uniform critical value from b.
-  plot_bands(res$dose, res$att.d, b_att.d$se, b_att.d$crit.val, paste0(ifelse(v == "haz", "Main", "Appendix"), "/contdid_att_clustered_", v, ".png"),
+  plot_bands(res$dose, res$att.d, b_att.d$se, b_att.d$crit.val, paste0("Appendix/contdid_att_clustered_", v, ".png"),
              xlab, "ATT", paste0("ATT(d), ", v, ": 95% bands clustered by municipality"))
   
   # ACRT(d): same plot for the slope curve
-  plot_bands(res$dose, res$acrt.d, b_acrt.d$se, b_acrt.d$crit.val, paste0("Appendix/contdid_acrt_clustered_", v, ".png"),
+  plot_bands(res$dose, res$acrt.d, b_acrt.d$se, b_acrt.d$crit.val, paste0("Miscellaneous/contdid_acrt_clustered_", v, ".png"),
              xlab, "ACRT", paste0("ACRT(d), ", v, ": 95% bands clustered by municipality"))
   
   # If have time can insert an event study where we cluster by municipality
@@ -509,7 +509,7 @@ for (v in misc$outcomes) {
   spi_results <- rbind(spi_results, row)
   
   # Graph note not necessary to keep if only want the results, this is the exact same code as above
-  plot_bands(res_spi$dose, res_spi$att.d, b_att_spi.d$se, b_att_spi.d$crit.val, paste0(ifelse(v == "waz", "Miscellaneous", "Appendix"), "/contdid_spi_att_clustered_", v, ".png"),
+  plot_bands(res_spi$dose, res_spi$att.d, b_att_spi.d$se, b_att_spi.d$crit.val, paste0("Miscellaneous/contdid_spi_att_clustered_", v, ".png"),
              "2009 rainfall deficit (SDs below the 1981-2004 mean), z <= -1", "ATT",
              paste0("ATT(d), SPI dose, ", v, ": 95% bands clustered by municipality"))
   
@@ -525,13 +525,6 @@ for (v in misc$outcomes) {
   spi_reg(fd_spi, c("mod_dry","sev_dry"), v, "Groups: moderately dry, severely dry or worse", near_normal)
   cat("Extremely dry shown alone (6 municipalities, SE not reliable):\n")
   spi_reg(fd_spi, c("mod_dry","sev_only","ext_dry"), v, "Groups: all three SPI dry classes", near_normal)
-  
-  # ---- d. Pre-trends ----
-  # d. Pre trends, same regression but on 2002 to 2005 change for each SPI group vs near normal, children in all three waves
-  cat("d. Pre-trends, 2002 to 2005, each group vs near normal:\n")
-  df3_spi <- add_spi(df3_list[[v]])
-  pre_spi <- first_diff(df3_spi[df3_spi$time_period %in% c(1, 2), ])
-  spi_reg(pre_spi, c("mod_dry","sev_dry"), v, "Pre-trend 2002-2005: moderately dry, severely dry or worse", near_normal)
   
   # ---- f. Remittance buffer ----
   # f. Remittance buffer with the SPI groups. Difference in the average ATT dry vs near normal between 2002 remittance and non-remittance children

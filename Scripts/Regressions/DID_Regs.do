@@ -37,6 +37,7 @@ foreach d in "$out_regs" "$out_logs" "$out_figs" {
         capture mkdir "`d'/`s'"
     }
 }
+capture mkdir "$out_figs/Miscellaneous"
 
 * If the master already opened the log, the capture fails quietly and the master keeps logging. If this file is run on its own, it opens the same log here and closes it at the end, so the DID and the event study are always in the log.
 capture log using "$out_logs/Main/did_regs.log", replace text name(regs_did)
@@ -77,6 +78,8 @@ capture which ftools
 if _rc ssc install ftools
 capture which require
 if _rc ssc install require
+capture which boottest
+if _rc ssc install boottest
 
 * NOTE: Standard errors are clustered at the 2005 municipality, where treatment is assigned. STILL IN PROCESS OF THINKING ABOUT CVEOGEO INSTEAD OF CVEOGEO05. Reasoning for 2005 is because cveogeo changes for movers and thus the clusters would not stay fixed over time
 
@@ -148,7 +151,7 @@ foreach v in haz waz bmiz {
         xtitle("Wave") ytitle("Mean `v'") ///
         title("Mean `v' by wave, treated vs control")
     * Saved to the Figures folder
-    graph export "$out_figs/Appendix/trends_`v'.png", replace
+    graph export "$out_figs/Miscellaneous/trends_`v'.png", replace
     restore
 }
 
@@ -156,21 +159,34 @@ foreach v in haz waz bmiz {
 gen lead_2_treat = treat2009 * (year == 2002)
 gen lag_0_treat  = treat2009 * (year == 2009)
 
+* Model 3 and Model 5 children, so the event studies use the same children as the DID tables
 foreach v in haz waz bmiz {
-    reghdfe `v' lead_2_treat lag_0_treat if e_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
+    quietly reghdfe `v' treat_post $did_controls $controls02 $controls05 if s_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
+    gen tmp = e(sample)
+    bysort pid_link_canonical: egen m3_`v' = max(tmp)
+    drop tmp
+    quietly reghdfe `v' treat_post remittance_hh_02_post treat_post_remit02 $did_controls $controls02 $controls05 if s_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
+    gen tmp = e(sample)
+    bysort pid_link_canonical: egen m5_`v' = max(tmp)
+    drop tmp
+}
+
+foreach v in haz waz bmiz {
+    * We restrict to the Model 3 children
+    reghdfe `v' lead_2_treat lag_0_treat if e_`v' == 1 & m3_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
     * Here we conduct a pretrend test where we expect lead to be around 0
     test lead_2_treat
 
     * Save coefficients and CIs for plotting, the reference period is posted as 0
     preserve
-    postfile handle int etime double b se lb ub using "$out_regs/Main/es_`v'.dta", replace
+    postfile handle int etime double b se lb ub using "$out_regs/Appendix/es_`v'.dta", replace
     post handle (-2) (_b[lead_2_treat]) (_se[lead_2_treat]) (_b[lead_2_treat] - 1.96*_se[lead_2_treat]) (_b[lead_2_treat] + 1.96*_se[lead_2_treat])
     post handle (-1) (0) (0) (0) (0)
     post handle (0) (_b[lag_0_treat]) (_se[lag_0_treat]) (_b[lag_0_treat] - 1.96*_se[lag_0_treat]) (_b[lag_0_treat] + 1.96*_se[lag_0_treat])
     postclose handle
 
     * Plot the event study coefficients
-    use "$out_regs/Main/es_`v'.dta", clear
+    use "$out_regs/Appendix/es_`v'.dta", clear
     sort etime
     twoway ///
         (rcap ub lb etime, lcolor(black)) ///
@@ -181,7 +197,88 @@ foreach v in haz waz bmiz {
         xtitle("Event time (wave)") ytitle("Coefficient") ///
         title("Event study: `v'") legend(off)
     * Saved to the Figures folder
-    graph export "$out_figs/Main/event_study_`v'.png", replace
+    graph export "$out_figs/Miscellaneous/event_study_`v'.png", replace
+    restore
+}
+
+* Event study with controls, the Model 3 controls each interacted with the 2002 and 2009 waves
+global es_controls ""
+foreach c in drought2005 drought2006 drought2007 drought2008 dwell_electricity_02 dwell_floor_good_02 dwell_roof_good_02 dwell_ventilation_good_02 rooms_per_person_02 ln_pc_expend_month_02 rural_02 child_male_05 mother_height_cm_05 mother_edu_years_05 mother_age_at_birth_05 mother_employed_05 fully_vaccinated_05 {
+    gen `c'_w02 = `c' * (year == 2002)
+    gen `c'_w09 = `c' * (year == 2009)
+    global es_controls "$es_controls `c'_w02 `c'_w09"
+}
+
+foreach v in haz waz bmiz {
+    * Again, we restrict to the Model 3 children
+    reghdfe `v' lead_2_treat lag_0_treat $es_controls if e_`v' == 1 & m3_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
+    test lead_2_treat
+
+    preserve
+    postfile handle int etime double b se lb ub using "$out_regs/Appendix/es_`v'_controls.dta", replace
+    post handle (-2) (_b[lead_2_treat]) (_se[lead_2_treat]) (_b[lead_2_treat] - 1.96*_se[lead_2_treat]) (_b[lead_2_treat] + 1.96*_se[lead_2_treat])
+    post handle (-1) (0) (0) (0) (0)
+    post handle (0) (_b[lag_0_treat]) (_se[lag_0_treat]) (_b[lag_0_treat] - 1.96*_se[lag_0_treat]) (_b[lag_0_treat] + 1.96*_se[lag_0_treat])
+    postclose handle
+
+    use "$out_regs/Appendix/es_`v'_controls.dta", clear
+    sort etime
+    twoway ///
+        (rcap ub lb etime, lcolor(black)) ///
+        (scatter b etime, mcolor(blue) msymbol(O)), ///
+        xlabel(-2 "2002" -1 "2005 (ref)" 0 "2009") ///
+        xline(-1, lpattern(dash) lcolor(red)) ///
+        yline(0, lpattern(dash) lcolor(black)) ///
+        xtitle("Event time (wave)") ytitle("Coefficient") ///
+        title("Event study with controls: `v'") legend(off)
+    graph export "$out_figs/Appendix/event_study_`v'_controls.png", replace
+    restore
+}
+
+* Event study by SPI class, near normal is the reference and wet municipalities (z >= 1) are dropped like add_spi() in functions.R. * Note: We don't use controls. This is same as the SPI table. Same children as the SPI table, in each wave they are measured, with child and wave FE like its first difference
+gen mod_dry = (rain_z2009 <= -1 & rain_z2009 > -1.5) if rain_z2009 < 1
+gen sev_dry = (rain_z2009 <= -1.5) if rain_z2009 < 1
+gen lead_2_mod = mod_dry * (year == 2002)
+gen lag_0_mod  = mod_dry * (year == 2009)
+gen lead_2_sev = sev_dry * (year == 2002)
+gen lag_0_sev  = sev_dry * (year == 2009)
+* SPI table children
+foreach v in haz waz bmiz {
+    bysort pid_link_canonical: egen spi_`v' = max(reg_`v' == 1 & rain_z2009 < 1)
+}
+
+foreach v in haz waz bmiz {
+    quietly areg `v' lead_2_mod lag_0_mod lead_2_sev lag_0_sev i.year if e_`v' == 1 & spi_`v' == 1, absorb(pid_link_canonical) vce(cluster cvegeo05)
+    boottest lead_2_mod, reps(9999) weighttype(webb) seed(1234) nograph
+    boottest lead_2_sev, reps(9999) weighttype(webb) seed(1234) nograph
+    reghdfe `v' lead_2_mod lag_0_mod lead_2_sev lag_0_sev if e_`v' == 1 & spi_`v' == 1, absorb(pid_link_canonical year) vce(cluster cvegeo05)
+
+    * The two classes are moved a little left and right of each wave so their CIs don't overlap
+    preserve
+    postfile handle str3 cls double etime b se lb ub using "$out_regs/Main/es_severity_`v'.dta", replace
+    foreach c in mod sev {
+        local off = cond("`c'" == "mod", -0.06, 0.06)
+        post handle ("`c'") (-2 + `off') (_b[lead_2_`c']) (_se[lead_2_`c']) (_b[lead_2_`c'] - 1.96*_se[lead_2_`c']) (_b[lead_2_`c'] + 1.96*_se[lead_2_`c'])
+        post handle ("`c'") (-1 + `off') (0) (0) (0) (0)
+        post handle ("`c'") (0 + `off') (_b[lag_0_`c']) (_se[lag_0_`c']) (_b[lag_0_`c'] - 1.96*_se[lag_0_`c']) (_b[lag_0_`c'] + 1.96*_se[lag_0_`c'])
+    }
+    postclose handle
+
+    use "$out_regs/Main/es_severity_`v'.dta", clear
+    sort cls etime
+    twoway ///
+        (rcap ub lb etime if cls == "mod", lcolor(gs9)) ///
+        (scatter b etime if cls == "mod", mcolor(orange) msymbol(O)) ///
+        (rcap ub lb etime if cls == "sev", lcolor(black)) ///
+        (scatter b etime if cls == "sev", mcolor(cranberry) msymbol(T)), ///
+        xlabel(-2 "2002" -1 "2005 (ref)" 0 "2009") ///
+        xline(-1, lpattern(dash) lcolor(red)) ///
+        yline(0, lpattern(dash) lcolor(black)) ///
+        xtitle("Event time (wave)") ytitle("Coefficient") ///
+        title("Event study by drought severity: `v'") ///
+        legend(order(2 "Moderately dry (-1.5 < z <= -1)" 4 "Severely dry or worse (z <= -1.5)") pos(6) row(1))
+    local f = cond("`v'" == "bmiz", "Main", "Appendix")
+    graph export "$out_figs/`f'/event_study_severity_`v'.png", replace
     restore
 }
 
@@ -197,7 +294,8 @@ label variable lead_2_ddd "2009 drought x 2002 remittances x 2002 wave (pre-tren
 label variable lag_0_ddd  "2009 drought x 2002 remittances x 2009 wave (buffer effect)"
 
 foreach v in haz waz bmiz {
-    reghdfe `v' lead_2_ddd lag_0_ddd lead_2_treat lag_0_treat lead_2_remit lag_0_remit if e_`v' == 1 & !missing(remittance_hh_02), absorb($FE_month) vce(cluster cvegeo05)
+    * We restrict to the Model 5 children
+    reghdfe `v' lead_2_ddd lag_0_ddd lead_2_treat lag_0_treat lead_2_remit lag_0_remit $es_controls if e_`v' == 1 & m5_`v' == 1, absorb($FE_month) vce(cluster cvegeo05)
     * Pre-trend test for the DDD. The lead should be about 0
     test lead_2_ddd
     lincom lag_0_treat + lag_0_ddd
@@ -219,7 +317,7 @@ foreach v in haz waz bmiz {
         yline(0, lpattern(dash) lcolor(black)) ///
         xtitle("Event time (wave)") ytitle("Coefficient") ///
         title("DDD event study (drought x 2002 remittances): `v'") legend(off)
-    graph export "$out_figs/Appendix/event_study_ddd_`v'.png", replace
+    graph export "$out_figs/Miscellaneous/event_study_ddd_`v'.png", replace
     restore
 }
 
@@ -272,7 +370,7 @@ foreach v in haz waz bmiz {
         legend(order(1 "Control" 2 "Treated (2009 drought)") pos(6) row(1)) ///
         xtitle("Wave") ytitle("Mean `v'") ///
         title("Mean `v' by wave, children in all 3 waves")
-    graph export "$out_figs/Appendix/trends_`v'_all3.png", replace
+    graph export "$out_figs/Miscellaneous/trends_`v'_all3.png", replace
     restore
 
     reghdfe `v' lead_2_treat lag_0_treat if e_`v'_all3 == 1, absorb($FE_month) vce(cluster cvegeo05) 
@@ -299,7 +397,7 @@ foreach v in haz waz bmiz {
         xtitle("Event time (wave)") ytitle("Coefficient") ///
         title("Event study, children in all 3 waves: `v'") legend(off)
     * Saved to the Figures folder
-    graph export "$out_figs/Appendix/event_study_`v'_all3.png", replace
+    graph export "$out_figs/Miscellaneous/event_study_`v'_all3.png", replace
     restore
 }
 

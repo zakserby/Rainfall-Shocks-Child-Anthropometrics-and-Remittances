@@ -89,9 +89,7 @@ global baseline_vars "$outcomes $remit $controls_hh $controls_child $controls_bi
 * Table variables as they enter the regressions, so 2002 remittances and household controls, and 2005 child and parent controls
 global remit02 "remittance_hh_02"
 global controls_hh02 "dwell_electricity_02 dwell_floor_good_02 dwell_roof_good_02 dwell_ventilation_good_02 rooms_per_person_02 ln_pc_expend_month_02 rural_02"
-* Continuous DID treatment
-global contdid_treat "rain_deficit2009 any_deficit2009"
-global table_vars "$treatment $contdid_treat $remit02 $controls_hh02 $controls_child $controls_birth"
+global table_vars "$treatment $remit02 $controls_hh02 $controls_child $controls_birth"
 
 
 *******************************************************************
@@ -100,9 +98,27 @@ global table_vars "$treatment $contdid_treat $remit02 $controls_hh02 $controls_c
 
 * Creating general summary table for our primary regression samples. Split into two panels. 
 local cells "mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(fmt(2)) count(fmt(%9.0fc))"
-local groups `"treat2009 "\addlinespace[6pt]\textit{Binary DID treatment (CHIRPS)}" rain_deficit2009 "\addlinespace[6pt]\textit{Continuous DID treatment (CHIRPS)}" remittance_hh_02 "\addlinespace[6pt]\textit{Remittances (MxFLS-1, 2002)}" dwell_electricity_02 "\addlinespace[6pt]\textit{Household (MxFLS-1, 2002)}" age "\addlinespace[6pt]\textit{Child and mother (MxFLS-2, 2005)}" father_height_cm "\addlinespace[6pt]\textit{Father and birth (MxFLS-1 and MxFLS-2)}""'
+local groups `"treat2009 "\addlinespace[6pt]\textit{Binary DID treatment (CHIRPS)}" remittance_hh_02 "\addlinespace[6pt]\textit{Remittances (MxFLS-1, 2002)}" dwell_electricity_02 "\addlinespace[6pt]\textit{Household (MxFLS-1, 2002)}" age "\addlinespace[6pt]\textit{Child and mother (MxFLS-2, 2005)}" father_height_cm "\addlinespace[6pt]\textit{Father and birth (MxFLS-1 and MxFLS-2)}""'
 
-* We compute the numbers in the notes underneath the table here, so nothing is hardcoded. Same regressions as the sample size table further down including Models 1 and 3 of DID_Regs.do
+* SPI classes, same cutoffs as add_spi() in functions.R, just adding and labeling some variables
+foreach o in haz waz bmiz {
+    gen tmp = `o' if year == 2009
+    bysort pid_link_canonical: egen tmp09 = max(tmp)
+    gen d_`o' = tmp09 - `o' if year == 2005
+    drop tmp tmp09
+}
+label variable d_haz "Change in HAZ"
+label variable d_waz "Change in WAZ"
+label variable d_bmiz "Change in BMIZ"
+gen cls_near = (rain_z2009 > -1) if rain_z2009 < 1
+gen cls_mod = (rain_z2009 <= -1 & rain_z2009 > -1.5) if rain_z2009 < 1
+gen cls_sev = (rain_z2009 <= -1.5) if rain_z2009 < 1
+label variable rain_z2009 "2009 rainfall, z"
+label variable cls_near "Near normal, \ensuremath{-1<z<1}"
+label variable cls_mod "Moderately dry, \ensuremath{-1.5<z\le -1}"
+label variable cls_sev "Severely dry or worse, \ensuremath{z\le -1.5}"
+
+* We compute the numbers in the notes underneath the table here, so nothing is hardcoded. Same regressions as the sample size table further down including Model 3 of DID_Regs.do. 
 capture which reghdfe
 if _rc ssc install reghdfe
 * reghdfe needs ftools and require, so on a new computer they must be installed before the first reghdfe below
@@ -111,44 +127,70 @@ if _rc ssc install ftools
 capture which require
 if _rc ssc install require
 foreach o in haz waz bmiz {
-    quietly count if reg_`o' == 1 & year == 2005
-	* n_ = children in the estimation sample
-    local n = r(N)
-    quietly reghdfe `o' treat_post if s_`o' == 1, absorb(pid_link_canonical int_ym) vce(cluster cvegeo05)
-    quietly distinct pid_link_canonical if e(sample)
-	* single_ = children Model 1 drops as singletons
-    local single_`o' = `n' - r(ndistinct)
     quietly reghdfe `o' treat_post drought2005_post drought2006_post drought2007_post drought2008_post dwell_electricity_02_post dwell_floor_good_02_post dwell_roof_good_02_post dwell_ventilation_good_02_post rooms_per_person_02_post ln_pc_expend_month_02_post rural_02_post child_male_05_post mother_height_cm_05_post mother_edu_years_05_post mother_age_at_birth_05_post mother_employed_05_post fully_vaccinated_05_post if s_`o' == 1, absorb(pid_link_canonical int_ym) vce(cluster cvegeo05)
+	* Picking model 3 sample for model 3 summary table
+    gen m3s_`o' = e(sample)
     quietly distinct pid_link_canonical if e(sample)
 	* Here we add some formatting for these 4 lines below
 	* m3_ = children in Model 3
     local m3_`o' : display %9.0fc r(ndistinct)
     local m3_`o' = strtrim("`m3_`o''")
-    quietly count if reg_`o' == 1 & year == 2005 & rain_z2009 >= 1 & !missing(rain_z2009)
-	* wet_ = children with z of 1 or above that the SPI analysis drops
-    local wet_`o' = r(N)
-    local n_`o' : display %9.0fc `n'
-    local n_`o' = strtrim("`n_`o''")
+    * spi_ = children in the SPI sample
+    quietly count if reg_`o' == 1 & year == 2005 & rain_z2009 < 1
+    local spi_`o' : display %9.0fc r(N)
+    local spi_`o' = strtrim("`spi_`o''")
 }
 
 * Panel A: WAZ sample
 preserve
-    keep if reg_waz == 1 & year == 2005
-    quietly estpost summarize waz $table_vars, detail
+    * SPI sample, so without children in wet municipalities
+    keep if reg_waz == 1 & year == 2005 & rain_z2009 < 1
+    quietly estpost summarize waz d_waz rain_z2009 cls_near cls_mod cls_sev, detail
     esttab using "$out_sumstats/Main/summary_stats_did_table.tex", replace booktabs label ///
         cells("`cells'") collabels("Mean" "Std. dev." "Min." "Median" "Max." "Obs.") noobs nonumber nomtitle ///
-        refcat(waz "\textit{Outcomes (MxFLS-2, 2005)}" `groups', nolabel) ///
+        refcat(waz "\textit{Outcomes (MxFLS-2, 2005)}" d_waz "\addlinespace[6pt]\textit{Outcome change, 2005 to 2009}" rain_z2009 "\addlinespace[6pt]\textit{Rainfall classes (CHIRPS)}", nolabel) ///
         prehead("\documentclass[12pt]{article}" "\usepackage[margin=1in]{geometry}" "\usepackage{booktabs}" "\usepackage{longtable}" "\usepackage{caption}" ///
             "\DeclareCaptionLabelSeparator{emdash}{---}" "\captionsetup{font=normalsize,labelfont=sc,textfont=sc,labelsep=emdash}" "\begin{document}" ///
             "\begingroup" "\footnotesize" "\renewcommand{\arraystretch}{0.86}" "\setlength{\tabcolsep}{4pt}" "\setlength{\LTcapwidth}{\textwidth}" ///
-            "\begin{longtable}{l*{6}{c}}" "\caption{Summary Statistics, 2009 Drought DID Samples}\\" ///
+            "\begin{longtable}{l*{6}{c}}" "\caption{Summary Statistics, Rainfall Class Samples}\\" ///
+            "\toprule" " & \multicolumn{6}{c}{Panel A: WAZ, age \ensuremath{\le}10 in 2005 and 2009}\\" "\cmidrule(lr){2-7}") ///
+        posthead("\midrule") prefoot("") postfoot("\bottomrule" "\addlinespace[12pt]")
+restore
+
+* Panel B: HAZ and BMIZ sample, appended to the same table
+preserve
+    keep if reg_haz == 1 & year == 2005 & rain_z2009 < 1
+    quietly estpost summarize haz bmiz d_haz d_bmiz rain_z2009 cls_near cls_mod cls_sev, detail
+    esttab using "$out_sumstats/Main/summary_stats_did_table.tex", append booktabs label ///
+        cells("`cells'") collabels("Mean" "Std. dev." "Min." "Median" "Max." "Obs.") noobs nonumber nomtitle ///
+        refcat(haz "\textit{Outcomes (MxFLS-2, 2005)}" d_haz "\addlinespace[6pt]\textit{Outcome change, 2005 to 2009}" rain_z2009 "\addlinespace[6pt]\textit{Rainfall classes (CHIRPS)}", nolabel) ///
+        prehead("\toprule" " & \multicolumn{6}{c}{Panel B: HAZ and BMIZ, age \ensuremath{\le}15 in 2005 and 2009}\\" "\cmidrule(lr){2-7}") ///
+        posthead("\midrule") prefoot("") ///
+        postfoot("\bottomrule" ///
+            "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table is for the rainfall class specification, the main model. Obs. counts children. The sample is children with the outcome measured in MxFLS-2 (2005) and MxFLS-3 (2009), under the panel's age cutoff" ///
+            "in both rounds, with a 2005 municipality. They were not measured in MxFLS-3 before November 2009. We use November 2009 as the cutoff because the 2009 rainfall deficit, the drought, had not fully occurred before then. Dropping them from both groups equalizes treated and control measurement timing. Children in wet municipalities (z of 1 or above) are excluded." ///
+            "Panel A uses the WAZ sample, Panel B the HAZ and BMIZ sample. The BMIZ sample is marginally smaller than the HAZ sample shown in Panel B, at `spi_bmiz' children. Statistics are at the 2005 baseline, except the change in WAZ, HAZ and BMIZ from 2005 to 2009, the outcome of the rainfall class regressions, and 2009 rainfall. z is 2009 May--October CHIRPS rainfall, the maize growing season (Jessoe et al., 2018), in the child's 2005 municipality in standard deviations" ///
+            "from its 1981--2004 mean, grouped into standardized rainfall classes with the SPI cutoffs (McKee et al., 1993). The rainfall class regressions have no controls, as the contdid package does not yet support covariates (Callaway et al., 2024).}\\" ///
+            "\end{longtable}" "\endgroup")
+restore
+
+* Summary table for the Model 3 sample of the binary DID, the same rows as the main table had before, without the continuous DID treatment. It goes in Main right after the SPI table
+* Panel A: WAZ sample
+preserve
+    keep if m3s_waz == 1 & year == 2005
+    quietly estpost summarize waz $table_vars, detail
+    esttab using "$out_sumstats/Main/summary_stats_did_table.tex", append booktabs label ///
+        cells("`cells'") collabels("Mean" "Std. dev." "Min." "Median" "Max." "Obs.") noobs nonumber nomtitle ///
+        refcat(waz "\textit{Outcomes (MxFLS-2, 2005)}" `groups', nolabel) ///
+        prehead("\clearpage" "\begingroup" "\footnotesize" "\renewcommand{\arraystretch}{0.86}" "\setlength{\tabcolsep}{4pt}" "\setlength{\LTcapwidth}{\textwidth}" ///
+            "\begin{longtable}{l*{6}{c}}" "\caption{Summary Statistics, Binary DID Model 3 Samples}\\" ///
             "\toprule" " & \multicolumn{6}{c}{Panel A: WAZ, age \ensuremath{\le}10 in 2005 and 2009}\\" "\cmidrule(lr){2-7}") ///
         posthead("\midrule") prefoot("") postfoot("\bottomrule" "\newpage")
 restore
 
 * Panel B: HAZ and BMIZ sample, appended to the same table
 preserve
-    keep if reg_haz == 1 & year == 2005
+    keep if m3s_haz == 1 & year == 2005
     quietly estpost summarize haz bmiz $table_vars, detail
     esttab using "$out_sumstats/Main/summary_stats_did_table.tex", append booktabs label ///
         cells("`cells'") collabels("Mean" "Std. dev." "Min." "Median" "Max." "Obs.") noobs nonumber nomtitle ///
@@ -156,16 +198,12 @@ preserve
         prehead("\toprule" " & \multicolumn{6}{c}{Panel B: HAZ and BMIZ, age \ensuremath{\le}15 in 2005 and 2009}\\" "\cmidrule(lr){2-7}") ///
         posthead("\midrule") prefoot("") ///
         postfoot("\bottomrule" ///
-            "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} Sample is children with the outcome measured in MxFLS-2 (2005) and MxFLS-3 (2009), aged 10 or younger (Panel A) or 15 or younger (Panel B)" ///
-            "in both rounds, with a 2005 municipality and not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Each row is a child, and Obs. counts children. Statistics are at the 2005 baseline, except" ///
-            "remittances and household variables (2002). Panel B reports BMIZ for the HAZ sample, as the BMIZ sample is similar and slightly smaller, at `n_bmiz' children." ///
-            "The continuous DID uses these samples, and binary DID Model 1 excludes `single_waz' (Panel A) and `single_haz' (Panel B) children in singleton" ///
-            "interview-month cells. Model 3, the main binary DID, adds 2005--2008 droughts and 2002 household and 2005 child and mother controls and includes" ///
-            "`m3_waz' (WAZ), `m3_haz' (HAZ), and `m3_bmiz' (BMIZ) children. The SPI analysis compares z of -1 or below with z between -1 and 1, excluding" ///
-            "`wet_waz' (Panel A) and `wet_haz' (Panel B) children with z of 1 or above. Drought is annual CHIRPS rainfall in the 2005 municipality below its 1981--2004 20th percentile." ///
-            "Rainfall deficit is max(0,~-z), where z is 2009 rainfall in standard deviations from the 1981--2004 municipal mean. Remittances, a proxy, are cash received in the last" ///
-            "12 months from parents, siblings, or children outside the household. Expenditure is in 2002 pesos per person per month, a proxy for" ///
-            "household income. Rural is a locality under 2,500 inhabitants (INEGI, 2024).}\\" ///
+            "\addlinespace[6pt]\multicolumn{7}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} This table is for the sample of Model 3, the main binary DID with controls. Obs. counts children. The children have the outcome measured in MxFLS-2 (2005) and MxFLS-3 (2009), under the panel's age cutoff" ///
+            "in both rounds, and a 2005 municipality. They were not measured in MxFLS-3 before November 2009. We use November 2009 as the cutoff because the 2009 rainfall deficit, the drought, had not fully occurred before then. Dropping them from both groups equalizes treated and control measurement timing. Children also have all Model 3 controls observed and are not alone in their interview-month cell." ///
+            "Panel A uses the WAZ sample, Panel B the HAZ and BMIZ sample. The BMIZ sample is marginally smaller than the HAZ sample shown in Panel B, at `m3_bmiz' children. Statistics are at the 2005 baseline, except remittances and household variables (2002). Remittances enter Model 5, and the father and birth controls enter Model 4. Both are observed for fewer children." ///
+            "Drought is May--October CHIRPS rainfall in the 2005 municipality below its 1981--2004 20th percentile (Jessoe et al., 2018). Remittances, a proxy, are cash received in the last" ///
+            "12 months from parents, siblings, or children outside the household. Expenditure, a proxy for income, is in 2002 pesos per person per month." ///
+            "Rural is a locality under 2,500 inhabitants (INEGI, 2024).}\\" ///
             "\end{longtable}" "\endgroup")
 restore
 
@@ -304,7 +342,7 @@ file write cnt "\bottomrule" _n
 *******************************************************************
 
 * Panel C starts on a new page like Panel B of the summary statistics table, so its header is not left at the bottom of a page
-file write cnt "\newpage" _n "\toprule" _n " & \multicolumn{2}{c}{Panel C: SPI classes vs near normal}\\*" _n "\cmidrule(lr){2-3}" _n " & Control & Treated\\*" _n "\midrule" _n
+file write cnt "\newpage" _n "\toprule" _n " & \multicolumn{2}{c}{Panel C: Rainfall classes vs near normal}\\*" _n "\cmidrule(lr){2-3}" _n " & Control & Treated\\*" _n "\midrule" _n
 * Each class with its z range, in the order of the SPI regressions in Contdid_regs.R
 local cls_mod "Moderately dry, \ensuremath{-1.5<z\le -1}"
 local cls_sev "Severely dry or worse, \ensuremath{z\le -1.5}"
@@ -326,15 +364,15 @@ foreach c in mod sev sevonly ext {
 * Notes at the bottom
 file write cnt "\bottomrule" _n
 file write cnt "\addlinespace[6pt]\multicolumn{3}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} Counts are children, households, or 2005 municipalities in each regression sample, at the 2005 baseline." _n
-file write cnt "The estimation samples are children with the outcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009), aged 15 or younger (HAZ and BMIZ) or 10 or younger (WAZ) in both rounds." _n
-file write cnt "Children have a 2005 municipality and were not measured in MxFLS-3 before November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. In Panel A, treated children's 2005 municipality had a drought in 2009, with annual CHIRPS" _n 
-file write cnt "rainfall below its 1981--2004 20th percentile. Model 1 drops children alone in their interview-month cell, and the continuous DID, with no interview-month fixed effects, uses the full sample. Model 3 adds the 2005--2008 droughts and 2002 household" _n 
+file write cnt "The estimation samples are children with the outcome measured in both MxFLS-2 (2005) and MxFLS-3 (2009), aged 15 or younger for HAZ and BMIZ and 10 or younger for WAZ in both rounds." _n
+file write cnt "Children have a 2005 municipality. They were not measured in MxFLS-3 before November 2009. We use November 2009 as the cutoff because the 2009 rainfall deficit, the drought, had not fully occurred before then. Dropping them from both groups equalizes treated and control measurement timing. In Panel A, treated children's 2005 municipality had a drought in 2009, with May--October CHIRPS" _n 
+file write cnt "rainfall below its 1981--2004 20th percentile (Jessoe et al., 2018). Model 1 drops children alone in their interview-month cell, and the continuous DID, with no interview-month fixed effects, uses the full sample. Model 3 adds the 2005--2008 droughts and 2002 household" _n 
 file write cnt "and 2005 child and mother controls, and keeps children with all of them observed. Model 5 adds 2002 remittances times post and the drought times post times 2002 remittances, and keeps children" _n
 file write cnt "with 2002 remittances observed, so Model 5 children not in remittance households are the Model 5 count minus the remittance row. In Panel B, treated children's 2005 municipality had 2009" _n
 file write cnt "rainfall below its 1981--2004 mean (z below 0), where z is 2009 rainfall in standard deviations from that mean. These are the continuous DID samples, and the two remittance rows are the groups" _n
-file write cnt "of the remittance split. They do not add up to the total, as children with missing 2002 remittances are in neither row. Panel C compares each SPI class with near normal (z between -1 and 1)" _n
-file write cnt "in the continuous DID. As McKee et al. (1993) note, drought intensity is arbitrarily defined for values of the SPI with these categories. Children in wet municipalities (z of 1 or above)" _n
-file write cnt "are not in the SPI analysis. Remittances are cash received in the last 12 months" _n
+file write cnt "of the remittance split. They do not add up to the total, as children with missing 2002 remittances are in neither row. Panel C compares each rainfall class with near normal (z between -1 and 1)" _n
+file write cnt "in the continuous DID. The classes use standardized rainfall with the SPI cutoffs defined by McKee et al. and adopted by the World Meteorological Organization (McKee et al., 1993; WMO, 2012). Children in wet municipalities (z of 1 or above)" _n
+file write cnt "are not in the rainfall class analysis. Remittances are cash received in the last 12 months" _n
 file write cnt "from parents, siblings, or children living outside the household, from MxFLS-1 (2002).}\\" _n
 file write cnt "\end{longtable}" _n "\endgroup" _n
 
@@ -347,7 +385,7 @@ restore
 * Attrition
 *******************************************************************
 
-* Table 3: Sample attrition across the waves, as counts of children in each wave. The DID only uses 2005 and 2009 and the event studies use all three waves. The continuous DID uses the same samples, so this covers it too
+* Table 4: Sample attrition across the waves, as counts of children in each wave. The DID only uses 2005 and 2009 and the event studies use all three waves. The continuous DID uses the same samples, so this covers it too
 * Each row starts from the children who meet the regression sample rules in the first wave and could stay in the sample, not from all children measured. Then the later columns count who is still in the sample
 
 preserve
@@ -442,8 +480,8 @@ foreach o in haz waz bmiz {
 file write cnt "\bottomrule" _n
 file write cnt "\addlinespace[6pt]\multicolumn{4}{p{0.97\textwidth}}{\scriptsize \textit{Notes:} Counts of children in each wave. The DID only uses MxFLS-2 (2005) and MxFLS-3 (2009), and the event studies" _n
 file write cnt "use all three waves. The continuous DID uses the same samples. Each row starts from the children who meet the regression sample rules in its first wave and could stay in the sample, not" _n
-file write cnt "from all children measured. They are under the age cutoff in every wave, 15 or younger (HAZ and BMIZ) or 10 or younger (WAZ), have a municipality, and were not measured in MxFLS-3 before" _n 
-file write cnt "November 2009, as the July--October 2009 rainfall deficit had not yet fully occurred. Dropping them from both groups equalizes treated and control measurement timing. Later columns count the children still in the sample, so the drop across columns is attrition. This is not the same as the children the regressions drop as singletons, with" _n
+file write cnt "from all children measured. They are under the age cutoff in every wave, 15 or younger for HAZ and BMIZ and 10 or younger for WAZ, and have a municipality. They were not measured in MxFLS-3 before" _n 
+file write cnt "November 2009. We use November 2009 as the cutoff because the 2009 rainfall deficit, the drought, had not fully occurred before then. Dropping them from both groups equalizes treated and control measurement timing. Later columns count the children still in the sample, so the drop across columns is attrition. This is not the same as the children the regressions drop as singletons, with" _n
 file write cnt "only one wave in the sample, as these also include children who aged out or are only in a later wave. The DID 2009 count is the estimation sample, and the event study 2009 count is the" _n
 file write cnt "children in all three waves. For children not measured in a later wave, the age then comes from their birth date and their household's MxFLS-3 measurement date, as MxFLS-3 interviews ran" _n 
 file write cnt "over several years. Children not in MxFLS-3, or whose birth date does not agree with their reported age, get their last measured age plus the median age gap between the waves, `gap0509' years" _n
